@@ -1,0 +1,3 @@
+[console_scripts]
+netspot = netspot.run:main
+
