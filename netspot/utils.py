@@ -125,25 +125,25 @@ def _is_valid_ipv6_address(address):
     return True
 
 
-def print_error(msg):
+def print_error(msg, **kwargs):
     """
     Print in light red
     """
-    print(colorize(msg, 'red', light=True))
+    print(colorize(msg, 'red', light=True), **kwargs)
 
 
-def print_ok(msg):
+def print_ok(msg, **kwargs):
     """
     Print in light green
     """
-    print(colorize(msg, 'green', light=True))
+    print(colorize(msg, 'green', light=True), **kwargs)
 
 
-def print_warning(msg):
+def print_warning(msg, **kwargs):
     """
     Print in yellow
     """
-    print(colorize(msg, 'yellow'))
+    print(colorize(msg, 'yellow'), **kwargs)
 
 
 def is_valid_address(address):
@@ -177,7 +177,9 @@ def is_file_ok(file):
     """
     Check if a file is valid (= we can read or create it)
     """
-    path = os.path.abspath(file)
-    basename = os.path.basename(path)
-    folder = os.path.dirname(path)
-    return os.path.isdir(folder) and basename != ''
+    if file:
+        path = os.path.abspath(file)
+        basename = os.path.basename(path)
+        folder = os.path.dirname(path)
+        return os.path.isdir(folder) and basename != ''
+    return False

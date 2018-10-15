@@ -12,8 +12,14 @@ import pylibspot
 from abc import abstractmethod, ABCMeta
 import sys
 import inspect
-import netspot.counters as counters
-import netspot.utils as utils
+import logging
+
+try:
+    import netspot.counters as counters
+    import netspot.utils as utils
+except BaseException:
+    import counters
+    import utils
 
 ###############################################################################
 ###############################################################################
@@ -29,9 +35,9 @@ class AtomicStat(metaclass=ABCMeta):
     Abstract class defining a basic statistic which can be computed through
     counters
     """
-    monitored = False
-    spot = None
-    last_spot_status = None
+    __logger = logging.getLogger('netspot')
+    __spot_status = None
+    __value = None
 
     __row_spot_status_format = "{:>8d} {:>8.3f} {:>8.3f} {:>8d} {:>8d}"
     __spot_status_format = "\
@@ -42,8 +48,13 @@ class AtomicStat(metaclass=ABCMeta):
 {4:>8s}  {9:>8d}  Current number of stored *** peaks (for the fit)"
 #         n  {:>8d}  Total number of normal observations
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        """
+        **kwargs
+            SPOT algorithm parameters
+        """
         self.name = self.__class__.__name__
+        self.__spot = pylibspot.Spot(**kwargs)
 
     def counter_names(self):
         return [n.name for n in self.needs]
@@ -81,18 +92,41 @@ class AtomicStat(metaclass=ABCMeta):
         pass
 
     def compute_and_monitor(self, *args):
-        data = self.compute(*args)
-        if self.monitored:
-            self.last_spot_status = self.spot.step(data)
-        return data
+        self.__value = self.compute(*args)
+        self.__spot_status = self.__spot.step(self.__value)
+        self._log()
+        return self.__value
 
-    def monitor(self, restart=True, **kwargs):
-        self.monitored = True
-        if restart or (self.spot is None):
-            self.spot = pylibspot.Spot(**kwargs)
+    def _log(self):
+        if self.__spot_status == 1:  # UP alarm
+            self.__logger.warning(
+                '%15s Alarm [value: %.3f, p: %.3e]',
+                '[' + self.name + ']',
+                self.__value,
+                self.__spot.up_probability(self.__value))
+        elif self.__spot_status == -1:  # DOWN alarm
+            self.__logger.warning(
+                '%15s Alarm [value: %.3f, p: %.3e]',
+                '[' + self.name + ']',
+                self.__value,
+                self.__spot.down_probability(self.__value))
+        elif self.__spot_status == 4:  # Calibration
+            self.__logger.info(
+                '%15s Calibration',
+                '[' + self.name + ']')
 
-    def unmonitor(self):
-        self.monitored = False
+    def reset(self, **kwargs):
+        """
+        Reset the spot instance
+        """
+        # current config
+        config = dict(self.__spot.config())
+        # update the config is new parameters are given
+        config.update(kwargs)
+        # recreate the object
+        self.__spot = pylibspot.Spot(**config)
+        # log it
+        self.__logger.info('Statistics {} reset'.format(self.name))
 
     def __eq__(self, other):
         if isinstance(other, AtomicStat):
@@ -101,8 +135,8 @@ class AtomicStat(metaclass=ABCMeta):
             raise TypeError("We can only compare AtomicStats")
 
     def spot_status(self):
-        status = dict(self.spot.status())
-        config = dict(self.spot.config())
+        status = dict(self.__spot.status())
+        config = dict(self.__spot.config())
         # if up is not set, we remove the linked values
         if not config['up']:
             for k in filter(lambda k: '_up' in k, status.keys()):
@@ -120,55 +154,50 @@ class AtomicStat(metaclass=ABCMeta):
         """
         Row formatting of the spot status
         """
-        if self.monitored:
-            conf = dict(self.spot.config())
-            status = dict(self.spot.status())
-            output = "{:>8d} | ".format(status['n'])
-            if conf['up']:
-                output += self.__row_spot_status_format.format(status['al_up'],
-                                                               status['z_up'],
-                                                               status['t_up'],
-                                                               status['Nt_up'],
-                                                               status['ex_up'])
-            else:
-                output += ' ' * 44
-            output += ' | '
-            if conf['down']:
-                output += self.__row_spot_status_format.format(
-                    status['al_down'],
-                    status['z_down'],
-                    status['t_down'],
-                    status['Nt_down'],
-                    status['ex_down'])
-            else:
-                output += ' ' * 44
-            return output
+        conf = dict(self.__spot.config())
+        status = dict(self.__spot.status())
+        output = "{:>8d} | ".format(status['n'])
+        if conf['up']:
+            output += self.__row_spot_status_format.format(status['al_up'],
+                                                           status['z_up'],
+                                                           status['t_up'],
+                                                           status['Nt_up'],
+                                                           status['ex_up'])
         else:
-            raise ValueError("This statistics is not monitored")
+            output += ' ' * 44
+        output += ' | '
+        if conf['down']:
+            output += self.__row_spot_status_format.format(
+                status['al_down'],
+                status['z_down'],
+                status['t_down'],
+                status['Nt_down'],
+                status['ex_down'])
+        else:
+            output += ' ' * 44
+        return output
 
     def str_spot_status(self):
         """
         Fancy formatting of the spot status
         """
-        if self.monitored:
-            conf = dict(self.spot.config())
-            status = dict(self.spot.status())
-            base_header = ['al_***', 'z_***', 't_***', 'Nt_***', 'ex_***']
-            output = "\n{:>8s}  {:>8d}  Total number of normal observations\n".format(
-                'n', status['n'])
-            if conf['up']:
-                up_base = [b.replace('***', 'up') for b in base_header]
-                filled_up_base = up_base + [status[b] for b in up_base]
-                output += self.__spot_status_format.format(
-                    *filled_up_base).replace('***', 'up') + '\n'
-            if conf['down']:
-                down_base = [b.replace('***', 'down') for b in base_header]
-                filled_down_base = down_base + [status[b] for b in down_base]
-                output += self.__spot_status_format.format(
-                    *filled_down_base).replace('***', 'down') + '\n'
-            return output
-        else:
-            raise ValueError("This statistics is not monitored")
+
+        conf = dict(self.__spot.config())
+        status = dict(self.__spot.status())
+        base_header = ['al_***', 'z_***', 't_***', 'Nt_***', 'ex_***']
+        output = "\n{:>8s}  {:>8d}  Total number of normal observations\n".format(
+            'n', status['n'])
+        if conf['up']:
+            up_base = [b.replace('***', 'up') for b in base_header]
+            filled_up_base = up_base + [status[b] for b in up_base]
+            output += self.__spot_status_format.format(
+                *filled_up_base).replace('***', 'up') + '\n'
+        if conf['down']:
+            down_base = [b.replace('***', 'down') for b in base_header]
+            filled_down_base = down_base + [status[b] for b in down_base]
+            output += self.__spot_status_format.format(
+                *filled_down_base).replace('***', 'down') + '\n'
+        return output
 
 
 ###############################################################################
@@ -184,7 +213,7 @@ class R_SYN(AtomicStat):
     """
     Ratio of SYN packets
     """
-#    name = "rSYN"
+
     description = "Ratio of SYN packets"
     needs = [counters._SYN(), counters._IP()]
     fmt = "{:.3f}"
@@ -199,7 +228,7 @@ class R_ACK(AtomicStat):
     """
     Ratio of ACK packets
     """
-#    name = "rACK"
+
     description = "Ratio of ACK packets"
     needs = [counters._ACK(), counters._IP()]
     fmt = "{:.3f}"
@@ -214,7 +243,7 @@ class R_ICMP(AtomicStat):
     """
     Ratio of ICMP packets
     """
-#    name = "rICMP"
+
     description = "Ratio of ICMP packets"
     needs = [counters._ICMP(), counters._IP()]
     fmt = "{:.3f}"
@@ -229,10 +258,10 @@ class AVG_PKT_BYTES(AtomicStat):
     """
     Average size of IP packets
     """
-#    name = "avg_pkt_bytes"
+
     description = "Average size of IP packets"
     needs = [counters._IP_BYTES(), counters._IP()]
-    fmt = "{:13.3f}"
+    fmt = "{:.3f}"
 
     def compute(self, byte, ip):
         if byte == 0:
@@ -244,7 +273,7 @@ class NB_IP_PKTS(AtomicStat):
     """
     Number of IP packets
     """
-#    name = "#PKTS"
+
     description = "Number of IP packets"
     needs = [counters._IP()]
     fmt = "{:d}"
@@ -257,10 +286,10 @@ class SRC_DST_RATIO(AtomicStat):
     """
     Ratio (unique src addr) / (unique dst addr)
     """
-#    name = "SRC/DST"
+
     description = "Ratio (unique src addr) / (unique dst addr)"
     needs = [counters._UNIQUE_SRC_ADDR(), counters._UNIQUE_DST_ADDR()]
-    fmt = "{:" + str(len(__name__)) + ".3f}"
+    fmt = "{:.3f}"
 
     def compute(self, nb_unique_srcaddr, nb_unique_dstaddr):
         if nb_unique_srcaddr == 0:
@@ -272,12 +301,13 @@ class NB_IP_TO_IP_PKTS(AtomicStat):
     """
     Number of pkts between 2 IP
     """
-#    name = ''
+
     description = "Number of pkts between 2 IP"
     needs = []
-    fmt = "{:" + str(len(__name__)) + ".3f}"
+    # fmt = "{:" + str(len(__name__)) + ".3f}"
+    fmt = "{:d}"
 
-    def __init__(self, ip_a, ip_b):
+    def __init__(self, ip_a, ip_b, **kwargs):
         super(NB_IP_TO_IP_PKTS, self).__init__()
         self.needs = [counters._IP_TO_IP(ip_a, ip_b)]
         self.name = "NB_{}_TO_{}_PKTS".format(ip_a, ip_b)
@@ -298,12 +328,12 @@ AVAILABLE_STATS = utils.get_pure_source_classes(sys.modules[__name__])
 
 def is_requiring_parameters(stat_class):
     if stat_class in AVAILABLE_STATS.values():
-        return len(inspect.signature(stat_class).parameters) > 0
+        return len(inspect.signature(stat_class).parameters) > 1
 
 
-def stat_from_name(name, extra=None):
+def stat_from_name(name, *extra):
     if name in AVAILABLE_STATS.keys():
-        if utils.is_iterable(extra) and len(extra) > 0:
+        if is_requiring_parameters(AVAILABLE_STATS[name]):
             return AVAILABLE_STATS[name](*extra)
         else:
             return AVAILABLE_STATS[name]()

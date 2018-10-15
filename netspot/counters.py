@@ -5,7 +5,12 @@ Created on Wed Sep 19 16:00:23 2018
 
 @author: asr
 """
-from netspot.utils import is_valid_address
+
+try:
+    from netspot.utils import is_valid_address
+except BaseException:
+    from utils import is_valid_address
+
 from abc import abstractmethod, ABCMeta
 from scapy.layers.inet import IP, TCP, ICMP
 
@@ -36,13 +41,13 @@ class AbstractCounter(metaclass=ABCMeta):
     @abstractmethod
     def process(self, pkt):
         """
-        main method which process a pkt
+        Main method which process a pkt
         """
 
     @abstractmethod
     def get(self):
         """
-        Method which returns te counter
+        Method which returns the counter
         """
         return self.counter
 
@@ -56,10 +61,6 @@ class AbstractCounter(metaclass=ABCMeta):
 
 class _IP(AbstractCounter):
     layer = 1
-
-#    def __init__(self):
-#        self.counter = 0
-#        super(_IP, self).__init__()
 
     def get(self):
         return self.counter
@@ -75,10 +76,6 @@ class _IP(AbstractCounter):
 class _ICMP(AbstractCounter):
     layer = 2
 
-#    def __init__(self):
-#        self.counter = 0
-#        super(_ICMP, self).__init__()
-
     def get(self):
         return self.counter
 
@@ -92,10 +89,6 @@ class _ICMP(AbstractCounter):
 
 class _SYN(AbstractCounter):
     layer = 3
-
-#    def __init__(self):
-#        self.counter = 0
-#        super(_SYN, self).__init__()
 
     def get(self):
         return self.counter
@@ -113,10 +106,6 @@ class _SYN(AbstractCounter):
 class _ACK(AbstractCounter):
     layer = 3
 
-#    def __init__(self):
-#        self.counter = 0
-#        super(_ACK, self).__init__()
-
     def get(self):
         return self.counter
 
@@ -132,10 +121,6 @@ class _ACK(AbstractCounter):
 
 class _IP_BYTES(AbstractCounter):
     layer = 2
-
-#    def __init__(self):
-#        self.counter = 0
-#        super(_IP_BYTES, self).__init__()
 
     def get(self):
         return self.counter
@@ -198,10 +183,6 @@ class _IP_TO_IP(AbstractCounter):
 
     def __eq__(self, other):
         return isinstance(other, type(self)) and (self.pair == other.pair)
-
-#    def __hash__(self):
-#        l = list(self.pair)
-#        return hash(self.__class__.__name__ + '_' + l[0] + '_' + l[1])
 
     def get(self):
         return self.counter

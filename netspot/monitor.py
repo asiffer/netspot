@@ -13,15 +13,19 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 import configparser
 import logging
-from logging.handlers import SocketHandler
 import pandas as pd
 from scapy.all import sniff
 import netifaces
-
-import netspot.stats as stats
-import netspot.utils as utils
-
-
+try:  # package mode
+    import netspot.stats as stats
+    import netspot.utils as utils
+    from netspot.recorder import Recorder
+    from netspot.sniffer import Sniffer
+except BaseException:  # local mode
+    import stats
+    import utils
+    from recorder import Recorder
+    from sniffer import Sniffer
 
 
 class Monitor:
@@ -30,62 +34,37 @@ class Monitor:
     Moreover, it embeds a logger which records program events (at INFO level) and network
     anomalies (at WARNING level).
     """
-    # Threads
+    # # Threads
     __monitor_thread = None
-    __sniff_thread = None
-    # Thread events to stop sniffing and monitoring threads
-    __stop_sniff_thread_event = threading.Event()
+    # # Thread events to stop sniffing and monitoring threads
     __stop_monitor_thread_event = threading.Event()
-    _thread_error = None
-    # switch to print stats
-    live = False
-    # switch to export stats to file (or database)
-    record = False
-
     # config parameters
     config_keys = ["interval",
                    "record_file",
-                   "log_file",
-                   "log_socket",
-                   "log_file_level",
-                   "log_socket_level",
-                   "sniffing_iface",
+                   "source_type",
+                   "source",
                    "sniffing_filter"]
 
-    # logging formatter
-    __logging_formater = logging.Formatter(
-        '%(asctime)s\t%(levelname)s\t%(message)s',
-        datefmt='%H:%M:%S')
+    # the logger
+    __logger = logging.getLogger('netspot')
 
-    def __init__(self, interval, log_file=None, record_file=None):
-        # start time (initialization is useless)
-        self.begin = time.time()
-        # time interval to compute the statistics
+    def __init__(self, interval):
         self.interval = interval
-        # embedded counters
-        self.__counters = {}
-        # list of the desired statistics
+        self.__sniffer = Sniffer()
+        self.__recorder = Recorder()
         self.__statistics = []
-        # print parameters
-        self.__format_options = {'refresh_header_period': 15,
-                                 'refresh_header_counter': 15,
-                                 'header': '',
-                                 'fmt': ''}
-        # for scapy sniff
-        self.__sniff_options = {'iface': None,
-                                'filter': None}
-        # the last computed statistics
-        self.__stat_values = []
-        # data recorder
-        self.__recorder = {'buffer': None, 'data': None, 'chunk_size': 10}
-        # initilization of the logger
-        self.__logger = logging.getLogger('netspot')
-        self.__logger.setLevel(logging.INFO)
-        if log_file:
-            self.set_log_file(log_file, level=logging.INFO)
-        if record_file:
-            self.set_record_file(record_file)
+        self.__values = []
+        self.__begin = 0
 
+    def __del__(self):
+        self.__stop_monitor_thread_event.set()
+        self.__statistics.clear()
+        self.__values.clear()
+
+    def _init_recorder(self):
+        header = [stat.name for stat in self.__statistics]
+        formatter = [stat.fmt for stat in self.__statistics]
+        self.__recorder.init_formatters(header, formatter)
 
     @staticmethod
     def _stat_section_to_spot_config(section):
@@ -103,7 +82,10 @@ class Monitor:
 
     @staticmethod
     def from_config_file(file_path):
-        if os.path.exists(file_path):
+        """
+        Return a Monitor object from a config file
+        """
+        if os.path.isfile(file_path):
             # create the config parser
             config = configparser.ConfigParser()
             # open the file
@@ -111,29 +93,16 @@ class Monitor:
             # basic configuration
             basic_config = config['config']
             # we get the interval
-            interval = basic_config.getfloat('interval', 5.0)
-            # we get the log file
-            log_file = basic_config.get('log_file', '/tmp/netspot.log')
+            interval = basic_config.getfloat('interval', 2.0)
+            obj = Monitor(interval=interval)
             # we get the output records file
-            record_file = basic_config.get('record_file', '/tmp/netspot_records.csv')
-            # we create the object
-            obj = Monitor(interval=interval, log_file=log_file, record_file=record_file)
-            # then we can set the level of the log file
-            log_file_level = basic_config.get('log_file_level')
-            if log_file_level:
-                obj.set_log_file_level(log_file_level)
-            # we can add a socket log
-            log_socket = basic_config.get('log_socket')
-            if log_socket:
-                obj.set_log_socket(*log_socket.split(':'))
-#                obj.set_log_socket(log_socket)
-                # and define its level
-                log_socket_level = basic_config.get('log_socket_level')
-                if log_socket_level:
-                    obj.set_log_socket_level(log_socket_level)
-            # scapy sniffing interface
-            sniffing_iface = basic_config.get('sniffing_iface', 'all')
-            obj.set_sniffing_interface(sniffing_iface)
+            record_file = basic_config.get('record_file', '/tmp/netspot.csv')
+            obj.set_record_file(record_file)
+            # type of the source
+            source_type = basic_config.get('source_type', 'iface')
+            # real source
+            source = basic_config.get('source', 'all')
+            obj.set_source(source_type, source)
             # scapy sniffing filter (tcpdump)
             sniffing_filter = basic_config.get('sniffing_filter')
             obj.set_sniffing_filter(sniffing_filter)
@@ -152,6 +121,10 @@ class Monitor:
                 if s in stats.AVAILABLE_STATS:
                     # we get the class
                     stat_class = stats.AVAILABLE_STATS[s]
+                    # we retrive the spot configuration from the .ini file
+                    # section
+                    spot_config = Monitor._stat_section_to_spot_config(
+                        config[s])
                     # we check if this class requires parameters or not
                     if stats.is_requiring_parameters(stat_class):
                         # if it needs parameters, they are in the 'param' key
@@ -159,17 +132,10 @@ class Monitor:
                             m for m in map(
                                 lambda p: p.strip(),
                                 config[s].get('param').split(','))]
-                        stat = stat_class(*param)
+                        stat = stat_class(*param, **spot_config)
                     else:
                         # otherwise we can directly create the new instance
-                        stat = stat_class()
-                    # we retrive the spot configuration from the .ini file
-                    # section
-                    spot_config = Monitor._stat_section_to_spot_config(
-                        config[s])
-                    # we set the spot configuration (take the default profile
-                    # if parameter is not set)
-                    stat.monitor(restart=True, **spot_config)
+                        stat = stat_class(**spot_config)
                     # then we load the stat
                     obj.load(stat)
             # finally we get all the statistics (which do not require any parameters)
@@ -182,12 +148,11 @@ class Monitor:
                 if (stat_name in stats.AVAILABLE_STATS) and \
                         config['statistics'].getboolean(s) and \
                         (not obj.is_loaded(stat_name)):
-                    # we create the stat (it does not require parameter)
-                    stat = stats.AVAILABLE_STATS[stat_name]()
                     # we get and set the [default] spot parameters
                     spot_config = Monitor._stat_section_to_spot_config(
                         config['DEFAULT'])
-                    stat.monitor(restart=True, **spot_config)
+                    # we create the stat (it does not require parameter)
+                    stat = stats.AVAILABLE_STATS[stat_name](**spot_config)
                     # and we load the stat
                     obj.load(stat)
             return obj
@@ -198,290 +163,23 @@ class Monitor:
     ###########################################################################
     ###########################################################################
     ###########################################################################
-    # RECORDING
+    # STATS STUFF
     ###########################################################################
     ###########################################################################
     ###########################################################################
-    def set_record_file(self, file):
-        if utils.is_file_ok(file):
-            self.__recorder['buffer'] = open(file, 'w')
-        else:
-            raise ValueError("The file is not valid")
 
-    def get_record_file(self):
-        if self.__recorder['buffer']:
-            return self.__recorder['buffer'].name
-        else:
-            return None
-
-    def _is_record_buffer_new(self):
-        return self.__recorder['buffer'].tell() == 0
-
-    def export_records(self):
-        # print("Data sent to {}".format(self.get_record_file()))
-        self.__recorder['data'].to_csv(self.__recorder['buffer'],
-                                       header=self._is_record_buffer_new(),
-                                       index=None)
-        self._init_dataframe()
-    
-    def _init_dataframe(self):
-        columns = ['time'] + self.get_loaded_stat_names()
-        self.__recorder['data'] = pd.DataFrame(columns=columns)
-
-    def save_record(self):
-        if self.__recorder['data'] is None:
-            self._init_dataframe()
-        # we append new data
-        self.__recorder['data'].loc[self.__recorder['data'].index.size] = [time.time()] + self.__stat_values
-        # print(self.__recorder['data'])
-        if self.__recorder['data'].index.size == self.__recorder['chunk_size']:
-            self.export_records()
-            
-
-
-
-        
-
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    # LOGGING
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-#    def debug(self):
-#        ch = logging.StreamHandler(sys.stdout)
-#        ch.setLevel(logging.DEBUG)
-#        ch.setFormatter(self.__logging_formater)
-#        self.__logger.addHandler(ch)
-
-    def _get_file_handler(self):
-        """
-        Return the file handler
-        """
-        for h in self.__logger.handlers:
-            if isinstance(h, logging.FileHandler):
-                return h
-        return None
-
-    def _get_socket_handler(self):
-        """
-        Return the socket handler
-        """
-        for h in self.__logger.handlers:
-            if isinstance(h, SocketHandler):
-                return h
-        return None
-
-    def _add_file_logger(self, file, level=logging.INFO):
-        """
-        Add new file handler (log will be written to this file)
-        """
-        handler = logging.FileHandler(file)
-        handler.setLevel(level)
-        # Add the Formatter to the Handleris
-        handler.setFormatter(self.__logging_formater)
-        # Add the Handler to the Logger
-        self.__logger.addHandler(handler)
-        self.__logger.info('File handler {} added'.format(file))
-
-    def _add_socket_logger(self, host, port, level):
-        """
-        Add new socket handler (log will be sent to this socket)
-        """
-        handler = SocketHandler(host, port)
-        handler.setLevel(level)
-        # Add the Formatter to the Handleris
-        handler.setFormatter(self.__logging_formater)
-        # Add the Handler to the Logger
-        self.__logger.addHandler(handler)
-        self.__logger.info('Socket handler {}:{} added'.format(host, port))
-
-    def _remove_file_logger(self):
-        """
-        Remove file logger (if exists)
-        """
-        self.__logger.removeHandler(self._get_file_handler())
-
-    def _remove_socket_logger(self):
-        """
-        Remove socket handler (if exists)
-        """
-        self.__logger.removeHandler(self._get_socket_handler())
-
-    def set_log_file(self, file, level=logging.INFO):
-        """
-        Define the log file
-        """
-        if utils.is_file_ok(file):
-            self._remove_file_logger()
-            self._add_file_logger(file)
-            self.__logger.info('Logging file set to {}'.format(file))
-        else:
-            raise ValueError("The file is not valid")
-
-    def set_log_socket(self, host, port, level=logging.INFO):
-        """
-        Define the log socket
-        """
-        if host == 'localhost':
-            host = '127.0.0.1'
-        if not isinstance(port, int):
-            port = utils.to_int(port, "The given port is not valid")
-        if utils.is_valid_address(host) and isinstance(
-                port, int) and (
-                port > 0):
-            self._remove_socket_logger()
-            self._add_socket_logger(host, port, level)
-            self.__logger.info(
-                'Logging socket set to {}:{}'.format(
-                    host, port))
-        else:
-            raise ValueError("The socket is not valid")
-
-    def get_log_file(self):
-        """
-        Return the log file (if it exists)
-        """
-        handler = self._get_file_handler()
-        if handler:
-            return handler.baseFilename
-        return None
-
-    def get_log_file_level(self):
-        """
-        Return the log file level (if it exists)
-        """
-        handler = self._get_file_handler()
-        if handler:
-            return handler.level
-        return None
-
-    def set_log_file_level(self, level):
-        """
-        Set the log file level
-
-        Parameters
-        ----------
-        level: int, str
-            The log level, it could be either a positive integer or a logging level like 'INFO', 'WARNING' etc.
-            For example 'INFO' corresponds to 20 and 'WARNING' to 30.
-        """
-        if not (isinstance(level, int) or isinstance(level, str)):
-            level = utils.to_int(level, "The level is not valid")
-        handler = self._get_file_handler()
-        if handler:
-            handler.setLevel(level)
-            self.__logger.info('Logging file level set to {}'.format(level))
-        else:
-            raise RuntimeError('The log file handler is not defined')
-
-    def get_log_socket(self):
-        """
-        Return the log socket address:port
-        """
-        handler = self._get_socket_handler()
-        if handler:
-            return "{}:{}".format(*handler.address)
-        return None
-
-    def get_log_socket_level(self):
-        """
-        Return the log socket level (if it exists)
-        """
-        handler = self._get_socket_handler()
-        if handler:
-            return handler.level
-        return None
-
-    def set_log_socket_level(self, level):
-        """
-        Set the log socket level.
-
-        Parameters
-        ----------
-        level: int, str
-            The log level, it could be either a positive integer or a logging level like 'INFO', 'WARNING' etc.
-            For example 'INFO' corresponds to 20 and 'WARNING' to 30.
-        """
-        if not (isinstance(level, int) or isinstance(level, str)):
-            level = utils.to_int(level, "The level is not valid")
-
-        handler = self._get_socket_handler()
-        if handler:
-            handler.setLevel(level)
-            self.__logger.info('Logging socket level set to {}'.format(level))
-        else:
-            raise RuntimeError('The log file handler is not defined')
-
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    # LIVE FORMAT
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    def _init_header(self):
-        """
-        Initialize the header string (for live print)
-        """
-        names = [s.name for s in self.__statistics]
-        self.__format_options['header'] = '\t'.join(names)
-        self.__format_options['refresh_header_counter'] = \
-            self.__format_options['refresh_header_period']
-        self.__logger.debug('Header initialized')
-
-    def _init_fmt(self):
-        """
-        Initialize the format string (for live print)
-        """
-        fmts = [s.fmt for s in self.__statistics]
-        self.__format_options['fmt'] = '\t'.join(fmts)
-        self.__logger.debug('Format string initialized')
-
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    # SNIFF OPTIONS
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    def set_sniffing_interface(self, iface):
-        if iface == 'all':
-            self.__sniff_options['iface'] = None
-        elif iface in netifaces.interfaces():
-            self.__sniff_options['iface'] = iface
-        else:
-            raise ValueError(
-                "The network interface {} does not exist".format(iface))
-
-    def set_sniffing_filter(self, tcpdump_filter):
-        if tcpdump_filter is None:
-            self.__sniff_options['filter'] = None
-        elif isinstance(tcpdump_filter, str):
-            self.__sniff_options['filter'] = tcpdump_filter
-        else:
-            raise ValueError("The filter must be a string")
-
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    # MISC
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
     def stat_from_name(self, stat_name):
+        """
+        Get the stat from its name
+        """
         for s in self.__statistics:
             if s.name == stat_name:
                 return s
-        raise ValueError("Unknown statistics")
-
-    def get_thread_error(self):
-        return self._thread_error
+        raise ValueError("Unknown statistic")
 
     def get_loaded_stats(self):
         """
-        Return real instanciations of the loadded statistics
+        Return real instanciations of the loaded statistics
         """
         return list.copy(self.__statistics)
 
@@ -520,11 +218,7 @@ class Monitor:
         Return the status of the spot instance monitoring the feature
         """
         stat = self.stat_from_name(stat_name)
-        if stat.monitored:
-            return dict(stat.spot.status())
-        else:
-            raise ValueError(
-                "The statistics {} is not monitored".format(stat_name))
+        return dict(stat.spot.status())
 
     def full_inspection(self):
         """
@@ -532,11 +226,18 @@ class Monitor:
         """
         status = []
         for stat in self.__statistics:
-            if stat.monitored:
-                stat_status = stat.spot_status()
-                stat_status['statistics'] = stat.name
-                status.append(stat_status)
+            stat_status = stat.spot_status()
+            stat_status['statistics'] = stat.name
+            status.append(stat_status)
         return pd.DataFrame(status)
+
+    ###########################################################################
+    ###########################################################################
+    ###########################################################################
+    # CONFIG - GETTER - SETTER
+    ###########################################################################
+    ###########################################################################
+    ###########################################################################
 
     def info(self):
         """
@@ -544,13 +245,45 @@ class Monitor:
         """
         return {"interval": self.interval,
                 "record_file": self.get_record_file(),
-                "log_file": self.get_log_file(),
-                "log_socket": self.get_log_socket(),
-                "log_file_level": self.get_log_file_level(),
-                "log_socket_level": self.get_log_socket_level(),
-                "sniffing_iface": self.__sniff_options['iface']
-                if self.__sniff_options['iface'] else 'all',
-                "sniffing_filter": self.__sniff_options['filter']}
+                "source_type": self.get_source_type(),
+                "source": self.get_source(),
+                "sniffing_filter": self.get_sniffing_filter()}
+
+    def set_record_file(self, file):
+        """
+        Change the file where the records are saved
+        """
+        self.__recorder.set_record_file(file)
+
+    def get_record_file(self):
+        """
+        Get the file where the records are saved
+        """
+        return self.__recorder.get_record_file()
+
+    def get_source_type(self):
+        """
+        Return the type of the source of the incoming packets (iface or file)
+        """
+        return self.__sniffer.get_source_type()
+
+    def get_source(self):
+        """
+        Return the name of the source (path of iface name)
+        """
+        return self.__sniffer.get_source()
+
+    def set_source(self, source_type, source):
+        self.__sniffer.set_source(source_type, source)
+
+    def get_sniffing_filter(self):
+        return self.__sniffer.get_filter()
+
+    def set_sniffing_filter(self, filter_):
+        if not self.is_monitoring():
+            self.__sniffer.set_filter(filter_)
+        else:
+            raise RuntimeError("The monitoring is currently active")
 
     def set_interval(self, value):
         """
@@ -579,26 +312,15 @@ class Monitor:
         """
         if isinstance(stat, stats.AtomicStat):
             if stat not in self.__statistics:
-                # we create a spot instance to monitor it
-                if not stat.monitored:
-                    stat.monitor()
                 # we append it to our stat list
                 self.__statistics.append(stat)
-
-                self.__logger.info('Statistics {} loaded'.format(stat.name))
+                self.__logger.info('Statistic {} loaded'.format(stat.name))
             else:
-                raise ValueError('This statistics is already loaded')
+                raise ValueError('The statistic {} is already loaded'.format(stat.name))
         else:
-            raise ValueError('Unknown statistics')
-
+            raise ValueError('Unknown statistic')
         # add new counters
-        for _need in stat.needs:
-            if _need.name not in self.__counters:
-                self.__counters[_need.name] = _need
-
-        # update the header and the format string
-        self._init_fmt()
-        self._init_header()
+        self.__sniffer.load(stat.needs)
 
     def unload(self, stat):
         """
@@ -606,11 +328,9 @@ class Monitor:
         """
         try:
             self.__statistics.remove(stat)
-            self._init_fmt()
-            self._init_header()
-            self.__logger.info('Statistics {} unloaded'.format(stat.name))
+            self.__logger.info('Statistic {} unloaded'.format(stat.name))
         except ValueError:
-            raise ValueError('This statistics is not loaded')
+            raise ValueError('This statistic is not loaded')
 
     def unload_from_name(self, stat_name):
         """
@@ -619,57 +339,57 @@ class Monitor:
         index = self.get_loaded_stat_names().index(stat_name)
         if index >= 0:
             self.__statistics.pop(index)
-            self._init_fmt()
-            self._init_header()
-            self.__logger.info('Statistics {} unloaded'.format(stat_name))
+            # self._init_fmt()
+            # self._init_header()
+            self.__logger.info('Statistic {} unloaded'.format(stat_name))
         else:
-            raise ValueError('This statistics is not loaded')
+            raise ValueError('This statistic is not loaded')
+
+    def clear(self):
+        self.__statistics.clear()
 
     def reset_counters(self):
         """
         Reset all the counters
         """
-        for _counter in self.__counters.values():
-            _counter.reset()
-        self.begin = time.time()
-        self.__logger.info('Counters reset')
+        self.__sniffer.reset()
+
+    def reset_all_stats(self):
+        """
+        Reset the spot instances of the loaded statistics
+        """
+        for stat in self.__statistics:
+            stat.reset()
+    
+    def reset_buffer_and_recoder(self):
+        """
+        Re open the buffer if the source type is a file
+        """
+        if self.get_source_type() == 'file':
+            pcap_file = self.get_source()
+            self.set_source('file', pcap_file)
+            self.__logger.info('The capture file {} has be reloaded'.format(pcap_file))
+        record_file = self.get_record_file()
+        self.set_record_file(record_file)
+        self.__logger.info('The record file {} has be reloaded'.format(record_file))
+
+
 
     def is_sniffing(self):
         """
         Return the status of the sniffing
         """
         try:
-            return self.__sniff_thread.is_alive()
+            return self.__sniffer.is_sniffing()
         except AttributeError:
             return False
-
-    def _sniff(self):
-        """
-        Scapy sniff function
-        """
-        try:
-            sniff(
-                prn=self._process,
-                filter=self.__sniff_options['filter'],
-                iface=self.__sniff_options['iface'],
-                store=False,
-                stop_filter=lambda pkt: self.__stop_sniff_thread_event.is_set())
-        except BaseException:
-            self.__stop_sniff_thread_event.set()
-            _, self._thread_error, _ = sys.exc_info()
-
-    def _process(self, pkt):
-        """
-        Send the packet to the counters so as to let them process it
-        """
-        for _counter in self.__counters.values():
-            _counter.process(pkt)
 
     def _compute(self, stat):
         """
         Compute a statistic (and perform the monitoring if it is activated)
         """
-        counter_values = [self.__counters[n.name].get() for n in stat.needs]
+        counter_values = self.__sniffer.get_values(
+            [counter.name for counter in stat.needs])
         return stat.compute_and_monitor(*counter_values)
 
     def compute_all_stats(self):
@@ -677,80 +397,45 @@ class Monitor:
         Compute all the loaded statistics
         """
         return [self._compute(s) for s in self.__statistics]
-        # with ThreadPoolExecutor() as executor:
-        #     futures = [executor.submit(self._compute, s)
-        #                for s in self.__statistics]
-        # return [f.result() for f in futures]
 
-    def get_counters_for(self, stat):
-        """
-        Get the values of the counters required to compute the given stat
-        """
-        return [self.__counters[n.name].get() for n in stat.needs]
-
-    def start_monitor(self):
+    def start(self):
         """
         Launch the monitoring (start sniffing if not already started)
         """
-        # If sscapy is not sniffing, we try to launch it
-        if not self.is_sniffing():
-            self.start_sniffing()
-            # we need a certain amount of time to be sure that nothing happened
-            time.sleep(0.1)
-        # if scapy fails
-        if self._thread_error:
-            # we get the exception
-            exception = self._thread_error
-            # we reset it
-            self._thread_error = None
-            # and we raise it
-            raise exception
-        else:
-            # we unset the STOP event
-            self.__stop_monitor_thread_event.clear()
-            # we reset the counters
-            self.reset_counters()
-            # we create a new thread and start it
-            self.__monitor_thread = threading.Thread(daemon=True,
-                                                     target=self._monitorloop)
-            self.__monitor_thread.start()
-            self.__logger.info('Monitoring started')
+        # If scapy is not sniffing, we try to launch it
+        if not self.__sniffer.is_sniffing():
+            self.__sniffer.start()
 
-    def start_monitor_if_not(self):
+        self.__begin = self.__sniffer.time()
+
+        self._init_recorder()
+        # we unset the STOP event
+        self.__stop_monitor_thread_event.clear()
+        # we reset the counters
+        self.reset_counters()
+        # we create a new thread and start it
+        self.__monitor_thread = threading.Thread(daemon=True,
+                                                 target=self._monitorloop)
+        self.__monitor_thread.start()
+        self.__logger.info('Monitoring started')
+
+    def start_if_not(self):
         """
         Launch the monitoring (start sniffing if not already started)
         """
         if self.is_monitoring():
             raise RuntimeError('The monitoring is currently active')
         else:
-            self.start_monitor()
+            self.start()
 
-    def stop_monitor(self):
+    def stop(self):
         """
         Stop the monitoring (but not the sniffing)
         """
         # to stop, we have to active the MONITOR STOP event
         self.__stop_monitor_thread_event.set()
         self.__logger.info('Monitoring stopped')
-
-    def start_sniffing(self):
-        """
-        Start to sniff the network
-        """
-        self.__stop_sniff_thread_event.clear()
-        self.__sniff_thread = threading.Thread(daemon=True,
-                                               target=self._sniff)
-
-        self.__sniff_thread.start()
-
-    def stop_sniffing(self):
-        """
-        Stop to sniff network (and monitoring too if started)
-        """
-        # to stop, we have to active the MONITOR STOP event
-        self.__stop_sniff_thread_event.set()
-        self.stop_monitor()
-        self.__logger.info('Sniffing stopped')
+        self.__sniffer.stop()
 
     def is_monitoring(self):
         """
@@ -761,91 +446,39 @@ class Monitor:
         except AttributeError:
             return False
 
+    def live_on(self):
+        self.__recorder.live = True
+        print('')
+
+    def live_off(self):
+        self.__recorder.live = False
+
+    def is_live_mode_on(self):
+        if self.__recorder:
+            return self.__recorder.live
+        else:
+            return False
+
     def _monitorloop(self):
         """
         Main loop: compute statistics and monitor it
         """
         self.reset_counters()
-        while not self.__stop_monitor_thread_event.is_set():
-            if (time.time() - self.begin) > self.interval:
-                # get all the new values
-                self.__stat_values = self.compute_all_stats()
-                # retrieve the logs
-                self._log_spot_output()
-                # print values if live mode
-                if self.live:
-                    print(self.print_values())
-                if self.record:
-                    self.save_record()
-                # reset counters
+        self.__recorder.reset()
+        while (not self.__stop_monitor_thread_event.is_set()) and self.__sniffer.is_sniffing():
+            now = self.__sniffer.time()
+            if (now - self.__begin) > self.interval:
+                try:
+                    # get all the new values
+                    self.__stat_values = self.compute_all_stats()
+                    # store it
+                    self.__recorder.save(now, self.__stat_values)
+                except Exception as e:
+                    self.__logger.warning(e)
+                # reset the counters
                 self.reset_counters()
-
-    def _log_spot_output(self):
-        """
-        Log the monitoring result (if an event occurs)
-        """
-        for stat, stat_val in zip(self.__statistics, self.__stat_values):
-            if stat.last_spot_status == 1:  # UP alarm
-                self.__logger.warning(
-                    '%15s Alarm [value: %.3f, p: %.3e]',
-                    '[' + stat.name + ']',
-                    stat_val,
-                    stat.spot.up_probability(stat_val))
-            elif stat.last_spot_status == -1:  # DOWN alarm
-                self.__logger.warning(
-                    '%15s Alarm [value: %.3f, p: %.3e]',
-                    '[' + stat.name + ']',
-                    stat_val,
-                    stat.spot.up_probability(stat_val))
-            elif stat.last_spot_status == 4:  # Calibration
-                self.__logger.info(
-                    '%15s Calibration',
-                    '[' + stat.name + ']')
-
-    # def _log_spot_output(self, index):
-    #     """
-    #     Log the monitoring result (if an event occurs)
-    #     """
-    #     stat = self.__statistics[index]
-    #     stat_val = self.__stat_values[index]
-    #     if stat.last_spot_status == 1:  # UP alarm
-    #         self.__logger.warning(
-    #             '%15s Alarm [value: %.3f, p: %.3e]',
-    #             '[' + stat.name + ']',
-    #             stat_val,
-    #             stat.spot.up_probability(stat_val))
-    #     elif stat.last_spot_status == -1:  # DOWN alarm
-    #         self.__logger.warning(
-    #             '%15s Alarm [value: %.3f, p: %.3e]',
-    #             '[' + stat.name + ']',
-    #             stat_val,
-    #             stat.spot.up_probability(stat_val))
-    #     elif stat.last_spot_status == 4:  # Calibration
-    #         self.__logger.info(
-    #             '%15s Calibration',
-    #             '[' + stat.name + ']')
-
-    def _name_of(self, index):
-        """
-        Return the name of a statistics given its index
-        """
-        return self.__statistics[index].name
-
-    def print_values(self):
-        """
-        Print current statistics values
-        """
-        # if we have to refresh the header
-        if self.__format_options['refresh_header_counter'] == \
-                self.__format_options['refresh_header_period']:
-            # we skip a line and rewrite the header
-            msg = '\n' + self.__format_options['header'] + '\n'
-            # reset the counter
-            self.__format_options['refresh_header_counter'] = 0
-        else:
-            msg = ""
-            # otherwise, we will write new values so the counter is incremented
-            self.__format_options['refresh_header_counter'] += 1
-        # we write all the stats
-        msg += self.__format_options['fmt']
-        return msg.format(*self.__stat_values)
+                # set the new time basis
+                self.__begin = now
+        self.__recorder.live = False
+        self.__logger.info('Monitoring stopped')
+        utils.print_warning('\nThe monitoring has stopped')

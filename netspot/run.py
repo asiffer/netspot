@@ -7,9 +7,11 @@ Created on Thu Sep 27 14:07:24 2018
 """
 
 import argparse
-from netspot.cli import NetSpotCli
-
-# if __name__ == '__main__':
+import logging
+try:
+    from netspot.cli import NetSpotCli
+except BaseException:
+    from cli import NetSpotCli
 
 
 def main():
@@ -20,6 +22,14 @@ def main():
         dest='config',
         help="config file",
         type=str)
+    cli_parser.add_argument(
+        "-l",
+        "--log",
+        dest='log',
+        help="log file",
+        default="/tmp/netspot.log",
+        type=str)
     args = cli_parser.parse_args()
-    cli = NetSpotCli(args.config)
+
+    cli = NetSpotCli(args.config, args.log)
     cli.cmdloop()

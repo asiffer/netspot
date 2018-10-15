@@ -5,7 +5,9 @@ netspot/cli.py
 netspot/counters.py
 netspot/monitor.py
 netspot/parsers.py
+netspot/recorder.py
 netspot/run.py
+netspot/sniffer.py
 netspot/stats.py
 netspot/utils.py
 netspot.egg-info/PKG-INFO
@@ -15,3 +17,6 @@ netspot.egg-info/entry_points.txt
 netspot.egg-info/not-zip-safe
 netspot.egg-info/requires.txt
 netspot.egg-info/top_level.txt
+test/test_monitor.py
+test/test_recorder.py
+test/test_sniffer.py
