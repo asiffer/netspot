@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='netspot',
-    version='1.2',
+    version='1.1',
     description='A basic IDS with statistical learning',
     author='Alban Siffer',
     author_email='alban.siffer@irisa.fr',
