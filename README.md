@@ -30,6 +30,16 @@ When a `SPOT` instance finds an abnormal value, it merely logs it (currently to 
 This tool is available through a python3 package. First I have to understand how to make releases on Gitlab and then I will show you.
 
 ## Notes
+
+### Version 1.1
+
+This version is cleaner than the previous one. Some object have been added so as to balance the tasks. The interactive console is also simpler.
+
+Now, I am reflecting on improving performances. Python is not very efficient for this purpose so I will probably use another programming language for specific and highly parallelizable tasks.
+
+Sorry Scapy, but you take too long time to parse and dispatch packets...
+
+
 ### Version 1.0
 
 This first version is ugly: everything is a big class! No, not really but the size of the main object has increased greatly with the new incoming ideas. So the next version will try to split it into smaller classes.

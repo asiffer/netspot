@@ -8,14 +8,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='netspot',
-    version='1.1',
+    version='1.2',
     description='A basic IDS with statistical learning',
     author='Alban Siffer',
     author_email='alban.siffer@irisa.fr',
     license='GPL-3',
     packages=find_packages(),
     install_requires=[
-        'pylibspot',
         'scapy',
         'pandas',
         'netifaces',
