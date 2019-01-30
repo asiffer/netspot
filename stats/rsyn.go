@@ -1,6 +1,6 @@
 // rsyn.go
-// @name R_SYN
-// @brief The ratio of packets with TCP + SYN flag
+
+// R_SYN: The ratio of packets with TCP + SYN flag
 package stats
 
 import "math"

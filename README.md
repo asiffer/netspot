@@ -1,13 +1,18 @@
-# netspot
+# NetSpot
 
-`netspot` is a basic network IDS, in `python3`, based on [`Scapy`](https://scapy.net/) which embeds [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm. `netspot` is managed by a command line interface.
+![NetSpot_logo](assets/bat.png)
 
-This is merely a proof of concept, not a well implemented tool (not yet) 
+`netspot` is a basic *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
+The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour.
+
+`netspot` works as a server and can be controlled trough an HTTP API.
+The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
+
 
 ## Details
 
 ### Counters
-The idea is to increment network counters with `Scapy`. Examples of counters are the following:
+The idea is to increment network counters with `GoPacket`. Examples of counters are the following:
 * number of SYN packets;
 * number of ICMP packets;
 * number of IP packets;
@@ -23,13 +28,19 @@ Every statistic embeds a `SPOT` instance to monitor itself. Like the counters, y
 
 ### Alarms
 
-When a `SPOT` instance finds an abnormal value, it merely logs it (currently to a file or a socket).
+When a `SPOT` instance finds an abnormal value, it merely logs it (currently to a file or to InfluxDB).
 
 ## Usage
 
-This tool is available through a python3 package. First I have to understand how to make releases on Gitlab and then I will show you.
+This tool is available through a debian package. Next I will show how to implement Counters/Stats and how to use the controller.
 
 ## Notes
+
+### Version 1.2
+
+Bye, bye python... Welcome Go! The IDS has been reimplemented in `Go` for performances and concurrency reasons.
+
+A controller (CLI) is also provided so as to manage the NetSpot service. I don't know if I will put it in another package later.
 
 ### Version 1.1
 

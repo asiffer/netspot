@@ -1,6 +1,6 @@
 // ricmp.go
-// @name R_ICMP
-// @brief The ratio of ICMP packets
+
+// R_ICMP: The ratio of ICMP packets
 package stats
 
 import "math"

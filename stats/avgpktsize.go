@@ -1,6 +1,6 @@
 // avgpktsize.go
-// @name AVG_PKT_SIZE
-// @brief The average size of IP packets
+
+// AVG_PKT_SIZE: The average size of IP packets
 package stats
 
 import "math"

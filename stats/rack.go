@@ -1,6 +1,6 @@
 // rack.go
-// @name R_ACK
-// @brief The ratio of packets with TCP + ACK flag
+
+// R_ACK: The ratio of packets with TCP + ACK flag
 package stats
 
 import "math"

@@ -1,7 +1,6 @@
 // rdstsrc.go
-// @name R_DST_SRC
-// @brief The ratio 'number of unique destination addresses' /
-// 'number of unique source addresses'
+
+// R_DST_SRC: The ratio 'number of unique destination addresses' / 'number of unique source addresses'
 package stats
 
 import "math"

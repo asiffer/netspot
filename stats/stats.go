@@ -16,8 +16,7 @@ import (
 type StatConstructor func(bs BaseStat) StatInterface
 
 var (
-	logger zerolog.Logger // package logger
-	// AVAILABLE_STATS []string
+	logger          zerolog.Logger             // package logger
 	AVAILABLE_STATS map[string]StatConstructor = make(map[string]StatConstructor)
 )
 
@@ -71,7 +70,7 @@ type StatInterface interface {
 	Name() string                       // the name of the statistics
 	Requirement() []string              // the names of the requested counters
 	Compute(ctrvalues []uint64) float64 // only compute the statistics
-	Update(val float64) int32           // feed spot/dash
+	Update(val float64) int32           // feed dspot
 	DSpot() *gospot.DSpot               // return the DSpot instance
 }
 
