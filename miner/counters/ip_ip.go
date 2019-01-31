@@ -1,4 +1,5 @@
 // ip_ip.go
+
 package counters
 
 import (
@@ -10,31 +11,33 @@ import (
 func init() {
 	Register("IP", func() BaseCtrInterface {
 		return &IP{
-			IpCtr:   NewIpCtr(),
+			IPCtr:   NewIPCtr(),
 			Counter: 0}
 	})
 }
 
-// IP
+// IP is an IP counter counting the number of IP packets
 type IP struct {
-	IpCtr
+	IPCtr
 	Counter uint64
 }
 
-// Generic function (BaseCtrInterface)
+// Name returns the name of the counter (method of BaseCtrInterface)
 func (ip *IP) Name() string {
 	return "IP"
 }
 
+// Value returns the current value of the counter (method of BaseCtrInterface)
 func (ip *IP) Value() uint64 {
 	return atomic.LoadUint64(&ip.Counter)
 }
 
+// Reset resets the counter
 func (ip *IP) Reset() {
 	atomic.StoreUint64(&ip.Counter, 0)
 }
 
-// Specific function (IpCtr)
+// Process update the counter according to data it receives
 func (ip *IP) Process(*layers.IPv4) {
 	atomic.AddUint64(&ip.Counter, 1)
 }

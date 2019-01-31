@@ -1,4 +1,5 @@
 // ip_nb_uniq_dst_addr.go
+
 package counters
 
 import (
@@ -9,43 +10,43 @@ import (
 
 func init() {
 	Register("NB_UNIQ_DST_ADDR", func() BaseCtrInterface {
-		return &NB_UNIQ_DST_ADDR{
-			IpCtr: NewIpCtr(),
+		return &NbUniqDstAddr{
+			IPCtr: NewIPCtr(),
 			Addr:  make(map[string]bool)}
 	})
 }
 
-// NB_UNIQ_DST_ADDR
-// The number of unique source addresses
-type NB_UNIQ_DST_ADDR struct {
-	IpCtr
+// NbUniqDstAddr gives the number of unique source addresses
+type NbUniqDstAddr struct {
+	IPCtr
 	Addr map[string]bool
 	mux  sync.RWMutex
 }
 
-// Generic function (BaseCtrInterface)
-func (*NB_UNIQ_DST_ADDR) Name() string {
+// Name returns the name of the counter (method of BaseCtrInterface)
+func (*NbUniqDstAddr) Name() string {
 	return "NB_UNIQ_DST_ADDR"
 }
 
-func (nuda *NB_UNIQ_DST_ADDR) Value() uint64 {
+// Value returns the current value of the counter (method of BaseCtrInterface)
+func (nuda *NbUniqDstAddr) Value() uint64 {
 	return uint64(len(nuda.Addr))
 }
 
-func (nuda *NB_UNIQ_DST_ADDR) Reset() {
+// Reset resets the counter
+func (nuda *NbUniqDstAddr) Reset() {
 	nuda.mux.Lock()
-	for k, _ := range nuda.Addr {
+	for k := range nuda.Addr {
 		delete(nuda.Addr, k)
 	}
 	nuda.mux.Unlock()
 }
 
-// Specific function (IpCtr)
-
-func (nuda *NB_UNIQ_DST_ADDR) Process(ip *layers.IPv4) {
+// Process update the counter according to data it receives
+func (nuda *NbUniqDstAddr) Process(ip *layers.IPv4) {
 	nuda.mux.Lock()
 	nuda.Addr[ip.SrcIP.String()] = true
 	nuda.mux.Unlock()
 }
 
-// END OF NB_UNIQ_DST_ADDR
+// END OF NbUniqDstAddr

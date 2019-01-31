@@ -18,11 +18,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-type DeviceList []string
-
 var (
 	counterMap map[int]counters.BaseCtrInterface // Map id->counter
-	counterId  int                               // Id to store counters in counterMap
+	counterID  int                               // Id to store counters in counterMap
 	mux        sync.RWMutex                      // Locker for the counter map access
 	events     chan int                          // to receive events
 
@@ -53,7 +51,7 @@ func init() {
 
 	// counter loader
 	counterMap = make(map[int]counters.BaseCtrInterface)
-	counterId = 0 // 0 is never used
+	counterID = 0 // 0 is never used
 
 	// events
 	events = make(chan int)
@@ -98,7 +96,7 @@ func Zero() error {
 
 		// sniff variables
 		sniffing = false
-		// stopSniff = make(chan int)
+		// reset the number of parsed packets
 		nbParsedPkts = 0
 
 		// time variables
@@ -109,7 +107,7 @@ func Zero() error {
 
 		// counter loader
 		counterMap = make(map[int]counters.BaseCtrInterface)
-		counterId = 0 // 0 is never used
+		counterID = 0 // 0 is never used
 
 		// events
 		events = make(chan int)
@@ -117,10 +115,9 @@ func Zero() error {
 		// everything is ok
 		log.Info().Msg("Miner package reloaded")
 		return nil
-	} else {
-		log.Error().Msg("Cannot reload, sniffing in progress")
-		return errors.New("Cannot reload, sniffing in progress")
 	}
+	log.Error().Msg("Cannot reload, sniffing in progress")
+	return errors.New("Cannot reload, sniffing in progress")
 }
 
 //------------------------------------------------------------------------------
@@ -144,16 +141,27 @@ func isAlreadyLoaded(ctrname string) bool {
 	return false
 }
 
+func contains(list []string, str string) bool {
+	for _, s := range list {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
 //------------------------------------------------------------------------------
 // EXPORTED FUNCTIONS (BASIC TYPES)
 //------------------------------------------------------------------------------
 
+// DisableLogging sets the global zerolog log level to 0
 //export DisableLogging
 func DisableLogging() {
 	log.Warn().Msg("Disabling logging")
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 }
 
+// SetLogging sets the global zerolog log level
 //export SetLogging
 func SetLogging(level int) {
 	l := zerolog.Level(level)
@@ -161,36 +169,46 @@ func SetLogging(level int) {
 	log.Warn().Msgf("Enabling logging (level %s)", l.String())
 }
 
+// IsSniffing returns the sniffing status
 //export IsSniffing
 func IsSniffing() bool {
 	return sniffing
 }
 
+// GetSourceTime returns the time given by the current packet source
 //export GetSourceTime
 func GetSourceTime() int64 {
 	return SourceTime.UnixNano()
 }
 
+// GetNbParsedPkts returns the number of current parsed packets since
+// the initialization
 //export GetNbParsedPkts
 func GetNbParsedPkts() uint64 {
 	return nbParsedPkts
 }
 
+// GetNumberOfDevices returns the number of available devices (interfaces)
 //export GetNumberOfDevices
 func GetNumberOfDevices() int {
 	return len(GetAvailableDevices())
 }
 
+// IsDeviceInterface check if the current device is an interface
 //export IsDeviceInterface
 func IsDeviceInterface() bool {
 	return iface
 }
 
+// IsPromiscuous returns the current status of the interface
+// (not relevant for pcap file)
 //export IsPromiscuous
 func IsPromiscuous() bool {
 	return promiscuous
 }
 
+// SetPromiscuous set the promiscuous mode. If true, it means that the interface
+// will receives packets  that are not intended for it.
 //export SetPromiscuous
 func SetPromiscuous(b bool) int {
 	promiscuous = b
@@ -198,6 +216,7 @@ func SetPromiscuous(b bool) int {
 	return 0
 }
 
+// SetSnapshotLen sets the maximum size of packets which are captured
 //export SetSnapshotLen
 func SetSnapshotLen(sl int32) int {
 	snapshotLen = sl
@@ -205,6 +224,9 @@ func SetSnapshotLen(sl int32) int {
 	return 0
 }
 
+// StartSniffing starts to sniff the current device. It does nothing
+// if the sniffing is in progress. This is a goroutine, so it returns
+// once the sniffing has started.
 //export StartSniffing
 func StartSniffing() {
 	if !sniffing {
@@ -219,6 +241,9 @@ func StartSniffing() {
 
 }
 
+// StartSniffingAndWait sniff the current device but does not return immediately.
+// This is more relevant when the device is a capture file: the sniff stops when all
+// the packets have been read.
 //export StartSniffingAndWait
 func StartSniffingAndWait() {
 	if !sniffing {
@@ -230,6 +255,7 @@ func StartSniffingAndWait() {
 	log.Info().Msg("Sniffing stopped")
 }
 
+// StopSniffing stops to sniff the device
 //export StopSniffing
 func StopSniffing() {
 	if sniffing {
@@ -238,53 +264,63 @@ func StopSniffing() {
 	}
 }
 
+// GetNumberOfLoadedCounters returns the current number of
+// counters that are loaded
 //export GetNumberOfLoadedCounters
 func GetNumberOfLoadedCounters() int {
 	return len(counterMap)
 }
 
+// UnloadAll remove all the loaded counters
 //export UnloadAll
 func UnloadAll() {
-	for k, _ := range counterMap {
+	for k := range counterMap {
 		Unload(k)
 	}
 	// reset the counter
-	counterId = 0
+	counterID = 0
 }
 
+// GetCounterValue returns the current value of the counter
+// identified by its id
 //export GetCounterValue
 func GetCounterValue(id int) uint64 {
 	mux.Lock()
-
-	if counterMap[id].IsRunning() {
+	ctr, ok := counterMap[id]
+	if !ok {
+		log.Fatal().Msg("Invalid counter identifier")
+	}
+	if ctr.IsRunning() {
 		// send the signal
 		counterMap[id].SigPipe() <- uint8(1)
 		// return the value
 		defer mux.Unlock()
 		return <-counterMap[id].ValPipe()
-	} else {
-		defer mux.Unlock()
-		return counterMap[id].Value()
 	}
+	defer mux.Unlock()
+	return counterMap[id].Value()
+
 }
 
+// Unload removes the counter identified by its id
 //export Unload
 func Unload(id int) {
 	log.Debug().Msgf("Unloading counter %s", counterMap[id].Name())
 	delete(counterMap, id)
 }
 
+// Reset sets the counter value to zero (the "zero" value of the counter)
 //export Reset
 func Reset(id int) int {
 	ctr, exists := counterMap[id]
 	if exists {
 		ctr.Reset()
 		return 0
-	} else {
-		return -1
 	}
+	return -1
 }
 
+// ResetAll sets all the counters to zero
 //export ResetAll
 func ResetAll() {
 	mux.Lock()
@@ -298,11 +334,12 @@ func ResetAll() {
 // EXPORTED FUNCTIONS (GOLANG ONLY)
 //------------------------------------------------------------------------------
 
+// Events returns the event channel of the package
 func Events() chan int {
 	return events
 }
 
-// SetTimeout
+// SetTimeout set the timeout to the desired duration
 func SetTimeout(d time.Duration) {
 	timeout = d
 	log.Debug().Msgf("Timeout set to %s", d)
@@ -311,7 +348,7 @@ func SetTimeout(d time.Duration) {
 // SetDevice sets the device to listen. It can be either an interface or
 // a capture file (ex: .pcap)
 func SetDevice(dev string) int {
-	if AvailableDevices.contains(dev) {
+	if contains(AvailableDevices, dev) {
 		device = dev
 		iface = true
 	} else if fileExists(dev) {
@@ -348,11 +385,11 @@ func UnloadFromName(ctrname string) int {
 	id := idFromName(ctrname)
 	if id == -1 {
 		return -1
-	} else {
-		Unload(id)
-		log.Debug().Msgf("Unloading %s", ctrname)
-		return 0
 	}
+	Unload(id)
+	log.Debug().Msgf("Unloading %s", ctrname)
+	return 0
+
 }
 
 // GetLoadedCounters returns a slice of the names of
@@ -387,10 +424,10 @@ func startCounter(id int) error {
 		if !ctr.IsRunning() {
 			go counters.Run(ctr)
 		} else {
-			return errors.New(fmt.Sprintf("The counter %s is already running", ctr.Name()))
+			return fmt.Errorf("The counter %s is already running", ctr.Name())
 		}
 	} else {
-		return errors.New(fmt.Sprintf("The counter %s is not loaded", ctr.Name()))
+		return fmt.Errorf("The counter %s is not loaded", ctr.Name())
 	}
 	return nil
 }
@@ -411,50 +448,14 @@ func stopAllCounters() error {
 // given name. It returns an error when the desired counter does
 // not exist.
 func counterFromName(name string) counters.BaseCtrInterface {
-	cc, exists := counters.AVAILABLE_COUNTERS[name]
+	cc, exists := counters.AvailableCounters[name]
 	if exists {
 		return cc()
-	} else {
-		log.Error().Msg("Unknown counter")
-		return nil
 	}
-}
+	log.Error().Msg("Unknown counter")
+	return nil
 
-// func counterFromName(name string) counters.BaseCtrInterface {
-// 	switch name {
-// 	case "IP":
-// 		return &counters.IP{
-// 			IpCtr:   counters.NewIpCtr(),
-// 			Counter: 0}
-// 	case "SYN":
-// 		return &counters.SYN{
-// 			TcpCtr:  counters.NewTcpCtr(),
-// 			Counter: 0}
-// 	case "ACK":
-// 		return &counters.ACK{
-// 			TcpCtr:  counters.NewTcpCtr(),
-// 			Counter: 0}
-// 	case "IP_BYTES":
-// 		return &counters.IP_BYTES{
-// 			IpCtr:   counters.NewIpCtr(),
-// 			Counter: 0}
-// 	case "NB_UNIQ_SRC_ADDR":
-// 		return &counters.NB_UNIQ_SRC_ADDR{
-// 			IpCtr: counters.NewIpCtr(),
-// 			Addr:  make(map[string]bool)}
-// 	case "NB_UNIQ_DST_ADDR":
-// 		return &counters.NB_UNIQ_DST_ADDR{
-// 			IpCtr: counters.NewIpCtr(),
-// 			Addr:  make(map[string]bool)}
-// 	case "ICMP":
-// 		return &counters.ICMP{
-// 			IcmpCtr: counters.NewIcmpCtr(),
-// 			Counter: 0}
-// 	default:
-// 		log.Error().Msgf("Unknown counter (%s)", name)
-// 		return nil
-// 	}
-// }
+}
 
 func load(ctr counters.BaseCtrInterface) (int, error) {
 	if ctr != nil {
@@ -462,12 +463,12 @@ func load(ctr counters.BaseCtrInterface) (int, error) {
 			msg := fmt.Sprintf("Counter %s already loaded", ctr.Name())
 			log.Debug().Msgf("Counter %s already loaded", ctr.Name())
 			return -2, errors.New(msg)
-		} else {
-			counterId = counterId + 1
-			counterMap[counterId] = ctr
-			log.Debug().Msgf("Loading counter %s", ctr.Name())
-			return counterId, nil
 		}
+		counterID = counterID + 1
+		counterMap[counterID] = ctr
+		log.Debug().Msgf("Loading counter %s", ctr.Name())
+		return counterID, nil
+
 	}
 	log.Error().Msg("Cannot load null counter")
 	return -1, errors.New("Cannot load null counter")

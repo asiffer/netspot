@@ -38,9 +38,11 @@ This tool is available through a debian package. Next I will show how to impleme
 
 ### Version 1.2
 
-Bye, bye python... Welcome Go! The IDS has been reimplemented in `Go` for performances and concurrency reasons.
+Bye, bye Python... Welcome Go! The IDS has been reimplemented in `Go` for performances and concurrency reasons.
 
 A controller (CLI) is also provided so as to manage the NetSpot service. I don't know if I will put it in another package later.
+
+More tests are always needed.
 
 ### Version 1.1
 

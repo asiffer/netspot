@@ -1,34 +1,39 @@
 // icmp.go
+
 package counters
 
 import (
 	"github.com/google/gopacket/layers"
 )
 
-// Interface to define a Counter
+// ICMPCtrInterface si the interface defining an ICMP Counter
 // The paramount method is obviously 'process'
-type IcmpCtrInterface interface {
+type ICMPCtrInterface interface {
 	BaseCtrInterface
 	Process(*layers.ICMPv4)       // method to process a packet
 	LayPipe() chan *layers.ICMPv4 // receive packets
 }
 
-type IcmpCtr struct {
+// ICMPCtr is the generic object for ICMP counter
+type ICMPCtr struct {
 	BaseCtr
 	Lay chan *layers.ICMPv4
 }
 
-func NewIcmpCtr() IcmpCtr {
-	return IcmpCtr{
+// NewICMPCtr is the generic constructor of an ICMP counter
+func NewICMPCtr() ICMPCtr {
+	return ICMPCtr{
 		BaseCtr: NewBaseCtr(),
 		Lay:     make(chan *layers.ICMPv4)}
 }
 
-func (ctr *IcmpCtr) LayPipe() chan *layers.ICMPv4 {
+// LayPipe returns the ICMP layer channel of the ICMP counter
+func (ctr *ICMPCtr) LayPipe() chan *layers.ICMPv4 {
 	return ctr.Lay
 }
 
-func RunIcmpCtr(ctr IcmpCtrInterface) {
+// RunICMPCtr starts the ICMP counter
+func RunICMPCtr(ctr ICMPCtrInterface) {
 	ctr.SwitchRunningOn()
 	for {
 		select {
@@ -44,8 +49,6 @@ func RunIcmpCtr(ctr IcmpCtrInterface) {
 			}
 		case icmp := <-ctr.LayPipe(): // process the packet
 			ctr.Process(icmp)
-			// default:
-			// nothing (non blocking)
 		}
 	}
 }

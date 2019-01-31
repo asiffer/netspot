@@ -1,34 +1,39 @@
 // ip.go
+
 package counters
 
 import (
 	"github.com/google/gopacket/layers"
 )
 
-// COMMON FEATURES
-
-type IpCtrInterface interface {
+// IPCtrInterface is the interface defining an IP counter
+// The paramount method is obviously 'process'
+type IPCtrInterface interface {
 	BaseCtrInterface
 	Process(*layers.IPv4) // method to process a packet
 	LayPipe() chan *layers.IPv4
 }
 
-type IpCtr struct {
+// IPCtr is the generic IP counter (inherits from BaseCtr)
+type IPCtr struct {
 	BaseCtr
 	Lay chan *layers.IPv4
 }
 
-func NewIpCtr() IpCtr {
-	return IpCtr{
+// NewIPCtr is the generic constructor of an IP counter
+func NewIPCtr() IPCtr {
+	return IPCtr{
 		BaseCtr: NewBaseCtr(),
 		Lay:     make(chan *layers.IPv4)}
 }
 
-func (ctr *IpCtr) LayPipe() chan *layers.IPv4 {
+// LayPipe returns the IPv4 layer channel of the IP counter
+func (ctr *IPCtr) LayPipe() chan *layers.IPv4 {
 	return ctr.Lay
 }
 
-func RunIpCtr(ctr IpCtrInterface) {
+// RunIPCtr starts an IP counter
+func RunIPCtr(ctr IPCtrInterface) {
 	ctr.SwitchRunningOn()
 	for {
 		select {
@@ -44,8 +49,7 @@ func RunIpCtr(ctr IpCtrInterface) {
 			}
 		case ip := <-ctr.LayPipe(): // process the packet
 			ctr.Process(ip)
-			//default:
-			// nothing (non blocking)
+
 		}
 	}
 }

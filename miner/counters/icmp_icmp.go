@@ -1,4 +1,5 @@
 // icmp_icmp.go
+
 package counters
 
 import (
@@ -10,32 +11,33 @@ import (
 func init() {
 	Register("ICMP", func() BaseCtrInterface {
 		return &ICMP{
-			IcmpCtr: NewIcmpCtr(),
+			ICMPCtr: NewICMPCtr(),
 			Counter: 0}
 	})
 }
 
-// ICMP
-// Store the number of ICMP packets
+// ICMP stores the number of ICMP packets
 type ICMP struct {
-	IcmpCtr
+	ICMPCtr
 	Counter uint64
 }
 
-// Generic function (BaseCtrInterface)
+// Name returns the name of the counter (method of BaseCtrInterface)
 func (*ICMP) Name() string {
 	return "ICMP"
 }
 
+// Value returns the current value of the counter (method of BaseCtrInterface)
 func (icmp *ICMP) Value() uint64 {
 	return atomic.LoadUint64(&icmp.Counter)
 }
 
+// Reset resets the counter
 func (icmp *ICMP) Reset() {
 	atomic.StoreUint64(&icmp.Counter, 0)
 }
 
-// Specific function (IcmpCtr)
+// Process update the counter according to data it receives
 func (icmp *ICMP) Process(*layers.ICMPv4) {
 	atomic.AddUint64(&icmp.Counter, 1)
 }

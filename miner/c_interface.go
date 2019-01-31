@@ -1,13 +1,15 @@
 // c_interface.go
+
 package miner
 
 import (
 	"C"
 	"fmt"
 )
+import "time"
 
 func join(joiner string, list []string) string {
-	var joinedStrings string = ""
+	var joinedStrings string
 	l := len(list) - 1
 	for i := 0; i < l; i++ {
 		joinedStrings += list[i] + joiner
@@ -15,20 +17,23 @@ func join(joiner string, list []string) string {
 	return joinedStrings + list[l]
 }
 
-//export C_GetAvailableDevices
-func C_GetAvailableDevices() *C.char {
+// CGetAvailableDevices returns the raw list of available devices (raw string)
+//export CGetAvailableDevices
+func CGetAvailableDevices() *C.char {
 	return C.CString(join(",", GetAvailableDevices()))
 }
 
-//export C_GetDevice
-func C_GetDevice() *C.char {
+// CGetDevice returns the current device
+//export CGetDevice
+func CGetDevice() *C.char {
 	return C.CString(device)
 }
 
-//export C_SetDevice
-func C_SetDevice(dev_ptr *C.char) int {
-	dev := C.GoString(dev_ptr)
-	if AvailableDevices.contains(dev) {
+// CSetDevice changes the current device
+//export CSetDevice
+func CSetDevice(devPtr *C.char) int {
+	dev := C.GoString(devPtr)
+	if contains(AvailableDevices, dev) {
 		device = dev
 		iface = true
 	} else if fileExists(dev) {
@@ -41,26 +46,35 @@ func C_SetDevice(dev_ptr *C.char) int {
 	return 0
 }
 
-//export C_GetLoadedCounters
-func C_GetLoadedCounters() *C.char {
+// CSetTimeout changes the current timeout (given in seconds)
+//export CSetTimeout
+func CSetTimeout(t int64) {
+	var sec int64 = 1000000000 // 1sec = 1 000 000 000 ns
+	timeout = time.Duration(t * sec)
+}
+
+// CGetLoadedCounters returns the raw list of loaded counters
+//export CGetLoadedCounters
+func CGetLoadedCounters() *C.char {
 	dl := GetLoadedCounters()
 	return C.CString(join(",", dl))
 }
 
-//export C_LoadFromName
-func C_LoadFromName(ctrname_ptr *C.char) int {
-	ctr := counterFromName(C.GoString(ctrname_ptr))
+// CLoadFromName loads a counter from the given name
+//export CLoadFromName
+func CLoadFromName(ctrnamePtr *C.char) int {
+	ctr := counterFromName(C.GoString(ctrnamePtr))
 	id, _ := load(ctr)
 	return id
 }
 
-//export C_UnloadFromName
-func C_UnloadFromName(ctrname_ptr *C.char) int {
-	id := idFromName(C.GoString(ctrname_ptr))
+// CUnloadFromName unloads a counter from the given name
+//export CUnloadFromName
+func CUnloadFromName(ctrnamePtr *C.char) int {
+	id := idFromName(C.GoString(ctrnamePtr))
 	if id == -1 {
 		return -1
-	} else {
-		Unload(id)
-		return 0
 	}
+	Unload(id)
+	return 0
 }

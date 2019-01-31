@@ -1,34 +1,39 @@
 // tcp.go
+
 package counters
 
 import (
 	"github.com/google/gopacket/layers"
 )
 
-// Interface to define a Counter
+// TCPCtrInterface is the interface defining a TCP counter
 // The paramount method is obviously 'process'
-type TcpCtrInterface interface {
+type TCPCtrInterface interface {
 	BaseCtrInterface
 	Process(*layers.TCP)       // method to process a packet
 	LayPipe() chan *layers.TCP // receive packets
 }
 
-type TcpCtr struct {
+// TCPCtr is the generic TCP counter (inherits from BaseCtr)
+type TCPCtr struct {
 	BaseCtr
 	Lay chan *layers.TCP
 }
 
-func NewTcpCtr() TcpCtr {
-	return TcpCtr{
+// NewTCPCtr is the generic constructor of an TCP counter
+func NewTCPCtr() TCPCtr {
+	return TCPCtr{
 		BaseCtr: NewBaseCtr(),
 		Lay:     make(chan *layers.TCP)}
 }
 
-func (ctr *TcpCtr) LayPipe() chan *layers.TCP {
+// LayPipe returns the TCP layer channel of the TCP counter
+func (ctr *TCPCtr) LayPipe() chan *layers.TCP {
 	return ctr.Lay
 }
 
-func RunTcpCtr(ctr TcpCtrInterface) {
+// RunTCPCtr starts an TCP counter
+func RunTCPCtr(ctr TCPCtrInterface) {
 	ctr.SwitchRunningOn()
 	for {
 		select {
