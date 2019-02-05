@@ -109,6 +109,8 @@ func Run(ctr BaseCtrInterface) {
 			RunICMPCtr(icmpctr)
 		}
 	default:
-		fmt.Println("Unknown interface")
+		if ctr != nil {
+			log.Error().Msgf("The type of the counter '%s' is unknown", ctr.Name())
+		}
 	}
 }

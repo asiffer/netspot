@@ -45,7 +45,7 @@ func (nuda *NbUniqDstAddr) Reset() {
 // Process update the counter according to data it receives
 func (nuda *NbUniqDstAddr) Process(ip *layers.IPv4) {
 	nuda.mux.Lock()
-	nuda.Addr[ip.SrcIP.String()] = true
+	nuda.Addr[ip.DstIP.String()] = true
 	nuda.mux.Unlock()
 }
 
