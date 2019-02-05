@@ -1,0 +1,24 @@
+image: golang:1.11-bionic
+
+stages:
+  - test
+
+before_script:
+  - add-apt-repository ppa:asiffer/libspot
+  - apt update 
+  - apt install -y libspot make
+  - mkdir -p /go/src/gitlab.com
+  - mkdir -p /go/src/github.com
+  - go get -u github.com/c-bata/go-prompt
+  - go get -u github.com/rs/zerolog
+  - go get -u github.com/spf13/viper
+  - go get -u github.com/fatih/color
+  - go get -u github.com/fsnotify/fsnotify
+  - go get -u github.com/urfave/cli
+  - go get -u github.com/influxdata/influxdb/client/v2
+  - ln -s /builds/user /go/src/gitlab.com/user
+
+coverage:
+  stage: test
+  script:
+    - go test -cover -v ./...

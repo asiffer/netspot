@@ -74,7 +74,6 @@ func Tick(d time.Duration) chan time.Time {
 
 func updateTime(t time.Time) {
 	SourceTime = t
-
 	if sendTicks {
 		if SourceTime.Sub(last) < 0 {
 			last = SourceTime
@@ -132,8 +131,6 @@ func Sniff() {
 	// loop over the incoming packets
 	for {
 		select {
-		// stop the loop
-		// case <-stopSniff:
 		case e := <-events:
 			// event 0 means "stop sniffing"
 			if e == 0 {
@@ -191,28 +188,16 @@ func dispatch(goroutinePool *sync.WaitGroup, pkt gopacket.Packet) {
 			if ip != nil {
 				ipctr, _ := ctr.(counters.IPCtrInterface)
 				ipctr.LayPipe() <- ip
-				// ipctr, ok := ctr.(counters.IpCtrInterface)
-				// if ok {
-				// 	ipctr.LayPipe() <- ip
-				// }
 			}
 		case counters.TCPCtrInterface:
 			if tcp != nil {
 				tcpctr, _ := ctr.(counters.TCPCtrInterface)
 				tcpctr.LayPipe() <- tcp
-				// tcpctr, ok := ctr.(counters.TcpCtrInterface)
-				// if ok {
-				// 	tcpctr.LayPipe() <- tcp
-				// }
 			}
 		case counters.ICMPCtrInterface:
 			if icmp != nil {
 				icmpctr, _ := ctr.(counters.ICMPCtrInterface)
 				icmpctr.LayPipe() <- icmp
-				// icmpctr, ok := ctr.(counters.IcmpCtrInterface)
-				// if ok {
-				// 	icmpctr.LayPipe() <- icmp
-				// }
 			}
 		}
 	}

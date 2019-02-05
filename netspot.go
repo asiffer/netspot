@@ -1,5 +1,8 @@
 // netspot.go
-// RPC API
+
+// Netspot is a basic IDS with statistical learning. It works as a server
+// which either listens on interface or reads a network capture file. The server
+// is controlled by a client `netspotctl`.
 package main
 
 import (
@@ -27,6 +30,7 @@ var (
 	minerEvents chan int
 )
 
+// Netspot is the object to build the API
 type Netspot struct{}
 
 //------------------------------------------------------------------------------
@@ -72,7 +76,7 @@ func (ns *Netspot) Zero(none *int, i *int) error {
 func (ns *Netspot) SetDevice(device string, i *int) error {
 	*i = miner.SetDevice(device)
 	if *i == 1 {
-		return errors.New(fmt.Sprintf("Unknown device (%s)", device))
+		return fmt.Errorf("Unknown device (%s)", device)
 	}
 	return nil
 }
@@ -83,9 +87,9 @@ func (ns *Netspot) SetPromiscuous(b bool, i *int) error {
 		*i = -1
 		if b {
 			return errors.New("Promiscuous mode already activated")
-		} else {
-			return errors.New("Promiscuous mode already desactivated")
 		}
+		return errors.New("Promiscuous mode already desactivated")
+
 	}
 	*i = miner.SetPromiscuous(b)
 	if *i != 0 {
@@ -151,10 +155,10 @@ func (ns *Netspot) StatStatus(statName string, rawstatus *string) error {
 	status, err := analyzer.StatStatus(statName)
 	if err != nil {
 		return err
-	} else {
-		*rawstatus = status.String()
-		return nil
 	}
+	*rawstatus = status.String()
+	return nil
+
 }
 
 // Unload removes a loaded statistics. See analyzer.UnloadFromName to get
@@ -197,7 +201,7 @@ func (ns *Netspot) Config(none *int, s *string) error {
 	return nil
 }
 
-// Start
+// Start runs the miner and then the stats
 func (ns *Netspot) Start(none *int, i *int) error {
 	if analyzer.IsRunning() {
 		*i = 3
@@ -221,7 +225,7 @@ func (ns *Netspot) Start(none *int, i *int) error {
 	return nil
 }
 
-// Stop
+// Stop stops the stat computation (and the miner too)
 func (ns *Netspot) Stop(none *int, i *int) error {
 	if !analyzer.IsRunning() {
 		*i = 1
@@ -279,9 +283,8 @@ func InitConsoleWriter() {
 			f := i.(float64)
 			if f < 1e-3 {
 				return fmt.Sprintf("%e", f)
-			} else {
-				return fmt.Sprintf("%.5f", f)
 			}
+			return fmt.Sprintf("%.5f", f)
 		case int32, int16, int8, int:
 			return fmt.Sprintf("%d", i)
 		default:

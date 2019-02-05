@@ -157,9 +157,16 @@ func release() {
 
 func updateAndReset() {
 	mux.Lock()
+	var val uint64
+	var err error
 	for ctrname, ctrid := range counterId {
-		counterValues[ctrname] = miner.GetCounterValue(ctrid)
-		miner.Reset(ctrid)
+		val, err = miner.GetCounterValue(ctrid)
+		if err != nil {
+			log.Error().Msgf("The ID of %s (%d) is wrong for the miner", ctrname, ctrid)
+		} else {
+			counterValues[ctrname] = val
+			miner.Reset(ctrid)
+		}
 	}
 	log.Debug().Msg(fmt.Sprint(counterValues))
 	mux.Unlock()

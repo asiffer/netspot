@@ -1,8 +1,10 @@
 // test_miner.go
+
 package miner
 
 import (
 	"fmt"
+	"netspot/miner/counters"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -322,8 +324,18 @@ func TestUnloading(t *testing.T) {
 
 func TestLoading(t *testing.T) {
 	title("Testing counter loading")
+	UnloadAll()
 	ok := LoadFromName("SYN")
 	nok := LoadFromName("WTF")
+
+	checkTitle("Checking number of loaded counters...")
+	n := GetNumberOfLoadedCounters()
+	if n != 1 {
+		testERROR()
+		t.Errorf("Fail: Expected 1 counter, got %d", n)
+	} else {
+		testOK()
+	}
 
 	checkTitle("Checking existing counter loading...")
 	if ok < 0 {
@@ -340,6 +352,16 @@ func TestLoading(t *testing.T) {
 	} else {
 		testOK()
 	}
+
+	checkTitle("Checking loading twice...")
+	syn := counters.AvailableCounters["SYN"]()
+	_, err := load(syn)
+	if err == nil {
+		testERROR()
+		t.Error("Fail: counter wrongly loaded")
+	} else {
+		testOK()
+	}
 }
 
 func TestGettingCounterValue(t *testing.T) {
@@ -349,22 +371,246 @@ func TestGettingCounterValue(t *testing.T) {
 	idIP := LoadFromName("IP")
 	idSYN := LoadFromName("SYN")
 
-	StartSniffing()
-	time.Sleep(1 * time.Second)
+	StartSniffingAndWait()
+	time.Sleep(2 * time.Second)
 	checkTitle("Checking IP counter value...")
-	if GetCounterValue(idIP) != 908 {
+	ipCtrValue, _ := GetCounterValue(idIP)
+	if ipCtrValue != 908 {
 		testERROR()
-		t.Errorf("Fail: bad counter (get %d instead of 907)", GetCounterValue(idIP))
+		t.Errorf("Fail: bad counter (get %d instead of 907)", ipCtrValue)
 	} else {
 		testOK()
 	}
 
 	checkTitle("Checking SYN counter value...")
-	if GetCounterValue(idSYN) != 56 {
+	synCtrValue, _ := GetCounterValue(idSYN)
+	if synCtrValue != 56 {
 		testERROR()
-		t.Errorf("Fail: bad counter (get %d instead of 56)", GetCounterValue(idSYN))
+		t.Errorf("Fail: bad counter (get %d instead of 56)", synCtrValue)
 	} else {
 		testOK()
 	}
 
+	checkTitle("Checking unloaded counter value...")
+	_, err := GetCounterValue(-1)
+	if err == nil {
+		testERROR()
+		t.Error("Fail: bad counter")
+	} else {
+		testOK()
+	}
+
+}
+
+func TestStartStop(t *testing.T) {
+	title("Testing start/stop")
+	Zero()
+	setNormalConfig()
+	StartSniffing()
+	time.Sleep(1 * time.Millisecond)
+	StopSniffing()
+	time.Sleep(10 * time.Millisecond)
+
+	checkTitle("Checking sniffing status...")
+	if IsSniffing() {
+		testERROR()
+		t.Errorf("Fail: sniffing has not stopped")
+	}
+	testOK()
+}
+
+func TestResetCounter(t *testing.T) {
+	title("Testing counter reset")
+	Zero()
+	setNormalConfig()
+	// SetLogging(1)
+	idIP := LoadFromName("IP")
+	idSYN := LoadFromName("SYN")
+
+	StartSniffingAndWait()
+
+	time.Sleep(1 * time.Second)
+	Reset(idSYN)
+	Reset(idIP)
+	checkTitle("Checking IP counter reset...")
+	ipCtrValue, _ := GetCounterValue(idIP)
+	if ipCtrValue != 0 {
+		testERROR()
+		t.Error("Fail: resetting IP counter")
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking SYN counter reset...")
+	synCtrValue, _ := GetCounterValue(idSYN)
+	if synCtrValue != 0 {
+		testERROR()
+		t.Error("Fail: resetting SYN counter")
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking bad counter reset...")
+	if Reset(-1) != -1 {
+		testERROR()
+		t.Error("Fail: resetting bad counter")
+	} else {
+		testOK()
+	}
+}
+
+func TestResetAllCounter(t *testing.T) {
+	title("Testing resetting all counters")
+	Zero()
+	setNormalConfig()
+	// SetLogging(1)
+	idIP := LoadFromName("IP")
+	idSYN := LoadFromName("SYN")
+
+	StartSniffingAndWait()
+	time.Sleep(1 * time.Second)
+	ResetAll()
+	checkTitle("Checking IP counter reset...")
+	ipCtrValue, _ := GetCounterValue(idIP)
+	if ipCtrValue != 0 {
+		testERROR()
+		t.Error("Fail: resetting IP counter")
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking SYN counter reset...")
+	synCtrValue, _ := GetCounterValue(idSYN)
+	if synCtrValue != 0 {
+		testERROR()
+		t.Error("Fail: resetting SYN counter")
+	} else {
+		testOK()
+	}
+}
+
+func TestStartingSingleCounter(t *testing.T) {
+	title("Testing starting a single counter")
+	Zero()
+	id := LoadFromName("ACK")
+	err := startCounter(id)
+
+	checkTitle("Checking IP counter start...")
+	if err != nil {
+		testERROR()
+		t.Error(err.Error())
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking second IP start...")
+	if startCounter(id) == nil {
+		testERROR()
+		t.Error("Counter has wrongly started")
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking not loaded counter start...")
+	if startCounter(-1) == nil {
+		testERROR()
+		t.Error("Counter has wrongly started")
+	} else {
+		testOK()
+	}
+	time.Sleep(200 * time.Millisecond)
+	stopAllCounters()
+}
+
+func TestTick(t *testing.T) {
+	title("Testing tick")
+	Zero()
+
+	setNormalConfig()
+	LoadFromName("IP")
+	LoadFromName("SYN")
+
+	chant := Tick(500 * time.Microsecond)
+	to := time.Tick(2 * time.Second)
+	nticks := 0
+	StartSniffing()
+	checkTitle("Correct number of ticks...")
+	for {
+		select {
+		case <-chant:
+			nticks++
+		case <-to:
+			if nticks == 405 {
+				testOK()
+				return
+			}
+			testERROR()
+
+		}
+		// fmt.Println(nticks)
+	}
+
+}
+
+func TestCAPI(t *testing.T) {
+	title("Testing C API")
+	checkTitle("Available devices...")
+	if testCGetAvailableDevices() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	checkTitle("Get device...")
+	if testCGetDevice() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	checkTitle("Set device...")
+	if testCSetDevice() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	checkTitle("Set timeout...")
+	if testCSetTimeout() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	checkTitle("Get loaded counter...")
+	if testCGetLoadedCounters() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	checkTitle("Load counter...")
+	if testCLoadFromName() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	checkTitle("Unload counter...")
+	if testCUnloadFromName() {
+		testOK()
+	} else {
+		testERROR()
+	}
+
+	Zero()
+	i := LoadFromName("SYN")
+	pcapSniffing()
+
+	checkTitle("Geting counter value...")
+	if testCGetCounterValue(i, 56) {
+		testOK()
+	} else {
+		testERROR()
+	}
 }

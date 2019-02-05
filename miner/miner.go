@@ -283,22 +283,22 @@ func UnloadAll() {
 
 // GetCounterValue returns the current value of the counter
 // identified by its id
-//export GetCounterValue
-func GetCounterValue(id int) uint64 {
-	mux.Lock()
+func GetCounterValue(id int) (uint64, error) {
+	// mux.Lock()
 	ctr, ok := counterMap[id]
 	if !ok {
-		log.Fatal().Msg("Invalid counter identifier")
+		log.Error().Msg("Invalid counter identifier")
+		return 0, errors.New("Invalid counter identifier")
 	}
 	if ctr.IsRunning() {
 		// send the signal
 		counterMap[id].SigPipe() <- uint8(1)
 		// return the value
-		defer mux.Unlock()
-		return <-counterMap[id].ValPipe()
+		// defer mux.Unlock()
+		return <-counterMap[id].ValPipe(), nil
 	}
-	defer mux.Unlock()
-	return counterMap[id].Value()
+	// defer mux.Unlock()
+	return counterMap[id].Value(), nil
 
 }
 
@@ -314,7 +314,12 @@ func Unload(id int) {
 func Reset(id int) int {
 	ctr, exists := counterMap[id]
 	if exists {
-		ctr.Reset()
+		// ctr.Reset()
+		if ctr.IsRunning() {
+			ctr.SigPipe() <- 2
+		} else {
+			ctr.Reset()
+		}
 		return 0
 	}
 	return -1
@@ -325,9 +330,16 @@ func Reset(id int) int {
 func ResetAll() {
 	mux.Lock()
 	for _, ctr := range counterMap {
-		ctr.Reset()
+		//ctr.Reset()
+		if ctr.IsRunning() {
+			ctr.SigPipe() <- 2
+		} else {
+			ctr.Reset()
+		}
+
 	}
 	mux.Unlock()
+
 }
 
 //------------------------------------------------------------------------------
@@ -422,25 +434,39 @@ func startCounter(id int) error {
 	ctr, ok := counterMap[id]
 	if ok {
 		if !ctr.IsRunning() {
+			ctr.SwitchRunningOn()
 			go counters.Run(ctr)
 		} else {
 			return fmt.Errorf("The counter %s is already running", ctr.Name())
 		}
 	} else {
-		return fmt.Errorf("The counter %s is not loaded", ctr.Name())
+		return fmt.Errorf("The ID %d does not refer to a loaded counter", id)
 	}
 	return nil
 }
 
+func stillRunningCounters() bool {
+	for _, ctr := range counterMap {
+		if ctr.IsRunning() {
+			return true
+		}
+	}
+	return false
+}
+
 func stopAllCounters() error {
-	mux.Lock()
+	// mux.Lock()
 	for _, ctr := range counterMap {
 		if ctr.IsRunning() {
 			ctr.SigPipe() <- 0
 		}
 	}
-	mux.Unlock()
+	// mux.Unlock()
 	log.Info().Msg("Stopping all counters")
+	// to be sure they are all stopped
+	for stillRunningCounters() {
+		time.Sleep(50 * time.Millisecond)
+	}
 	return nil
 }
 
