@@ -1,0 +1,5 @@
+[miner]
+device = "test/test.pcap"
+promiscuous = true
+snapshot_len = 9999
+timeout = "7s"
