@@ -1,7 +1,8 @@
 // analyzer.go
-package analyzer
 
-// import "netspot/initconfig"
+// Package analyzer is the core of netspot as it controls the miner, the
+// stats computations and the logs.
+package analyzer
 
 import (
 	"errors"
@@ -27,9 +28,9 @@ import (
 //------------------------------------------------------------------------------
 
 var (
-	counterId     map[string]int              // map CounterName -> counterId (within miner CounterMap)
+	counterID     map[string]int              // map CounterName -> counterID (within miner CounterMap)
 	statMap       map[int]stats.StatInterface // map StatId -> Stat
-	statId        int                         // id of the next loaded stat
+	statID        int                         // id of the next loaded stat
 	statValues    map[string]float64          // the last computed values of the statistics
 	counterValues map[string]uint64           // temp container of the counter values
 	period        time.Duration               // time between two stat updates (= window size)
@@ -66,58 +67,33 @@ func init() {
 
 // init initializes package global variables
 func init() {
-	counterId = make(map[string]int)
+	counterID = make(map[string]int)
 	statMap = make(map[int]stats.StatInterface)
-	statId = 0
+	statID = 0
 	statValues = make(map[string]float64)
 	counterValues = make(map[string]uint64)
 	events = make(chan int)
 	running = false
 }
 
-// func init() {
+// InitConfig initialize the loggers and load the stats according to
+// the config file
 func InitConfig() {
 	// settings
 	SetPeriod(viper.GetDuration("analyzer.period"))
 	logDataToFile = viper.GetBool("analyzer.datalog.file")
 	logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
-	// SetSeriesName(seriesNameFromCurrentTime())
 
 	if logDataToInfluxDB {
 		influxdb.InitConfig()
 	}
 
-	// if logDataToFile {
-	// 	p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "nsraw_"+seriesName+".json")
-	// 	f, err := os.Create(p)
-	// 	if err != nil {
-	// 		log.Fatal().Msg("Error while creating raw data log file")
-	// 	}
-	// 	rawDataLogger = zerolog.New(f).With().Logger()
-	// 	rawDataOutputFile = f.Name()
-	// 	log.Debug().Msgf("Raw statistics saved to %s", rawDataOutputFile)
-
-	// 	p = path.Join(viper.GetString("analyzer.datalog.output_dir"), "nsthreshold_"+seriesName+".json")
-	// 	f, err = os.Create(p)
-	// 	if err != nil {
-	// 		log.Fatal().Msg("Error while creating threshold log file")
-	// 	}
-	// 	thresholdLogger = zerolog.New(f).With().Logger()
-	// 	thresholdOutputFile = f.Name()
-	// 	log.Debug().Msgf("Thresholds saved to %s", thresholdOutputFile)
-
-	// } else {
-	// 	rawDataLogger = zerolog.New(nil).With().Logger()
-	// 	thresholdLogger = zerolog.New(nil).With().Logger()
-	// }
-
 	for _, s := range viper.GetStringSlice("analyzer.stats") {
 		LoadFromName(s)
 	}
 
-	log.Debug().Msg(fmt.Sprint("Available stats: ", GetAvailableStats()))
+	log.Debug().Msgf("Available stats: %s", GetAvailableStats())
 	log.Info().Msg("Analyzer package configured")
-
 }
 
 //------------------------------------------------------------------------------
@@ -136,6 +112,18 @@ func find(sl []string, str string) int {
 }
 
 // SPECIFIC --------------------------------------------------------------------
+
+// autoSetSeriesName automaticcaly sets the name of the series for the
+// incoming sniff
+func autoSetSeriesName() {
+	// Interface: device_time
+	if miner.IsDeviceInterface() {
+		seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
+	} else {
+		// PCAP: file
+		seriesName = path.Base(miner.GetDevice())
+	}
+}
 
 func seriesNameFromCurrentTime() string {
 	t := strings.Replace(time.Now().Format(time.Stamp), "_", "0", -1)
@@ -159,7 +147,7 @@ func updateAndReset() {
 	mux.Lock()
 	var val uint64
 	var err error
-	for ctrname, ctrid := range counterId {
+	for ctrname, ctrid := range counterID {
 		val, err = miner.GetCounterValue(ctrid)
 		if err != nil {
 			log.Error().Msgf("The ID of %s (%d) is wrong for the miner", ctrname, ctrid)
@@ -202,20 +190,19 @@ func load(stat stats.StatInterface) (int, error) {
 			log.Debug().Msgf("Stat %s already loaded", stat.Name())
 			msg := fmt.Sprintf("Stat %s already loaded", stat.Name())
 			return -2, errors.New(msg)
-		} else {
-			// load the counters
-			for _, ctrname := range stat.Requirement() {
-				id = miner.LoadFromName(ctrname)
-				if id > 0 {
-					counterId[ctrname] = id
-				}
-			}
-			// increment the stat container
-			statId = statId + 1
-			statMap[statId] = stat
-			log.Debug().Msgf("Loading stat %s", stat.Name())
-			return statId, nil
 		}
+		// load the counters
+		for _, ctrname := range stat.Requirement() {
+			id = miner.LoadFromName(ctrname)
+			if id > 0 {
+				counterID[ctrname] = id
+			}
+		}
+		// increment the stat container
+		statID = statID + 1
+		statMap[statID] = stat
+		log.Debug().Msgf("Loading stat %s", stat.Name())
+		return statID, nil
 	}
 	return -1, errors.New("Cannot load null stat")
 }
@@ -244,7 +231,7 @@ func unload(id int) (int, error) {
 	}
 	// We remove all the useless counters
 	for _, ctr := range counters2remove {
-		delete(counterId, ctr)
+		delete(counterID, ctr)
 		delete(counterValues, ctr)
 		miner.UnloadFromName(ctr)
 	}
@@ -308,7 +295,8 @@ func RawStatus() map[string]string {
 // InitDataLogging creates new loggers (file/influxdb). Normally, it is called when
 // start to run.
 func InitDataLogging() {
-	SetSeriesName(seriesNameFromCurrentTime())
+	//SetSeriesName(seriesNameFromCurrentTime())
+	autoSetSeriesName()
 
 	if logDataToFile {
 		p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_raw_"+seriesName+".json")
@@ -342,33 +330,11 @@ func Zero() error {
 		// period = viper.GetDuration("analyzer.period")
 		logDataToFile = viper.GetBool("analyzer.datalog.file")
 		logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
-		// SetSeriesName(seriesNameFromCurrentTime())
-
-		// if logDataToFile {
-		// 	p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "nsraw_"+seriesName+".json")
-		// 	f, err := os.Create(p)
-		// 	if err != nil {
-		// 		log.Fatal().Msg("Error while creating raw data log file")
-		// 	}
-		// 	rawDataLogger = zerolog.New(f).With().Logger()
-		// 	rawDataOutputFile = f.Name()
-
-		// 	p = path.Join(viper.GetString("analyzer.datalog.output_dir"), "nsthreshold_"+seriesName+".json")
-		// 	f, err = os.Create(p)
-		// 	if err != nil {
-		// 		log.Fatal().Msg("Error while creating threshold log file")
-		// 	}
-		// 	thresholdLogger = zerolog.New(f).With().Logger()
-		// 	thresholdOutputFile = f.Name()
-		// } else {
-		// 	rawDataLogger = zerolog.New(nil).With().Logger()
-		// 	thresholdLogger = zerolog.New(nil).With().Logger()
-		// }
 
 		// package variables
-		counterId = make(map[string]int)
+		counterID = make(map[string]int)
 		statMap = make(map[int]stats.StatInterface)
-		statId = 0
+		statID = 0
 		statValues = make(map[string]float64)
 		counterValues = make(map[string]uint64)
 		// stopChan = make(chan int)
@@ -377,10 +343,9 @@ func Zero() error {
 
 		log.Info().Msg("Analyzer package reloaded")
 		return nil
-	} else {
-		log.Error().Msg("Cannot reload, monitoring in progress")
-		return errors.New("Cannot reload, monitoring in progress")
 	}
+	log.Error().Msg("Cannot reload, monitoring in progress")
+	return errors.New("Cannot reload, monitoring in progress")
 }
 
 // Config return the configuration of the analyzer/miner
@@ -425,6 +390,16 @@ func GetPeriod() time.Duration {
 	return period
 }
 
+// GetThresholdOutputFile returns the file where the computed thresholds will be logged
+func GetThresholdOutputFile() string {
+	return thresholdOutputFile
+}
+
+// GetRawDataOutputFile returns the file where the raw statistics will be logged
+func GetRawDataOutputFile() string {
+	return rawDataOutputFile
+}
+
 // GetLoadedStats returns the slice of the names of the loaded statistics
 func GetLoadedStats() []string {
 	list := make([]string, 0)
@@ -443,7 +418,7 @@ func GetNumberOfLoadedStats() int {
 // statistics
 func GetAvailableStats() []string {
 	list := make([]string, 0)
-	for name, _ := range stats.AVAILABLE_STATS {
+	for name := range stats.AvailableStats {
 		list = append(list, name)
 	}
 	return list
@@ -468,25 +443,24 @@ func UnloadFromName(statname string) (int, error) {
 	if id > 0 {
 		ret, err := unload(id)
 		return ret, err
-	} else {
-		msg := fmt.Sprintf("%s statistics is not loaded", statname)
-		return -1, errors.New(msg)
 	}
+	msg := fmt.Sprintf("%s statistics is not loaded", statname)
+	return -1, errors.New(msg)
 }
 
 // UnloadAll removes all the previously loaded statistics
 func UnloadAll() {
-	for i, _ := range statMap {
+	for i := range statMap {
 		delete(statMap, i)
 	}
-	for i, _ := range counterValues {
+	for i := range counterValues {
 		delete(counterValues, i)
 	}
-	for i, _ := range counterId {
-		delete(counterId, i)
+	for i := range counterID {
+		delete(counterID, i)
 	}
 	miner.UnloadAll()
-	statId = 0
+	statID = 0
 }
 
 // IsRunning checks whether the statistics are currently computed
@@ -540,7 +514,7 @@ func StartStatsAndWait() error {
 // The stat values and the computed thresholds are logged (file and/or influxdb)
 func analyze() {
 	var val float64
-	var up_th, down_th float64
+	var upTh, downTh float64
 	var res int32
 	var name string
 	curtime := miner.SourceTime
@@ -552,21 +526,21 @@ func analyze() {
 		name = stat.Name()
 
 		// log thresholds
-		up_th = stat.DSpot().GetUpperThreshold()
-		down_th = stat.DSpot().GetLowerThreshold()
+		upTh = stat.DSpot().GetUpperThreshold()
+		downTh = stat.DSpot().GetLowerThreshold()
 
-		// if up_th is NaN, it means that up data are not monitored or
+		// if upTh is NaN, it means that up data are not monitored or
 		// the calibration has not finished
-		if !math.IsNaN(up_th) {
-			tlog.Float64(name+"_UP", up_th)
-			statValues[name+"_UP"] = up_th
+		if !math.IsNaN(upTh) {
+			tlog.Float64(name+"_UP", upTh)
+			statValues[name+"_UP"] = upTh
 		}
 
-		// if down_th is NaN, it means that down data are not monitored or
+		// if downTh is NaN, it means that down data are not monitored or
 		// the calibration has not finished
-		if !math.IsNaN(down_th) {
-			tlog.Float64(name+"_DOWN", down_th)
-			statValues[name+"_DOWN"] = down_th
+		if !math.IsNaN(downTh) {
+			tlog.Float64(name+"_DOWN", downTh)
+			statValues[name+"_DOWN"] = downTh
 		}
 
 		// compute the statistics
@@ -599,12 +573,12 @@ func run() {
 
 	// Define the clock
 	if miner.IsDeviceInterface() {
-		seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
+		//seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
 		// live ticker
 		ticker = time.Tick(period)
 	} else {
 		// the series name is then the name of the file
-		seriesName = path.Base(miner.GetDevice())
+		//seriesName = path.Base(miner.GetDevice())
 		// the timestamps of the capture define the clock
 		ticker = miner.Tick(period)
 	}
@@ -626,12 +600,11 @@ func run() {
 				release()
 				log.Warn().Msg("Stopping stats computation (miner)")
 				return
-			} else {
-				// get the stats values (call miner counters etc.)
-				updateAndReset()
-				// analyze the stats values (feed dspot, log data/thresholds)
-				analyze()
 			}
+			// get the stats values (call miner counters etc.)
+			updateAndReset()
+			// analyze the stats values (feed dspot, log data/thresholds)
+			analyze()
 		}
 	}
 }

@@ -1,4 +1,7 @@
 // influxdb.go
+
+// Package influxdb is a subpackage aimed to send data produced by netspot
+// to an influxdb database
 package influxdb
 
 import (

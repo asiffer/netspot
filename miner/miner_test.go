@@ -540,11 +540,13 @@ func TestTick(t *testing.T) {
 		case <-chant:
 			nticks++
 		case <-to:
-			if nticks == 405 {
+			if nticks == 406 {
 				testOK()
 				return
 			}
+			t.Errorf("Expected 406 ticks, got %d", nticks)
 			testERROR()
+			return
 
 		}
 		// fmt.Println(nticks)

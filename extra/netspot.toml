@@ -50,7 +50,7 @@ bounded = true
 max_excess = 200
 
 # you can define default values for some stats
-# [spot.R_SYN]
+# [dspot.R_SYN]
 # q = 2e-5
 
 

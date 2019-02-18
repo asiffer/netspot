@@ -81,7 +81,7 @@ func (ns *Netspot) SetDevice(device string, i *int) error {
 	return nil
 }
 
-// SetPromiscuous change the promiscuous mode (relevant to iface only)
+// SetPromiscuous changes the promiscuous mode (relevant to iface only)
 func (ns *Netspot) SetPromiscuous(b bool, i *int) error {
 	if miner.IsPromiscuous() == b {
 		*i = -1
@@ -98,7 +98,7 @@ func (ns *Netspot) SetPromiscuous(b bool, i *int) error {
 	return nil
 }
 
-// SetPeriod change period of stat computation
+// SetPeriod changes period of stat computation
 func (ns *Netspot) SetPeriod(duration string, i *int) error {
 	d, e := time.ParseDuration(duration)
 	if e != nil {
@@ -108,6 +108,15 @@ func (ns *Netspot) SetPeriod(duration string, i *int) error {
 	*i = 0
 	analyzer.SetPeriod(d)
 	return e
+}
+
+// SetOutputDir changes the directory of the netspot output
+func (ns *Netspot) SetOutputDir(dir string, i *int) error {
+	*i = miner.SetDevice(device)
+	if *i == 1 {
+		return fmt.Errorf("Unknown device (%s)", device)
+	}
+	return nil
 }
 
 // AvailableInterface returns a slice of the interfaces which can be sniffed

@@ -1,3 +1,7 @@
+// counters.go
+
+// Package counters implements a generic counter interface and some specific
+// counter objects.
 package counters
 
 import (

@@ -1,5 +1,7 @@
 // netspotctl.go
 
+// netspotctl is not a subpackage of netspot but it is a command line client
+// to manage the netspot server.
 package main
 
 import (

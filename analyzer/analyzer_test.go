@@ -1,8 +1,10 @@
 // analyezr_test.go
+
 package analyzer
 
 import (
 	"fmt"
+	"log"
 	"netspot/miner"
 	"strings"
 	"testing"
@@ -10,62 +12,103 @@ import (
 )
 
 var (
-	HEADER_WIDTH int    = 100
-	HEADER_SYM   string = "*"
-	PCAP_FILE_1  string = "/home/asr/Documents/Work/Python/netspot/test/resources/4SICS-GeekLounge-151020.pcap"
-	PCAP_FILE_2  string = "/data/201111111400.dump"
+	HeaderWidth = 100
+	HeaderSym   = "-"
+	pcapFile1   = "/home/asr/Documents/Work/Python/netspot/test/resources/4SICS-GeekLounge-151020.pcap"
+	pcapFile2   = "/data/201111111400.dump"
 )
 
 func title(s string) {
-	var l int = len(s)
+	l := len(s)
 	var border int
 	var left string
 	var right string
-	remaining := HEADER_WIDTH - l - 2
+	remaining := HeaderWidth - l - 2
 	if remaining%2 == 0 {
 		border = remaining / 2
-		left = strings.Repeat(HEADER_SYM, border) + " "
-		right = " " + strings.Repeat(HEADER_SYM, border)
+		left = strings.Repeat(HeaderSym, border) + " "
+		right = " " + strings.Repeat(HeaderSym, border)
 	} else {
 		border = (remaining - 1) / 2
-		left = strings.Repeat(HEADER_SYM, border+1) + " "
-		right = " " + strings.Repeat(HEADER_SYM, border)
+		left = strings.Repeat(HeaderSym, border+1) + " "
+		right = " " + strings.Repeat(HeaderSym, border)
 	}
 
 	fmt.Println(left + s + right)
 }
 
-func TestFirstConfig(t *testing.T) {
-	title("Testing config loading")
-	fmt.Println(GetLoadedStats())
-	UnloadAll()
+func checkTitle(s string) {
+	format := "%-" + fmt.Sprint(HeaderWidth-7) + "s"
+	fmt.Printf(format, s)
 }
 
-func TestAvailableStats(t *testing.T) {
-	title("Testing stat availability")
-	fmt.Println(GetAvailableStats())
+func init() {
+	DisableLogging()
+}
+
+func testOK() {
+	fmt.Println("[\033[32mOK\033[0m]")
+}
+
+func testERROR() {
+	fmt.Println("[\033[31mERROR\033[0m]")
 }
 
 func TestLoadStat(t *testing.T) {
 	title("Testing stat loading")
+	UnloadAll()
+
+	checkTitle("Checking available stats...")
+	if len(GetAvailableStats()) >= 5 {
+		testOK()
+	} else {
+		testERROR()
+		t.Errorf("Expected at least 5 stats, got %d", len(GetAvailableStats()))
+	}
+
+	checkTitle("Loading R_SYN...")
 	id1, _ := LoadFromName("R_SYN")
 	if id1 <= 0 {
 		t.Error("Error while loading R_SYN")
+		testERROR()
+	} else {
+		testOK()
 	}
+
+	checkTitle("Loading R_ACK...")
 	id2, _ := LoadFromName("R_ACK")
 	if id2 != (id1 + 1) {
 		t.Error("Error while loading R_ACK")
+		testERROR()
+	} else {
+		testOK()
 	}
+
+	checkTitle("Loading AVG_PKT_SIZE...")
 	id3, _ := LoadFromName("AVG_PKT_SIZE")
 	if id3 != (id2 + 1) {
 		t.Error("Error while loading AVG_PKT_SIZE")
+		testERROR()
+	} else {
+		testOK()
 	}
 
+	checkTitle("Reloading R_SYN...")
 	id4, _ := LoadFromName("R_SYN")
 	if id4 > 0 {
 		t.Error("Error while re-loading R_SYN")
+		testERROR()
+	} else {
+		testOK()
 	}
-	fmt.Println(GetLoadedStats())
+
+	checkTitle("Checking number of loaded stats...")
+	if len(GetLoadedStats()) != 3 {
+		t.Errorf("Bad number of loaded counters (expected 3, got %d)", len(GetLoadedStats()))
+		testERROR()
+	} else {
+		testOK()
+	}
 	UnloadAll()
 }
 
@@ -117,15 +160,16 @@ func TestZero(t *testing.T) {
 	LoadFromName("R_ICMP")
 
 	// small
-	// PCAP_FILE_1 : ~420min
-	miner.SetDevice(PCAP_FILE_1)
+	// pcapFile1 : ~420min
+	miner.SetDevice(pcapFile1)
 	period = 5 * time.Minute
 
 	// huge
-	// PCAP_FILE_2 : 900s
-	// miner.SetDevice(PCAP_FILE_2)
+	// pcapFile2 : 900s
+	// miner.SetDevice(pcapFile2)
 	// period = 200 * time.Millisecond
 
+	time.Sleep(1 * time.Second)
 	miner.StartSniffing()
 	StartStatsAndWait()
 
@@ -143,22 +187,23 @@ func TestLivePcap(t *testing.T) {
 	LoadFromName("R_ICMP")
 
 	// small
-	// PCAP_FILE_1 : ~420min
-	// miner.SetDevice(PCAP_FILE_1)
-	// period = 5 * time.Minute
+	// pcapFile1 : ~420min
+	logDataToFile = true
+	miner.SetDevice(pcapFile1)
+	period = 5 * time.Minute
 
 	// huge
-	// PCAP_FILE_2 : 900s
-	// miner.SetDevice(PCAP_FILE_2)
+	// pcapFile2 : 900s
+	// miner.SetDevice(pcapFile2)
 	// period = 200 * time.Millisecond
 
-	// miner.StartSniffing()
-	// if !miner.IsSniffing() {
-	// 	t.Error("Error: no sniffing")
-	// }
+	miner.StartSniffing()
+	if !miner.IsSniffing() {
+		t.Error("Error: no sniffing")
+	}
 
-	// start := time.Now()
-	// StartStatsAndWait()
-	// elapsed := time.Since(start)
-	// log.Printf("Timing: %f", elapsed.Seconds())
+	start := time.Now()
+	StartStatsAndWait()
+	elapsed := time.Since(start)
+	log.Printf("Timing: %f", elapsed.Seconds())
 }

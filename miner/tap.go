@@ -81,7 +81,6 @@ func updateTime(t time.Time) {
 		} else if SourceTime.Sub(last) > tickPeriod {
 			last = SourceTime
 			ticker <- SourceTime
-
 		}
 	}
 
@@ -91,8 +90,12 @@ func updateTime(t time.Time) {
 func release(goroutinePool *sync.WaitGroup) {
 	goroutinePool.Wait()
 	sniffing = false
-	sendTicks = false
 	stopAllCounters()
+	if sendTicks {
+		// a last tick is send to trigger the analyzer tick event
+		ticker <- time.Now()
+		sendTicks = false
+	}
 	close(events)
 }
 

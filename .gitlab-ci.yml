@@ -1,4 +1,4 @@
-image: golang:1.11-bionic
+image: golang:1.11-stretch
 
 stages:
   - test
