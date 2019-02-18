@@ -46,4 +46,5 @@ before_script:
 coverage:
   stage: test
   script:
+    - cd /builds/asr/netspot
     - go test -coverprofile fmt ./...
