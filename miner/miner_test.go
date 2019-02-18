@@ -71,7 +71,8 @@ func TestSetDevice(t *testing.T) {
 		testOK()
 	}
 
-	dev := AvailableDevices[0]
+	//dev := AvailableDevices[0]
+	dev := "any"
 	checkTitle(fmt.Sprintf("Setting device to %s... ", dev))
 	r = SetDevice(dev)
 	if r != 0 || GetDevice() != dev {
