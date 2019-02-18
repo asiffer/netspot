@@ -1,6 +1,6 @@
 // rsyn.go
-
 // R_SYN: The ratio of packets with TCP + SYN flag
+
 package stats
 
 import "math"
@@ -10,18 +10,22 @@ func init() {
 		func(bs BaseStat) StatInterface { return &RSyn{bs} })
 }
 
+// RSyn computes the ratio of packets with TCP + SYN flag
 type RSyn struct {
 	BaseStat
 }
 
+// Name returns the unique name of the stat
 func (stat *RSyn) Name() string {
 	return "R_SYN"
 }
 
+// Requirement returns teh requested counters to compute the stat
 func (stat *RSyn) Requirement() []string {
 	return []string{"SYN", "IP"}
 }
 
+// Compute implements the way to compute the stat from the counters
 func (stat *RSyn) Compute(ctrvalues []uint64) float64 {
 	//ctrvalues[0] -> syn
 	//ctrvalues[1] -> ip

@@ -1,0 +1,16 @@
+# config file to test stats package
+
+[influxdb]
+path = "/"
+
+[dspot.R_SYN]
+depth = 60
+q = 1e-5
+n_init = 1200
+level = 0.999
+up = true
+down = true
+alert = false
+bounded = true
+max_excess = 250
+

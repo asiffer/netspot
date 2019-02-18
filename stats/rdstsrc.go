@@ -1,6 +1,6 @@
 // rdstsrc.go
-
 // R_DST_SRC: The ratio 'number of unique destination addresses' / 'number of unique source addresses'
+
 package stats
 
 import "math"
@@ -10,18 +10,22 @@ func init() {
 		func(bs BaseStat) StatInterface { return &RDstSrc{bs} })
 }
 
+// RDstSrc computes the ratio 'number of unique destination addresses' / 'number of unique source addresses'
 type RDstSrc struct {
 	BaseStat
 }
 
+// Name returns the unique name of the stat
 func (stat *RDstSrc) Name() string {
 	return "R_DST_SRC"
 }
 
+// Requirement returns teh requested counters to compute the stat
 func (stat *RDstSrc) Requirement() []string {
 	return []string{"NB_UNIQ_DST_ADDR", "NB_UNIQ_SRC_ADDR"}
 }
 
+// Compute implements the way to compute the stat from the counters
 func (stat *RDstSrc) Compute(ctrvalues []uint64) float64 {
 	//ctrvalues[0] -> NB_UNIQ_DST_ADDR
 	//ctrvalues[1] -> NB_UNIQ_SRC_ADDR

@@ -7,27 +7,23 @@ import (
 	"errors"
 	"fmt"
 	"gospot"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
+// StatConstructor is the generic template for a stat constructor
 type StatConstructor func(bs BaseStat) StatInterface
 
 var (
-	logger          zerolog.Logger             // package logger
-	AVAILABLE_STATS map[string]StatConstructor = make(map[string]StatConstructor)
+	logger zerolog.Logger // package logger
+	// AvailableStats is the map linking a stat name to its constructor
+	AvailableStats = make(map[string]StatConstructor)
 )
 
 func init() {
-	// output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMicro}
-	// logger = zerolog.New(output).With().Timestamp().Logger()
-
-	// if gospot.IsInitialized {
-	// 	// log.Info().Msg("Gospot package initialized")
-	// }
-
 	// default values
 	viper.SetDefault("dspot.depth", 50)
 	viper.SetDefault("dspot.q", 1e-4)
@@ -38,22 +34,18 @@ func init() {
 	viper.SetDefault("dspot.alert", true)
 	viper.SetDefault("dspot.bounded", true)
 	viper.SetDefault("dspot.max_excess", 200)
-
-	// log.Info().Msg("Stats package initialized")
 }
 
-// Register aims to add implemented stats to the slice AVAILABLE_STATS
+// Register aims to add implemented stats to the slice AvailableStats
 func Register(name string, sc StatConstructor) error {
-	_, exists := AVAILABLE_STATS[name]
+	_, exists := AvailableStats[name]
 	if exists {
 		msg := fmt.Sprintf("The statistics %s is already available", name)
 		log.Error().Msg(msg)
 		return errors.New(msg)
-	} else {
-		AVAILABLE_STATS[name] = sc
-		// log.Debug().Msgf("The statistics %s is now available", name)
-		return nil
 	}
+	AvailableStats[name] = sc
+	return nil
 }
 
 // BaseStat is the basic structure which defines a statistic. It
@@ -62,7 +54,6 @@ func Register(name string, sc StatConstructor) error {
 type BaseStat struct {
 	name  string
 	dspot *gospot.DSpot // the spot instance
-
 }
 
 // StatInterface gathers the common behavior of the statistics
@@ -97,71 +88,73 @@ func (m *BaseStat) SetDSpotConfig(sc gospot.DSpotConfig) {
 // setCustomConfig builds a DSpotConfig instance according to the
 // settings written in the config file
 func setCustomConfig(statname string) gospot.DSpotConfig {
+	statname = strings.ToLower(statname)
+
 	prefix := "dspot." + statname + "."
 	var conf gospot.DSpotConfig
 	var setting string
 
 	setting = prefix + "depth"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Depth = viper.GetInt(setting)
 	} else {
 		conf.Depth = viper.GetInt("dspot.depth")
 	}
 
 	setting = prefix + "q"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Q = viper.GetFloat64(setting)
 	} else {
 		conf.Q = viper.GetFloat64("dspot.q")
 	}
 
 	setting = prefix + "n_init"
-	if viper.InConfig(setting) {
-		conf.N_init = viper.GetInt32(setting)
+	if viper.IsSet(setting) {
+		conf.Ninit = viper.GetInt32(setting)
 	} else {
-		conf.N_init = viper.GetInt32("dspot.n_init")
+		conf.Ninit = viper.GetInt32("dspot.n_init")
 	}
 
 	setting = prefix + "level"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Level = viper.GetFloat64(setting)
 	} else {
 		conf.Level = viper.GetFloat64("dspot.level")
 	}
 
 	setting = prefix + "up"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Up = viper.GetBool(setting)
 	} else {
 		conf.Up = viper.GetBool("dspot.up")
 	}
 
 	setting = prefix + "down"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Down = viper.GetBool(setting)
 	} else {
 		conf.Down = viper.GetBool("dspot.down")
 	}
 
 	setting = prefix + "alert"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Alert = viper.GetBool(setting)
 	} else {
 		conf.Alert = viper.GetBool("dspot.alert")
 	}
 
 	setting = prefix + "bounded"
-	if viper.InConfig(setting) {
+	if viper.IsSet(setting) {
 		conf.Bounded = viper.GetBool(setting)
 	} else {
 		conf.Bounded = viper.GetBool("dspot.bounded")
 	}
 
 	setting = prefix + "max_excess"
-	if viper.InConfig(setting) {
-		conf.Max_excess = viper.GetInt32(setting)
+	if viper.IsSet(setting) {
+		conf.MaxExcess = viper.GetInt32(setting)
 	} else {
-		conf.Max_excess = viper.GetInt32("dspot.max_excess")
+		conf.MaxExcess = viper.GetInt32("dspot.max_excess")
 	}
 
 	return conf
@@ -173,33 +166,13 @@ func setCustomConfig(statname string) gospot.DSpotConfig {
 func StatFromName(statname string) (StatInterface, error) {
 	s := gospot.NewDSpotFromConfig(setCustomConfig(statname))
 	bs := BaseStat{name: statname, dspot: s}
-	statConstructor, exists := AVAILABLE_STATS[statname]
+	statConstructor, exists := AvailableStats[statname]
 	if exists {
 		return statConstructor(bs), nil
-	} else {
-		log.Error().Msg("Unknown statistics")
-		return nil, errors.New("Unknown statistics")
 	}
+	log.Error().Msg("Unknown statistics")
+	return nil, errors.New("Unknown statistics")
 }
-
-// func StatFromName(statname string) (StatInterface, error) {
-// 	s := gospot.NewDSpotFromConfig(setCustomConfig(statname))
-// 	switch statname {
-// 	case "R_SYN":
-// 		return &RSyn{BaseStat{name: statname, dspot: s}}, nil
-// 	case "R_ACK":
-// 		return &RAck{BaseStat{name: statname, dspot: s}}, nil
-// 	case "R_ICMP":
-// 		return &RIcmp{BaseStat{name: statname, dspot: s}}, nil
-// 	case "AVG_PKT_SIZE":
-// 		return &AvgPktSize{BaseStat{name: statname, dspot: s}}, nil
-// 	case "R_DST_SRC":
-// 		return &RDstSrc{BaseStat{name: statname, dspot: s}}, nil
-// 	default:
-// 		log.Error().Msg("Unknown statistics")
-// 		return nil, errors.New("Unknown statistics")
-// 	}
-// }
 
 func main() {
 }
