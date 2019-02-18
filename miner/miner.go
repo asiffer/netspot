@@ -31,7 +31,7 @@ func init() {
 	AvailableDevices = GetAvailableDevices()
 
 	// Default configuration
-	viper.SetDefault("miner.device", GetAvailableDevices()[0])
+	viper.SetDefault("miner.device", "any")
 	viper.SetDefault("miner.snapshot_len", int32(65535))
 	viper.SetDefault("miner.promiscuous", true)
 	viper.SetDefault("miner.timeout", 30*time.Second)
