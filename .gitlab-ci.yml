@@ -4,6 +4,7 @@ stages:
   - test
 
 before_script:
+  - apt-get update
   - apt-get install software-properties-common
   - add-apt-repository ppa:asiffer/libspot
   - apt-get update 
