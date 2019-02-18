@@ -23,7 +23,7 @@ stages:
 before_script:
   - apt-get update
   - apt-get install -y snapd make
-  - snap install libspot
+  - sudo snap install core libspot
   - ln -s /snap/libspot/current/usr/lib/libspot.so /usr/lib/libspot.so
   - ln -s /snap/libspot/current/usr/include/libspot /usr/include/libspot
   - mkdir -p /go/src/gitlab.com
