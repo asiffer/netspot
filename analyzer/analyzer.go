@@ -7,7 +7,6 @@ package analyzer
 import (
 	"errors"
 	"fmt"
-	"gospot"
 	"math"
 	"netspot/influxdb"
 	"netspot/miner"
@@ -18,6 +17,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"

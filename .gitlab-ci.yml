@@ -19,6 +19,7 @@ before_script:
   - go get -u github.com/urfave/cli
   - go get -u github.com/influxdata/influxdb1-client/v2
   - go get -u github.com/asiffer/gospot
+  - go get -u github.com/google/gopacket
   # - go get -u github.com/influxdata/influxdb/client/v2
   - ln -s /builds/asr/netspot /go/src/netspot
 
