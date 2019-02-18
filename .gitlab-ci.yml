@@ -4,10 +4,10 @@ stages:
   - test
 
 before_script:
-  - apt install software-properties-common
+  - apt-get install software-properties-common
   - add-apt-repository ppa:asiffer/libspot
-  - apt update 
-  - apt install -y libspot make
+  - apt-get update 
+  - apt-get install -y libspot make
   - mkdir -p /go/src/gitlab.com
   - mkdir -p /go/src/github.com
   - go get -u github.com/c-bata/go-prompt
