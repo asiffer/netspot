@@ -6,9 +6,9 @@ package stats
 import (
 	"errors"
 	"fmt"
-	"gospot"
 	"strings"
 
+	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
