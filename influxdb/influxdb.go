@@ -6,9 +6,9 @@ package influxdb
 
 import (
 	"fmt"
-	"time"
+	"time" // idb "github.com/influxdata/influxdb/client/v2"
 
-	idb "github.com/influxdata/influxdb/client/v2"
+	idb "github.com/influxdata/influxdb1-client/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
