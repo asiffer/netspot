@@ -4,6 +4,7 @@ stages:
   - test
 
 before_script:
+  - apt install software-properties-common
   - add-apt-repository ppa:asiffer/libspot
   - apt update 
   - apt install -y libspot make
