@@ -178,7 +178,7 @@ func TestZero(t *testing.T) {
 	Zero()
 }
 func TestLivePcap(t *testing.T) {
-	SetLogging(0)
+	SetLogging(1)
 	title("Testing on PCAP")
 	UnloadAll()
 	LoadFromName("R_SYN")
