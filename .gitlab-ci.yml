@@ -8,7 +8,7 @@ before_script:
   - apt-get install -y software-properties-common python3-software-properties
   - add-apt-repository ppa:asiffer/libspot
   - apt-get update 
-  - apt-get install -y libspot make
+  - apt-get install -y libspot make --allow-unauthenticated
   - mkdir -p /go/src/gitlab.com
   - mkdir -p /go/src/github.com
   - go get -u github.com/c-bata/go-prompt
