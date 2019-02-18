@@ -4,12 +4,12 @@ package stats
 
 import (
 	"fmt"
-	"gospot"
 	"math/rand"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )

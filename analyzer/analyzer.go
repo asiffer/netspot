@@ -555,6 +555,7 @@ func analyze() {
 		statValues[name] = val
 
 	}
+	log.Debug().Msg(fmt.Sprint(statValues))
 	dlog.Msg("")
 	tlog.Msg("")
 	// if data have to be sent to InfluxDB
