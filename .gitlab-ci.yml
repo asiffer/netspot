@@ -3,31 +3,12 @@ image: golang:1.11-stretch
 stages:
   - test
 
-# before_script:
-#   - apt-get update
-#   - apt-get install -y software-properties-common python3-software-properties
-#   - add-apt-repository ppa:asiffer/libspot
-#   - apt-get update 
-#   - apt-get install -y libspot make
-#   - mkdir -p /go/src/gitlab.com
-#   - mkdir -p /go/src/github.com
-#   - go get -u github.com/c-bata/go-prompt
-#   - go get -u github.com/rs/zerolog
-#   - go get -u github.com/spf13/viper
-#   - go get -u github.com/fatih/color
-#   - go get -u github.com/fsnotify/fsnotify
-#   - go get -u github.com/urfave/cli
-#   - go get -u github.com/influxdata/influxdb/client/v2
-#   - ln -s /builds/user /go/src/gitlab.com/user
-
 before_script:
   - apt-get update
-  - apt-get install -y snapd make
-  - systemctl restart snapd
-  - snap install core
-  - snap install libspot
-  - ln -s /snap/libspot/current/usr/lib/libspot.so /usr/lib/libspot.so
-  - ln -s /snap/libspot/current/usr/include/libspot /usr/include/libspot
+  - apt-get install -y software-properties-common python3-software-properties
+  - add-apt-repository ppa:asiffer/libspot
+  - apt-get update 
+  - apt-get install -y libspot make
   - mkdir -p /go/src/gitlab.com
   - mkdir -p /go/src/github.com
   - go get -u github.com/c-bata/go-prompt
@@ -38,6 +19,25 @@ before_script:
   - go get -u github.com/urfave/cli
   - go get -u github.com/influxdata/influxdb/client/v2
   - ln -s /builds/user /go/src/gitlab.com/user
+
+# before_script:
+#   - apt-get update
+#   - apt-get install -y snapd make
+#   - systemctl restart snapd
+#   - snap install core
+#   - snap install libspot
+#   - ln -s /snap/libspot/current/usr/lib/libspot.so /usr/lib/libspot.so
+#   - ln -s /snap/libspot/current/usr/include/libspot /usr/include/libspot
+#   - mkdir -p /go/src/gitlab.com
+#   - mkdir -p /go/src/github.com
+#   - go get -u github.com/c-bata/go-prompt
+#   - go get -u github.com/rs/zerolog
+#   - go get -u github.com/spf13/viper
+#   - go get -u github.com/fatih/color
+#   - go get -u github.com/fsnotify/fsnotify
+#   - go get -u github.com/urfave/cli
+#   - go get -u github.com/influxdata/influxdb/client/v2
+#   - ln -s /builds/user /go/src/gitlab.com/user
 
 
 coverage:
