@@ -4,6 +4,7 @@ stages:
   - test
 
 before_script:
+  - ip link show
   - apt-get update
   - apt-get install -y software-properties-common python3-software-properties libpcap-dev
   - add-apt-repository ppa:asiffer/libspot
@@ -20,7 +21,6 @@ before_script:
   - go get -u github.com/influxdata/influxdb1-client/v2
   - go get -u github.com/asiffer/gospot
   - go get -u github.com/google/gopacket
-  # - go get -u github.com/influxdata/influxdb/client/v2
   - ln -s /builds/asr/netspot /go/src/netspot
 
 # before_script:
