@@ -56,10 +56,14 @@ func fileExists(name string) bool {
 
 // GetAvailableDevices returns the current available interfaces
 func GetAvailableDevices() []string {
-	dl, _ := pcap.FindAllDevs()
+	dl, err := pcap.FindAllDevs()
 	devNames := make([]string, 0)
-	for _, dev := range dl {
-		devNames = append(devNames, dev.Name)
+	if err == nil {
+		for _, dev := range dl {
+			devNames = append(devNames, dev.Name)
+		}
+	} else {
+		fmt.Println(err.Error())
 	}
 	return devNames
 }
