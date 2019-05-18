@@ -150,7 +150,7 @@ func TestIPRun(t *testing.T) {
 	title("Testing IP counter run")
 	ctr := &IP{IPCtr: NewIPCtr(), Counter: 0}
 	go RunIPCtr(ctr)
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	checkTitle("Check running status...")
 	if !ctr.IsRunning() {
 		testERROR()
@@ -160,8 +160,8 @@ func TestIPRun(t *testing.T) {
 
 	checkTitle("Check value signal...")
 	ctr.LayPipe() <- &layers.IPv4{Length: 10}
-	ctr.SigPipe() <- 1
-	time.Sleep(5 * time.Millisecond)
+	ctr.SigPipe() <- GET
+	time.Sleep(50 * time.Millisecond)
 	if v := <-ctr.ValPipe(); v != 1 {
 		testERROR()
 		t.Errorf("Bad counter value (expected 1, got %d)", v)
@@ -171,7 +171,7 @@ func TestIPRun(t *testing.T) {
 	checkTitle("Check reset signal...")
 	ctr.LayPipe() <- &layers.IPv4{Length: 10}
 	ctr.SigPipe() <- 2
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	if ctr.Value() != 0 {
 		testERROR()
 		t.Errorf("Bad counter value (expected 0, got %d)", ctr.Value())
@@ -180,8 +180,8 @@ func TestIPRun(t *testing.T) {
 
 	checkTitle("Check stop signal...")
 	ctr.LayPipe() <- &layers.IPv4{Length: 10}
-	ctr.SigPipe() <- 0
-	time.Sleep(5 * time.Millisecond)
+	ctr.SigPipe() <- STOP
+	time.Sleep(50 * time.Millisecond)
 	if ctr.IsRunning() {
 		testERROR()
 		t.Error("Counter is still running")
@@ -193,7 +193,7 @@ func TestICMPRun(t *testing.T) {
 	title("Testing ICMP counter run")
 	ctr := &ICMP{ICMPCtr: NewICMPCtr(), Counter: 0}
 	go RunICMPCtr(ctr)
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	checkTitle("Check running status...")
 	if !ctr.IsRunning() {
 		testERROR()
@@ -203,8 +203,8 @@ func TestICMPRun(t *testing.T) {
 
 	checkTitle("Check value signal...")
 	ctr.LayPipe() <- &layers.ICMPv4{}
-	ctr.SigPipe() <- 1
-	time.Sleep(5 * time.Millisecond)
+	ctr.SigPipe() <- GET
+	time.Sleep(50 * time.Millisecond)
 	if v := <-ctr.ValPipe(); v != 1 {
 		testERROR()
 		t.Errorf("Bad counter value (expected 1, got %d)", v)
@@ -214,7 +214,7 @@ func TestICMPRun(t *testing.T) {
 	checkTitle("Check reset signal...")
 	ctr.LayPipe() <- &layers.ICMPv4{}
 	ctr.SigPipe() <- 2
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	if ctr.Value() != 0 {
 		testERROR()
 		t.Errorf("Bad counter value (expected 0, got %d)", ctr.Value())
@@ -223,8 +223,8 @@ func TestICMPRun(t *testing.T) {
 
 	checkTitle("Check stop signal...")
 	ctr.LayPipe() <- &layers.ICMPv4{}
-	ctr.SigPipe() <- 0
-	time.Sleep(5 * time.Millisecond)
+	ctr.SigPipe() <- STOP
+	time.Sleep(50 * time.Millisecond)
 	if ctr.IsRunning() {
 		testERROR()
 		t.Error("Counter is still running")
@@ -236,7 +236,7 @@ func TestTCPRun(t *testing.T) {
 	title("Testing TCP counter run")
 	ctr := &ACK{TCPCtr: NewTCPCtr(), Counter: 0}
 	go RunTCPCtr(ctr)
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	checkTitle("Check running status...")
 	if !ctr.IsRunning() {
 		testERROR()
@@ -246,8 +246,8 @@ func TestTCPRun(t *testing.T) {
 
 	checkTitle("Check value signal...")
 	ctr.LayPipe() <- &layers.TCP{ACK: true}
-	ctr.SigPipe() <- 1
-	time.Sleep(5 * time.Millisecond)
+	ctr.SigPipe() <- GET
+	time.Sleep(50 * time.Millisecond)
 	if v := <-ctr.ValPipe(); v != 1 {
 		testERROR()
 		t.Errorf("Bad counter value (expected 1, got %d)", v)
@@ -257,7 +257,7 @@ func TestTCPRun(t *testing.T) {
 	checkTitle("Check reset signal...")
 	ctr.LayPipe() <- &layers.TCP{ACK: false}
 	ctr.SigPipe() <- 2
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	if ctr.Value() != 0 {
 		testERROR()
 		t.Errorf("Bad counter value (expected 0, got %d)", ctr.Value())
@@ -266,8 +266,51 @@ func TestTCPRun(t *testing.T) {
 
 	checkTitle("Check stop signal...")
 	ctr.LayPipe() <- &layers.TCP{ACK: true}
-	ctr.SigPipe() <- 0
-	time.Sleep(5 * time.Millisecond)
+	ctr.SigPipe() <- STOP
+	time.Sleep(50 * time.Millisecond)
+	if ctr.IsRunning() {
+		testERROR()
+		t.Error("Counter is still running")
+	}
+	testOK()
+}
+
+func TestUDPRun(t *testing.T) {
+	title("Testing UDP counter run")
+	ctr := &UDP{UDPCtr: NewUDPCtr(), Counter: 0}
+	go RunUDPCtr(ctr)
+	time.Sleep(50 * time.Millisecond)
+	checkTitle("Check running status...")
+	if !ctr.IsRunning() {
+		testERROR()
+		t.Error("The counter has not started")
+	}
+	testOK()
+
+	checkTitle("Check value signal...")
+	ctr.LayPipe() <- &layers.UDP{Length: 45}
+	ctr.SigPipe() <- GET
+	time.Sleep(50 * time.Millisecond)
+	if v := <-ctr.ValPipe(); v != 1 {
+		testERROR()
+		t.Errorf("Bad counter value (expected 1, got %d)", v)
+	}
+	testOK()
+
+	checkTitle("Check reset signal...")
+	ctr.LayPipe() <- &layers.UDP{Length: 5}
+	ctr.SigPipe() <- RESET
+	time.Sleep(50 * time.Millisecond)
+	if ctr.Value() != 0 {
+		testERROR()
+		t.Errorf("Bad counter value (expected 0, got %d)", ctr.Value())
+	}
+	testOK()
+
+	checkTitle("Check stop signal...")
+	ctr.LayPipe() <- &layers.UDP{Length: 500}
+	ctr.SigPipe() <- STOP
+	time.Sleep(50 * time.Millisecond)
 	if ctr.IsRunning() {
 		testERROR()
 		t.Error("Counter is still running")

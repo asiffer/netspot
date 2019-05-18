@@ -15,7 +15,7 @@ var (
 	HeaderWidth = 100
 	HeaderSym   = "-"
 	pcapFile1   = "/home/asr/Documents/Work/Python/netspot/test/resources/4SICS-GeekLounge-151020.pcap"
-	pcapFile2   = "/data/201111111400.dump"
+	pcapFile2   = "/data/pcap/201111111400.dump"
 )
 
 func title(s string) {
@@ -151,7 +151,7 @@ func TestUnloadSpecific(t *testing.T) {
 
 func TestZero(t *testing.T) {
 	title("Testing reset")
-
+	SetLogging(1)
 	UnloadAll()
 	LoadFromName("R_SYN")
 	LoadFromName("AVG_PKT_SIZE")
@@ -170,16 +170,16 @@ func TestZero(t *testing.T) {
 	// period = 200 * time.Millisecond
 
 	time.Sleep(1 * time.Second)
-	miner.StartSniffing()
+	// miner.StartSniffing()
 	StartStatsAndWait()
 
 	fmt.Println("Reset")
 	miner.Zero()
 	Zero()
 }
-func TestLivePcap(t *testing.T) {
-	SetLogging(1)
-	title("Testing on PCAP")
+func TestLivePcapSmall(t *testing.T) {
+	// DisableLogging()
+	title("Testing on a small PCAP")
 	UnloadAll()
 	LoadFromName("R_SYN")
 	LoadFromName("AVG_PKT_SIZE")
@@ -192,19 +192,51 @@ func TestLivePcap(t *testing.T) {
 	logDataToFile = true
 	miner.SetDevice(pcapFile1)
 	period = 5 * time.Minute
-
+	miner.SetTickPeriod(period)
 	// huge
 	// pcapFile2 : 900s
 	// miner.SetDevice(pcapFile2)
 	// period = 200 * time.Millisecond
 
-	miner.StartSniffing()
-	if !miner.IsSniffing() {
-		t.Error("Error: no sniffing")
-	}
+	// miner.StartSniffing()
+	// if !miner.IsSniffing() {
+	// 	t.Error("Error: no sniffing")
+	// }
 
 	start := time.Now()
 	StartStatsAndWait()
 	elapsed := time.Since(start)
 	log.Printf("Timing: %f", elapsed.Seconds())
+}
+
+func TestLivePcapHuge(t *testing.T) {
+	// DisableLogging()
+	title("Testing on a huge PCAP")
+	UnloadAll()
+	LoadFromName("R_SYN")
+	LoadFromName("AVG_PKT_SIZE")
+	LoadFromName("R_ACK")
+	LoadFromName("R_DST_SRC")
+	LoadFromName("R_ICMP")
+
+	// small
+	// pcapFile1 : ~420min
+	logDataToFile = true
+	// miner.SetDevice(pcapFile1)
+	// period = 5 * time.Minute
+
+	// huge
+	// pcapFile2 : 900s
+	miner.SetDevice(pcapFile2)
+	period = 200 * time.Millisecond
+
+	miner.SetTickPeriod(period)
+	// miner.StartSniffing()
+	// if !miner.IsSniffing() {
+	// 	t.Error("Error: no sniffing")
+	// }
+
+	StartStats()
+	time.Sleep(5 * time.Second)
+	StopStats()
 }

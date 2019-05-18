@@ -11,6 +11,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	// STOP stops a counter
+	STOP uint8 = 0
+	// GET returns the value of the counter
+	GET uint8 = 1
+	// RESET resets the counter
+	RESET uint8 = 2
+	// FLUSH returns the value of the counter and reset it
+	FLUSH uint8 = 3
+)
+
 // CounterConstructor is a generic counter constructor
 type CounterConstructor func() BaseCtrInterface
 
@@ -49,7 +60,6 @@ func Register(name string, sc CounterConstructor) error {
 	}
 	AvailableCounters[name] = sc
 	return nil
-
 }
 
 // BaseCtr is the basic counter object
@@ -94,23 +104,28 @@ func (ctr *BaseCtr) SwitchRunningOff() {
 	ctr.Running = false
 }
 
-// Run starts a counter, making it waiting for new incoming packets
+// Run starts a counter, making it waiting for new incoming layers
 func Run(ctr BaseCtrInterface) {
 	switch ctr.(type) {
 	case IPCtrInterface:
-		ipctr, ok := ctr.(IPCtrInterface)
-		if ok {
+		if ipctr, ok := ctr.(IPCtrInterface); ok {
 			RunIPCtr(ipctr)
 		}
 	case TCPCtrInterface:
-		tcpctr, ok := ctr.(TCPCtrInterface)
-		if ok {
+		if tcpctr, ok := ctr.(TCPCtrInterface); ok {
 			RunTCPCtr(tcpctr)
 		}
+	case UDPCtrInterface:
+		if udpctr, ok := ctr.(UDPCtrInterface); ok {
+			RunUDPCtr(udpctr)
+		}
 	case ICMPCtrInterface:
-		icmpctr, ok := ctr.(ICMPCtrInterface)
-		if ok {
+		if icmpctr, ok := ctr.(ICMPCtrInterface); ok {
 			RunICMPCtr(icmpctr)
+		}
+	case PatternCtrInterface:
+		if patternctr, ok := ctr.(PatternCtrInterface); ok {
+			RunPatternCtr(patternctr)
 		}
 	default:
 		if ctr != nil {

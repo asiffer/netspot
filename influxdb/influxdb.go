@@ -1,7 +1,8 @@
 // influxdb.go
 
 // Package influxdb is a subpackage aimed to send data produced by netspot
-// to an influxdb database
+// to an influxdb database. In practice, it stores observations to a small
+// batch and send it regularly to the database.
 package influxdb
 
 import (
@@ -20,14 +21,13 @@ var (
 	username  string
 	password  string
 	batchSize int
-	batchId   int
+	batchID   int
 	agentName string
 )
 
 var (
 	client idb.Client
 	batch  idb.BatchPoints
-	// tag    string
 	logger zerolog.Logger
 )
 
@@ -42,6 +42,7 @@ func init() {
 	viper.SetDefault("influxdb.agent_name", "unknown")
 }
 
+// InitConfig initializes the influxdb package from the config file
 func InitConfig() {
 	var err error
 	// config
@@ -53,7 +54,10 @@ func InitConfig() {
 	password = viper.GetString("influxdb.password")
 	database = viper.GetString("influxdb.database")
 	batchSize = viper.GetInt("influxdb.batch_size")
-	batchId = 0
+	if batchSize <= 0 {
+		batchSize = 10
+	}
+	batchID = 0
 
 	agentName = viper.GetString("influxdb.agent_name")
 
@@ -69,10 +73,10 @@ func InitConfig() {
 	}
 
 	// create database if it does not exist yet
-	new_db_query := idb.Query{
+	newDBQuery := idb.Query{
 		Command:  fmt.Sprintf("CREATE DATABASE %s", database),
 		Database: database}
-	_, err = client.Query(new_db_query)
+	_, err = client.Query(newDBQuery)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
@@ -94,6 +98,8 @@ func untypeMap(m map[string]float64) map[string]interface{} {
 	return M
 }
 
+// PushRecord store values to the current batch with given timestamp.
+// They are tagged by seriesName.
 func PushRecord(statValues map[string]float64, seriesName string, t time.Time) error {
 	point, err := idb.NewPoint(seriesName,
 		map[string]string{"agent": agentName},
@@ -103,13 +109,14 @@ func PushRecord(statValues map[string]float64, seriesName string, t time.Time) e
 		return err
 	}
 	batch.AddPoint(point)
-	batchId++
-	if batchId%batchSize == 0 {
+	batchID++
+	if batchID%batchSize == 0 {
 		return Flush()
 	}
 	return nil
 }
 
+// Flush send the batch of points to influxdb.
 func Flush() error {
 	err := client.Write(batch)
 	if err != nil {
@@ -124,6 +131,7 @@ func GetAddress() string {
 	return addr
 }
 
+// Close stops the influxdb conenction
 func Close() error {
 	Flush()
 	log.Info().Msg("Closing InfluxDB connection")

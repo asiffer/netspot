@@ -4,7 +4,7 @@
 
 # package details
 PACKAGE_NAME := netspot
-VERSION := 1.2
+VERSION := 1.3
 PACKAGE_DESC := "A basic IDS with statistical learning"
 
 # sources
@@ -37,10 +37,10 @@ build: build_netspot build_netspotctl
 
 install: install_bin install_config install_bin install_service post_install
 
-package: pre_debian debian
+package: build pre_debian debian
 
 
-# atomic ations 
+# atomic actions 
 build_netspot:
 	@echo "\033[34m[Building netspot]\033[0m"
 	@echo -n "Building go package...               "
@@ -51,12 +51,9 @@ build_netspot:
 build_netspotctl:
 	@echo "\033[34m[Building netspotctl]\033[0m"
 	@echo -n "Building go package...               "
-	@GOOS=$(OS) GOARCH=$(ARCH) go build -o $(BIN_DIR)/netspotctl $(SRC_DIR)/netspotctl/netspotctl.go 
+	@GOOS=$(OS) GOARCH=$(ARCH) go build -o $(BIN_DIR)/netspotctl $(SRC_DIR)/netspotctl/*.go 
 	@echo $(OK)
 
-
-pre_install:
-	@
 
 install_config:
 	@echo "\033[34m[Installing configurations]\033[0m"

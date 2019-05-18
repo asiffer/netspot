@@ -5,6 +5,9 @@
 // is controlled by a client `netspotctl`.
 package main
 
+// #cgo CFLAGS: -I/usr/include/x86_64-linux-gnu/
+import "C"
+
 import (
 	"errors"
 	"fmt"
@@ -32,6 +35,10 @@ var (
 
 // Netspot is the object to build the API
 type Netspot struct{}
+
+func init() {
+	InitConsoleWriter()
+}
 
 //------------------------------------------------------------------------------
 // SIDE FUNCTIONS
@@ -170,6 +177,16 @@ func (ns *Netspot) StatStatus(statName string, rawstatus *string) error {
 
 }
 
+// StatValues return a current snapshot of the stat values (and their thresholds)
+func (ns *Netspot) StatValues(none *int, values *map[string]float64) error {
+	val := analyzer.StatValues()
+	for s, v := range val {
+		(*values)[s] = v
+	}
+	return nil
+
+}
+
 // Unload removes a loaded statistics. See analyzer.UnloadFromName to get
 // the detail of the return values.
 func (ns *Netspot) Unload(statName string, i *int) error {
@@ -222,13 +239,7 @@ func (ns *Netspot) Start(none *int, i *int) error {
 		return errors.New("The sniffer is already running")
 	}
 
-	// start the counters
-	miner.StartSniffing()
-	if !miner.IsSniffing() {
-		*i = 1
-		return errors.New("The sniffer is not well started")
-	}
-
+	// start the analyzer (it also starts the miner)
 	analyzer.StartStats()
 	*i = 0
 	return nil
@@ -240,8 +251,8 @@ func (ns *Netspot) Stop(none *int, i *int) error {
 		*i = 1
 		return errors.New("The statistics are not currently monitored")
 	}
+	// stop the analyzer. It also stops the miner.
 	analyzer.StopStats()
-	miner.StopSniffing()
 	*i = 0
 	return nil
 }
@@ -310,7 +321,7 @@ func InitConsoleWriter() {
 // are initialized.
 func InitConfig(file string) {
 	if !fileExists(file) {
-		log.Error().Msgf("Config file %s does not exist. Falling back to default configuration", file)
+		log.Warn().Msgf("Config file %s does not exist. Falling back to default configuration", file)
 	}
 	viper.SetConfigFile(file)
 
@@ -319,7 +330,7 @@ func InitConfig(file string) {
 		log.Info().Msgf("Config file changed: %s", e.Name)
 	})
 	viper.ReadInConfig()
-	log.Info().Msgf("Config file %s loaded", viper.ConfigFileUsed())
+	log.Info().Msg("Config loaded")
 }
 
 // InitSubpackages initialize the config of the miner and the analyzer.
@@ -330,8 +341,8 @@ func InitSubpackages() {
 
 // StartServer (it receives the cli arguments)
 func StartServer(c *cli.Context) {
-	InitConfig(c.String("config"))
 	zerolog.SetGlobalLevel(zerolog.Level(c.Int("log-level")))
+	InitConfig(c.String("config"))
 	InitSubpackages()
 
 	ns := new(Netspot)

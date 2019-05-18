@@ -3,7 +3,9 @@
 package miner
 
 import (
+	"encoding/gob"
 	"fmt"
+	"net"
 	"netspot/miner/counters"
 	"path/filepath"
 	"strings"
@@ -407,9 +409,9 @@ func TestStartStop(t *testing.T) {
 	title("Testing start/stop")
 	Zero()
 	setNormalConfig()
-	StartSniffing()
+	ec, _, _ := StartSniffing()
 	time.Sleep(1 * time.Millisecond)
-	StopSniffing()
+	StopSniffing(ec)
 	time.Sleep(10 * time.Millisecond)
 
 	checkTitle("Checking sniffing status...")
@@ -531,14 +533,18 @@ func TestTick(t *testing.T) {
 	LoadFromName("IP")
 	LoadFromName("SYN")
 
-	chant := Tick(500 * time.Microsecond)
+	// chant := Tick(500 * time.Microsecond)
+	// SetLogging(1)
+	SetTickPeriod(500 * time.Microsecond)
+	// fmt.Println("SEND TICKS:", sendTicks)
 	to := time.Tick(2 * time.Second)
 	nticks := 0
-	StartSniffing()
+	// StartSniffing()
+	_, _, tc := GoSniff()
 	checkTitle("Correct number of ticks...")
 	for {
 		select {
-		case <-chant:
+		case <-tc:
 			nticks++
 		case <-to:
 			if nticks == 406 {
@@ -555,65 +561,200 @@ func TestTick(t *testing.T) {
 
 }
 
-func TestCAPI(t *testing.T) {
-	title("Testing C API")
-	// checkTitle("Available devices...")
-	// if testCGetAvailableDevices() {
-	// 	testOK()
-	// } else {
-	// 	testERROR()
-	// }
+// func TestCAPI(t *testing.T) {
+// 	title("Testing C API")
+// 	// checkTitle("Available devices...")
+// 	// if testCGetAvailableDevices() {
+// 	// 	testOK()
+// 	// } else {
+// 	// 	testERROR()
+// 	// }
 
-	checkTitle("Get device...")
-	if testCGetDevice() {
-		testOK()
-	} else {
+// 	checkTitle("Get device...")
+// 	if testCGetDevice() {
+// 		testOK()
+// 	} else {
+// 		testERROR()
+// 	}
+
+// 	// checkTitle("Set device...")
+// 	// if testCSetDevice() {
+// 	// 	testOK()
+// 	// } else {
+// 	// 	testERROR()
+// 	// }
+
+// 	checkTitle("Set timeout...")
+// 	if testCSetTimeout() {
+// 		testOK()
+// 	} else {
+// 		testERROR()
+// 	}
+
+// 	checkTitle("Get loaded counter...")
+// 	if testCGetLoadedCounters() {
+// 		testOK()
+// 	} else {
+// 		testERROR()
+// 	}
+
+// 	checkTitle("Load counter...")
+// 	if testCLoadFromName() {
+// 		testOK()
+// 	} else {
+// 		testERROR()
+// 	}
+
+// 	checkTitle("Unload counter...")
+// 	if testCUnloadFromName() {
+// 		testOK()
+// 	} else {
+// 		testERROR()
+// 	}
+
+// 	Zero()
+// 	i := LoadFromName("SYN")
+// 	pcapSniffing()
+
+// 	checkTitle("Geting counter value...")
+// 	if testCGetCounterValue(i, 56) {
+// 		testOK()
+// 	} else {
+// 		testERROR()
+// 	}
+// }
+
+func TestLoadPattern(t *testing.T) {
+	title("Checking pattern loading")
+	p := "192.168.200.166: -> :"
+
+	checkTitle("Loading pattern '" + p + " ...")
+	id, err := LoadPattern(p, "P0")
+	if err != nil {
 		testERROR()
+		t.Fatal(err.Error())
+	} else {
+		testOK()
 	}
 
-	// checkTitle("Set device...")
-	// if testCSetDevice() {
-	// 	testOK()
-	// } else {
-	// 	testERROR()
-	// }
-
-	checkTitle("Set timeout...")
-	if testCSetTimeout() {
-		testOK()
-	} else {
+	checkTitle("Checking counter value...")
+	pcapSniffing()
+	if val := counterMap[id].Value(); val != 441 {
 		testERROR()
-	}
-
-	checkTitle("Get loaded counter...")
-	if testCGetLoadedCounters() {
-		testOK()
+		t.Errorf("Bad counter value, expected 441, got %d", val)
 	} else {
-		testERROR()
-	}
-
-	checkTitle("Load counter...")
-	if testCLoadFromName() {
 		testOK()
-	} else {
-		testERROR()
-	}
-
-	checkTitle("Unload counter...")
-	if testCUnloadFromName() {
-		testOK()
-	} else {
-		testERROR()
 	}
 
 	Zero()
-	i := LoadFromName("SYN")
-	pcapSniffing()
-
-	checkTitle("Geting counter value...")
-	if testCGetCounterValue(i, 56) {
-		testOK()
-	} else {
+	p = "192.168.200.166: -> :443"
+	checkTitle("Loading pattern '" + p + " ...")
+	id, err = LoadPattern(p, "P0")
+	if err != nil {
 		testERROR()
+		t.Fatal(err.Error())
+	} else {
+		testOK()
 	}
+
+	checkTitle("Checking counter value...")
+	pcapSniffing()
+	if val := counterMap[id].Value(); val != 366 {
+		testERROR()
+		t.Errorf("Bad counter value, expected 366, got %d", val)
+	} else {
+		testOK()
+	}
+
+	Zero()
+	p = ": -> :80"
+	checkTitle("Loading pattern '" + p + " ...")
+	id, err = LoadPattern(p, "P0")
+	if err != nil {
+		testERROR()
+		t.Fatal(err.Error())
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking counter value...")
+	pcapSniffing()
+	if val := counterMap[id].Value(); val != 20 {
+		testERROR()
+		t.Errorf("Bad counter value, expected 20, got %d", val)
+	} else {
+		testOK()
+	}
+
+	Zero()
+	p = "192.168.200.0/24: -> :"
+	checkTitle("Loading pattern '" + p + " ...")
+	id, err = LoadPattern(p, "P0")
+	if err != nil {
+		testERROR()
+		t.Fatal(err.Error())
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking counter value...")
+	pcapSniffing()
+	if val := counterMap[id].Value(); val != 478 {
+		testERROR()
+		t.Errorf("Bad counter value, expected 20, got %d", val)
+	} else {
+		testOK()
+	}
+
+	p = ": -> :80"
+	checkTitle("Loading pattern with a name already in used")
+	id, err = LoadPattern(p, "P0")
+	if err == nil {
+		testERROR()
+		t.Fatal(err.Error())
+	} else {
+		testOK()
+	}
+
+	p = "!µ*:%%+->é:?&"
+	checkTitle("Loading a ugly pattern like '" + p + "'...")
+	id, err = LoadPattern(p, "Perr")
+	if err != nil {
+		testERROR()
+		t.Fatal(err.Error())
+	} else {
+		testOK()
+	}
+}
+
+func TestSnapshot(t *testing.T) {
+	title("Checking snapshots")
+	Zero()
+	SetDevice(pcapTestFile)
+	LoadFromName("ACK")
+	LoadFromName("UDP")
+	LoadFromName("IP")
+	LoadFromName("SYN")
+
+	addr := net.UnixAddr{
+		Name: "test/miner_test.socket",
+		Net:  "unixgram",
+	}
+	conn, err := net.ListenUnixgram("unixgram", &addr)
+	// defer conn.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	SetLogging(0)
+	// conn, err := ln.Accept()
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	decoder := gob.NewDecoder(conn)
+
+	go SniffAndSend(50*time.Millisecond, false, addr.Name)
+	// b := make([]byte, 1000)
+	var a interface{}
+	decoder.Decode(a)
+	fmt.Println(a)
 }

@@ -39,12 +39,15 @@ func RunICMPCtr(ctr ICMPCtrInterface) {
 		select {
 		case sig := <-ctr.SigPipe():
 			switch sig {
-			case 0: // stop the counter
+			case STOP: // stop the counter
 				ctr.SwitchRunningOff()
 				return
-			case 1: // return the value
+			case GET: // return the value
 				ctr.ValPipe() <- ctr.Value()
-			case 2:
+			case RESET: // reset
+				ctr.Reset()
+			case FLUSH: // return the value and reset
+				ctr.ValPipe() <- ctr.Value()
 				ctr.Reset()
 			}
 		case icmp := <-ctr.LayPipe(): // process the packet

@@ -28,15 +28,17 @@ import (
 //------------------------------------------------------------------------------
 
 var (
-	counterID     map[string]int              // map CounterName -> counterID (within miner CounterMap)
-	statMap       map[int]stats.StatInterface // map StatId -> Stat
-	statID        int                         // id of the next loaded stat
-	statValues    map[string]float64          // the last computed values of the statistics
-	counterValues map[string]uint64           // temp container of the counter values
-	period        time.Duration               // time between two stat updates (= window size)
-	mux           sync.RWMutex                // Locker for the counter map access
-	events        chan int                    // channel to sen/receive events
-	running       bool                        // to check if the stat are computed
+	counterID           map[string]int              // map CounterName -> counterID (within miner CounterMap)
+	statMap             map[int]stats.StatInterface // map StatId -> Stat
+	statID              int                         // id of the next loaded stat
+	statValues          map[string]float64          // the last computed values of the statistics
+	counterValues       map[string]uint64           // temp container of the counter values
+	period              time.Duration               // time between two stat updates (= window size)
+	mux                 sync.RWMutex                // Locker for the counter map access
+	smux                sync.RWMutex                // Locker for the stat map access
+	defaultEventChannel chan int                    // channel to send/receive events
+	defaultDataChannel  chan map[string]float64     // channel to sen/receive data
+	running             bool                        // to check if the stat are computed
 )
 
 var (
@@ -72,7 +74,8 @@ func init() {
 	statID = 0
 	statValues = make(map[string]float64)
 	counterValues = make(map[string]uint64)
-	events = make(chan int)
+	defaultEventChannel = make(chan int)
+	defaultDataChannel = make(chan map[string]float64)
 	running = false
 }
 
@@ -92,7 +95,7 @@ func InitConfig() {
 		LoadFromName(s)
 	}
 
-	log.Debug().Msgf("Available stats: %s", GetAvailableStats())
+	log.Info().Msgf("Available stats: %s", GetAvailableStats())
 	log.Info().Msg("Analyzer package configured")
 }
 
@@ -131,33 +134,36 @@ func seriesNameFromCurrentTime() string {
 	return t
 }
 
-// func release() {
-// 	running = false
-// 	// if logDataToInfluxDB {
-// 	// 	influxdb.Close()
-// 	// }
-// }
-
 func release() {
 	running = false
-	close(events)
+	close(defaultEventChannel)
 }
 
 func updateAndReset() {
-	mux.Lock()
-	var val uint64
-	var err error
-	for ctrname, ctrid := range counterID {
-		val, err = miner.GetCounterValue(ctrid)
-		if err != nil {
-			log.Error().Msgf("The ID of %s (%d) is wrong for the miner", ctrname, ctrid)
-		} else {
-			counterValues[ctrname] = val
-			miner.Reset(ctrid)
-		}
+	// m, _ := miner.SnapAndReset()
+	m := miner.Snapshot(true, nil, nil)
+	// if err != nil {
+	for name, val := range m {
+		counterValues[name] = val
+		log.Debug().Msg(fmt.Sprint(counterValues))
 	}
-	log.Debug().Msg(fmt.Sprint(counterValues))
-	mux.Unlock()
+
+	// }
+	// log.Error().Msg(err.Error())
+	// mux.Lock()
+	// var val uint64
+	// var err error
+	// for ctrname, ctrid := range counterID {
+	// 	val, err = miner.GetCounterValue(ctrid)
+	// 	if err != nil {
+	// 		log.Error().Msgf("The ID of %s (%d) is wrong for the miner", ctrname, ctrid)
+	// 	} else {
+	// 		counterValues[ctrname] = val
+	// 		miner.Reset(ctrid)
+	// 	}
+	// }
+	// log.Debug().Msg(fmt.Sprint(counterValues))
+	// mux.Unlock()
 }
 
 func isLoaded(statname string) int {
@@ -244,16 +250,16 @@ func unload(id int) (int, error) {
 // id is the stat identifier in statMap
 // val is the stat value
 // res is the (D)Spot output
-func checkSpotOutput(id int, val float64, res int32) {
+func checkSpotOutput(id int, val float64, res int) {
 	if res == 1 {
 		log.Warn().Str("Status", "UP_ALERT").
 			Str("Stat", statMap[id].Name()).
-			Float64("Value", val).Int32("Spot", res).
+			Float64("Value", val).Int("Spot", res).
 			Float64("Probability", statMap[id].DSpot().UpProbability(val)).Msg("Alarm!")
 	} else if res == -1 {
 		log.Warn().Str("Status", "DOWN_ALERT").
 			Str("Stat", statMap[id].Name()).
-			Float64("Value", val).Int32("Spot", res).
+			Float64("Value", val).Int("Spot", res).
 			Float64("Probability", statMap[id].DSpot().DownProbability(val)).Msg("Alarm!")
 	}
 }
@@ -302,7 +308,7 @@ func InitDataLogging() {
 		p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_raw_"+seriesName+".json")
 		f, err := os.Create(p)
 		if err != nil {
-			log.Fatal().Msg("Error while creating raw data log file")
+			log.Fatal().Msgf("Error while creating raw data log file (%s)", p)
 		}
 		rawDataLogger = zerolog.New(f).With().Logger()
 		rawDataOutputFile = f.Name()
@@ -310,7 +316,7 @@ func InitDataLogging() {
 		p = path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_threshold_"+seriesName+".json")
 		f, err = os.Create(p)
 		if err != nil {
-			log.Fatal().Msg("Error while creating threshold log file")
+			log.Fatal().Msgf("Error while creating threshold log file (%s)", p)
 		}
 		thresholdLogger = zerolog.New(f).With().Logger()
 		thresholdOutputFile = f.Name()
@@ -326,10 +332,11 @@ func InitDataLogging() {
 // new files/db.series
 func Zero() error {
 	if !IsRunning() {
-		SetPeriod(viper.GetDuration("analyzer.period"))
-		// period = viper.GetDuration("analyzer.period")
-		logDataToFile = viper.GetBool("analyzer.datalog.file")
-		logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
+		// SetPeriod(viper.GetDuration("analyzer.period"))
+		// stats := viper.GetStringSlice("an")
+		// // period = viper.GetDuration("analyzer.period")
+		// logDataToFile = viper.GetBool("analyzer.datalog.file")
+		// logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
 
 		// package variables
 		counterID = make(map[string]int)
@@ -338,9 +345,10 @@ func Zero() error {
 		statValues = make(map[string]float64)
 		counterValues = make(map[string]uint64)
 		// stopChan = make(chan int)
-		events = make(chan int)
+		defaultEventChannel = make(chan int)
 		running = false
 
+		InitConfig()
 		log.Info().Msg("Analyzer package reloaded")
 		return nil
 	}
@@ -471,38 +479,49 @@ func IsRunning() bool {
 // StopStats stops the analysis
 func StopStats() {
 	if running {
-		events <- 0
+		defaultEventChannel <- 0
 		// log.Info().Msg("Stopping stats computation")
 	}
+}
+
+// StatValues return a current snapshot of the stat values (and their thresholds)
+func StatValues() map[string]float64 {
+	if running {
+		defaultEventChannel <- 1
+		return <-defaultDataChannel
+	}
+	return nil
 }
 
 // StartStats starts the analysis
 // func StartStats() error {
 func StartStats() error {
-	if miner.IsSniffing() {
-		log.Info().Msg("Starting stats computation")
-		log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-		events = make(chan int)
-		go run()
-	} else {
-		log.Error().Msg("The counters have not been launched")
-		return errors.New("The counters have not been launched")
-	}
+	// if miner.IsSniffing() {
+	log.Info().Msg("Starting stats computation")
+	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
+	defaultEventChannel, defaultDataChannel = GoRun()
+	// } else {
+	// 	log.Error().Msg("The counters have not been launched")
+	// 	return errors.New("The counters have not been launched")
+	// }
 	return nil
 }
 
 // StartStatsAndWait starts the analysis. It will stop only when no packets
 // have to be processed (ex: pcap file)
 func StartStatsAndWait() error {
-	if miner.IsSniffing() {
-		log.Info().Msg("Starting stats computation")
-		log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-		events = make(chan int)
-		run()
-	} else {
-		log.Error().Msg("The counters have not been launched")
-		return errors.New("The counters have not been launched")
-	}
+	log.Info().Msg("Starting stats computation")
+	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
+	Run()
+	// if miner.IsSniffing() {
+	// 	log.Info().Msg("Starting stats computation")
+	// 	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
+	// 	events = make(chan int)
+	// 	Run()
+	// } else {
+	// 	log.Error().Msg("The counters have not been launched")
+	// 	return errors.New("The counters have not been launched")
+	// }
 	return nil
 }
 
@@ -515,12 +534,15 @@ func StartStatsAndWait() error {
 func analyze() {
 	var val float64
 	var upTh, downTh float64
-	var res int32
+	var res int
 	var name string
 	curtime := miner.SourceTime
 
 	dlog := rawDataLogger.Log().Time("time", curtime)
 	tlog := thresholdLogger.Log().Time("time", curtime)
+
+	// the locker is needed in case of a snapshot
+	smux.Lock()
 
 	for id, stat := range statMap {
 		name = stat.Name()
@@ -555,6 +577,7 @@ func analyze() {
 		statValues[name] = val
 
 	}
+	smux.Unlock()
 	log.Debug().Msg(fmt.Sprint(statValues))
 	dlog.Msg("")
 	tlog.Msg("")
@@ -564,51 +587,169 @@ func analyze() {
 	}
 }
 
-// run open the device to listen
-func run() {
-	var ticker <-chan time.Time
-	var e int
-
+// Run open the device to listen
+func Run() {
 	// initialize files/influxdb to log data and thresholds
 	InitDataLogging()
+	log.Info().Msg("Start running")
+	log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
+	log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
 
 	// Define the clock
-	if miner.IsDeviceInterface() {
-		//seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
-		// live ticker
-		ticker = time.Tick(period)
-	} else {
-		// the series name is then the name of the file
-		//seriesName = path.Base(miner.GetDevice())
-		// the timestamps of the capture define the clock
-		ticker = miner.Tick(period)
-	}
+	// if miner.IsDeviceInterface() {
+	// 	//seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
+	// 	// live ticker
+	// 	ticker = time.Tick(period)
+	// } else {
+	// 	// the series name is then the name of the file
+	// 	//seriesName = path.Base(miner.GetDevice())
+	// 	// the timestamps of the capture define the clock
+	// 	ticker = miner.Tick(period)
+	// }
 
+	// set the tick period to the miner
+	miner.SetTickPeriod(period)
 	// set the running state
 	running = true
-
+	// sniff
+	minerEvent, minerData, minerTime := miner.GoSniff()
 	// loop
 	for {
 		select {
-		case e = <-events:
+		case e := <-defaultEventChannel:
 			if e == 0 { // stop order
 				release()
+				// stop the miner
+				minerEvent <- miner.STOP
 				log.Info().Msg("Stopping stats computation (controller)")
 				return
 			}
-		case <-ticker:
+		case <-minerTime:
 			if !miner.IsSniffing() {
 				release()
 				log.Warn().Msg("Stopping stats computation (miner)")
 				return
 			}
+
 			// get the stats values (call miner counters etc.)
-			updateAndReset()
+			// counters are reset
+			m := miner.Snapshot(true, minerEvent, minerData)
+			for name, val := range m {
+				counterValues[name] = val
+				log.Debug().Msg(fmt.Sprint(counterValues))
+			}
 			// analyze the stats values (feed dspot, log data/thresholds)
 			analyze()
 		}
 	}
 }
+
+// GoRun open the device to listen
+func GoRun() (chan int, chan map[string]float64) {
+	eventChannel := make(chan int)
+	dataChannel := make(chan map[string]float64)
+
+	go func() {
+		// initialize files/influxdb to log data and thresholds
+		InitDataLogging()
+		log.Info().Msg("Start running")
+		log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
+		log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
+
+		// set the tick period to the miner
+		miner.SetTickPeriod(period)
+		// set the running state
+		running = true
+		// sniff
+		minerEvent, minerData, minerTime := miner.GoSniff()
+		// loop
+		for {
+			select {
+			case e := <-eventChannel:
+				switch e {
+				case 0: // stop order
+					// stop the miner
+					minerEvent <- miner.STOP
+					// release all
+					release()
+					log.Info().Msg("Stopping stats computation (controller)")
+					return
+				case 1: // send data
+					smux.Lock()
+					snapshot := make(map[string]float64)
+					for s, v := range statValues {
+						snapshot[s] = v
+					}
+					smux.Unlock()
+					fmt.Println(snapshot)
+					dataChannel <- snapshot
+				}
+			case <-minerTime:
+				if !miner.IsSniffing() {
+					release()
+					log.Warn().Msg("Stopping stats computation (miner)")
+					return
+				}
+				// get the stats values (call miner counters etc.)
+				// counters are reset
+				m := miner.Snapshot(true, minerEvent, minerData)
+				for name, val := range m {
+					counterValues[name] = val
+					log.Debug().Msg(fmt.Sprint(counterValues))
+				}
+				// analyze the stats values (feed dspot, log data/thresholds)
+				analyze()
+			}
+		}
+	}()
+	return eventChannel, dataChannel
+}
+
+// // run open the device to listen
+// func run() {
+// 	var ticker <-chan time.Time
+// 	var e int
+
+// 	// initialize files/influxdb to log data and thresholds
+// 	InitDataLogging()
+
+// 	// Define the clock
+// 	if miner.IsDeviceInterface() {
+// 		//seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
+// 		// live ticker
+// 		ticker = time.Tick(period)
+// 	} else {
+// 		// the series name is then the name of the file
+// 		//seriesName = path.Base(miner.GetDevice())
+// 		// the timestamps of the capture define the clock
+// 		ticker = miner.Tick(period)
+// 	}
+
+// 	// set the running state
+// 	running = true
+
+// 	// loop
+// 	for {
+// 		select {
+// 		case e = <-events:
+// 			if e == 0 { // stop order
+// 				release()
+// 				log.Info().Msg("Stopping stats computation (controller)")
+// 				return
+// 			}
+// 		case <-ticker:
+// 			if !miner.IsSniffing() {
+// 				release()
+// 				log.Warn().Msg("Stopping stats computation (miner)")
+// 				return
+// 			}
+// 			// get the stats values (call miner counters etc.)
+// 			updateAndReset()
+// 			// analyze the stats values (feed dspot, log data/thresholds)
+// 			analyze()
+// 		}
+// 	}
+// }
 
 //------------------------------------------------------------------------------
 // MAIN

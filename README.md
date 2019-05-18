@@ -3,22 +3,43 @@
 ![NetSpot_logo](assets/bat.png)
 
 `netspot` is a basic *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
-The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour.
+The `netspot` ML core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour.
 
 `netspot` works as a server and can be controlled trough an HTTP API.
 The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
 
+## Architecture overview
 
-## Details
+![miner](assets/archi.svg)
 
-### Counters
-The idea is to increment network counters with `GoPacket`. Examples of counters are the following:
+At the lowest level, `netspot` parse packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
+The source can either be an network interface or a .pcap file (network capture).
+
+At a given frequency, counter values are retrieved so as to build **statistics**, this is the role of the `analyzer`. The statistics are the measures monitored by `netspot`.
+
+Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. This algorithm learns the *normal* behaviour of the statistic and constantly updates its knowledge. When an abnormal value occurs, `SPOT` triggers an alarm.
+
+A logging system stores the stat values and the corresponding thresholds either to files or to an [influxdb](https://www.influxdata.com/) instance.
+
+## Miner
+
+The goal of the `miner` is threefold:
+* parse incoming packets
+* dispatch layers to the concerned counters
+* send snapshots along time (at the desired frequency)
+
+![miner](assets/miner.svg)
+
+The dispatching is done concurrently to increase performances. However when a snapshot has to be done, packets parsing is paused and we wait for all the counters to finish to process the last layers they receive. It seems like it's long, but actually it's quite fast.
+
+Many counters are already implemented within `netspot` like
 * number of SYN packets;
 * number of ICMP packets;
 * number of IP packets;
 * number of unique source IP addresses...
 
-Some are already implemented, but we can add more as desired.
+but `netspot` is designed to be modular, so every user is free to developed its own counter insofar as it respects the basic counter layout.
+
 
 
 ### Statistics

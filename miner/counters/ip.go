@@ -24,7 +24,7 @@ type IPCtr struct {
 func NewIPCtr() IPCtr {
 	return IPCtr{
 		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan *layers.IPv4)}
+		Lay:     make(chan *layers.IPv4, 100)}
 }
 
 // LayPipe returns the IPv4 layer channel of the IP counter
@@ -39,12 +39,15 @@ func RunIPCtr(ctr IPCtrInterface) {
 		select {
 		case sig := <-ctr.SigPipe():
 			switch sig {
-			case 0: // stop the counter
+			case STOP: // stop the counter
 				ctr.SwitchRunningOff()
 				return
-			case 1: // return the value
+			case GET: // return the value
 				ctr.ValPipe() <- ctr.Value()
-			case 2:
+			case RESET: // reset
+				ctr.Reset()
+			case FLUSH: // return the value and reset
+				ctr.ValPipe() <- ctr.Value()
 				ctr.Reset()
 			}
 		case ip := <-ctr.LayPipe(): // process the packet

@@ -28,7 +28,7 @@ var (
 	client          *rpc.Client
 	interfaces      []string
 	connectionError error
-	connected       string = "200 Connected to Go RPC" // (rpc package) Can connect to RPC service using HTTP CONNECT to rpcPath.
+	connected       = "200 Connected to Go RPC" // (rpc package) Can connect to RPC service using HTTP CONNECT to rpcPath.
 )
 
 //------------------------------------------------------------------------------
@@ -442,6 +442,10 @@ func execIface() {
 	}
 }
 
+func execValues() {
+	RunUI2()
+}
+
 func executor(s string) {
 	words := strings.Split(s, " ")
 	// First word
@@ -458,6 +462,8 @@ func executor(s string) {
 		execStart()
 	case "stop":
 		execStop()
+	case "values":
+		execValues()
 	case "connect":
 		if len(words) > 1 {
 			execParseConnect(words[1:])
@@ -523,10 +529,12 @@ func completer(d prompt.Document) []prompt.Suggest {
 			{Text: "list", Description: "List all statistics"},
 			{Text: "load", Description: "Load a new statistics"},
 			{Text: "reset", Description: "Reset Netspot"},
+			{Text: "set", Description: "Set parameters"},
 			{Text: "show", Description: "Details about a loaded statistics"},
 			{Text: "start", Description: "Start monitoring"},
 			{Text: "stop", Description: "Stop monitoring"},
 			{Text: "unload", Description: "Unload a statistics"},
+			{Text: "values", Description: "Print the current values of the statistics"},
 		}
 	case 2:
 		switch words[0] {
@@ -549,7 +557,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 			s = []prompt.Suggest{
 				{Text: "device", Description: "Set the device to listen (file of pcap)"},
 				{Text: "promisc", Description: "Set the promiscuous mode"},
-				{Text: "period", Description: "Set the period for stat compuation"}}
+				{Text: "period", Description: "Set the period for stat computation"}}
 		case "iface":
 			for _, r := range interfaces {
 				s = append(s, prompt.Suggest{Text: r})
@@ -585,7 +593,7 @@ func main() {
 	p := prompt.New(
 		executor,
 		completer,
-		prompt.OptionPrefix("> "),
+		prompt.OptionPrefix("netspot > "),
 		prompt.OptionPrefixTextColor(prompt.White))
 
 	p.Run()

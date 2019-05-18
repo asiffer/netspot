@@ -3,8 +3,6 @@
 
 package stats
 
-import "math"
-
 func init() {
 	Register("R_ACK",
 		func(bs BaseStat) StatInterface { return &RAck{bs} })
@@ -29,11 +27,15 @@ func (stat *RAck) Requirement() []string {
 func (stat *RAck) Compute(ctrvalues []uint64) float64 {
 	//ctrvalues[0] -> ack
 	//ctrvalues[1] -> ip
-	if ctrvalues[0] == 0 {
+	// if ctrvalues[0] == 0 {
+	// 	return 0.
+	// } else if ctrvalues[1] == 0 {
+	// 	return math.NaN()
+	// } else {
+	// 	return float64(ctrvalues[0]) / float64(ctrvalues[1])
+	// }
+	if ctrvalues[0] == 0 || ctrvalues[1] == 0 {
 		return 0.
-	} else if ctrvalues[1] == 0 {
-		return math.NaN()
-	} else {
-		return float64(ctrvalues[0]) / float64(ctrvalues[1])
 	}
+	return float64(ctrvalues[0]) / float64(ctrvalues[1])
 }

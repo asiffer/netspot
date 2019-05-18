@@ -3,8 +3,6 @@
 
 package stats
 
-import "math"
-
 func init() {
 	Register("R_SYN",
 		func(bs BaseStat) StatInterface { return &RSyn{bs} })
@@ -29,11 +27,15 @@ func (stat *RSyn) Requirement() []string {
 func (stat *RSyn) Compute(ctrvalues []uint64) float64 {
 	//ctrvalues[0] -> syn
 	//ctrvalues[1] -> ip
-	if ctrvalues[0] == 0 {
+	// if ctrvalues[0] == 0 {
+	// 	return 0.
+	// } else if ctrvalues[1] == 0 {
+	// 	return math.NaN()
+	// } else {
+	// 	return float64(ctrvalues[0]) / float64(ctrvalues[1])
+	// }
+	if ctrvalues[0] == 0 || ctrvalues[1] == 0 {
 		return 0.
-	} else if ctrvalues[1] == 0 {
-		return math.NaN()
-	} else {
-		return float64(ctrvalues[0]) / float64(ctrvalues[1])
 	}
+	return float64(ctrvalues[0]) / float64(ctrvalues[1])
 }

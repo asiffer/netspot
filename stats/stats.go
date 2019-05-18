@@ -61,7 +61,7 @@ type StatInterface interface {
 	Name() string                       // the name of the statistics
 	Requirement() []string              // the names of the requested counters
 	Compute(ctrvalues []uint64) float64 // only compute the statistics
-	Update(val float64) int32           // feed dspot
+	Update(val float64) int             // feed dspot
 	DSpot() *gospot.DSpot               // return the DSpot instance
 }
 
@@ -74,7 +74,7 @@ func (m *BaseStat) DSpot() *gospot.DSpot {
 // Update feeds the DSpot instance embedded in the BaseStat
 // with a new incoming value. It returns a return code
 // according to normality/abnormality of the event.
-func (m *BaseStat) Update(val float64) int32 {
+func (m *BaseStat) Update(val float64) int {
 	return m.dspot.Step(val)
 }
 
@@ -82,7 +82,7 @@ func (m *BaseStat) Update(val float64) int32 {
 // in the statistics.
 func (m *BaseStat) SetDSpotConfig(sc gospot.DSpotConfig) {
 	log.Debug().Msgf("(%s) Setting new config", m.name)
-	m.dspot = gospot.NewDSpotFromConfig(sc)
+	m.dspot = gospot.NewDSpotFromConfig(&sc)
 }
 
 // setCustomConfig builds a DSpotConfig instance according to the
@@ -110,9 +110,9 @@ func setCustomConfig(statname string) gospot.DSpotConfig {
 
 	setting = prefix + "n_init"
 	if viper.IsSet(setting) {
-		conf.Ninit = viper.GetInt32(setting)
+		conf.Ninit = viper.GetInt(setting)
 	} else {
-		conf.Ninit = viper.GetInt32("dspot.n_init")
+		conf.Ninit = viper.GetInt("dspot.n_init")
 	}
 
 	setting = prefix + "level"
@@ -152,9 +152,9 @@ func setCustomConfig(statname string) gospot.DSpotConfig {
 
 	setting = prefix + "max_excess"
 	if viper.IsSet(setting) {
-		conf.MaxExcess = viper.GetInt32(setting)
+		conf.MaxExcess = viper.GetInt(setting)
 	} else {
-		conf.MaxExcess = viper.GetInt32("dspot.max_excess")
+		conf.MaxExcess = viper.GetInt("dspot.max_excess")
 	}
 
 	return conf
@@ -164,7 +164,8 @@ func setCustomConfig(statname string) gospot.DSpotConfig {
 // given name. It returns an error when the desired statistic does
 // not exist.
 func StatFromName(statname string) (StatInterface, error) {
-	s := gospot.NewDSpotFromConfig(setCustomConfig(statname))
+	conf := setCustomConfig(statname)
+	s := gospot.NewDSpotFromConfig(&conf)
 	bs := BaseStat{name: statname, dspot: s}
 	statConstructor, exists := AvailableStats[statname]
 	if exists {

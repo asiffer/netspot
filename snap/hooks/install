@@ -1,5 +1,8 @@
+#!/bin/sh
+
 # netspot config file
 
+echo "
 [analyzer]
 # time between two statistics computations
 period = "1s"
@@ -13,7 +16,7 @@ stats = ["R_SYN", "R_ACK"]
 influxdb = false
 # log data to files
 file = true
-output_dir = "/tmp" # file mode only
+output_dir = $SNAP_DATA # file mode only
 
 [miner]
 # name of the interface to listen or dump/pcap file path
@@ -53,5 +56,4 @@ max_excess = 200
 # you can define default values for some stats
 # [dspot.R_SYN]
 # q = 2e-5
-
-
+" > "$SNAP_COMMON/netspot.toml"

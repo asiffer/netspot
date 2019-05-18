@@ -20,7 +20,7 @@ func (stat *RIcmp) Name() string {
 	return "R_ICMP"
 }
 
-// Requirement returns teh requested counters to compute the stat
+// Requirement returns the requested counters to compute the stat
 func (stat *RIcmp) Requirement() []string {
 	return []string{"ICMP", "IP"}
 }
