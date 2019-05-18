@@ -79,6 +79,8 @@ const (
 	GET uint8 = 1
 	// FLUSH trigger a snapshot of the counters and reset them
 	FLUSH uint8 = 3
+	// PERF triggers a snapshot of the number of parsed packets
+	PERF uint8 = 9
 )
 
 func init() {

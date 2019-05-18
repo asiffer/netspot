@@ -17,19 +17,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	// reserved keys for data different from
+	// counter values (index of counters start
+	// from 0)
+	perfIndex int = -1
+)
+
 //----------------------------------------------------------------------------//
 //---------------------------- EXPORTED FUNCTIONS ----------------------------//
 //----------------------------------------------------------------------------//
-
-// Events returns the event channel of the package
-// func Events() chan uint8 {
-// 	return events
-// }
-
-// Data returns the data channel of the package
-// func Data() chan map[int]uint64 {
-// 	return dataChannel
-// }
 
 // IsSniffing returns the sniffing status
 func IsSniffing() bool {
@@ -43,9 +40,9 @@ func GetSourceTime() int64 {
 
 // GetNbParsedPkts returns the number of current parsed packets since
 // the initialization
-func GetNbParsedPkts() uint64 {
-	return nbParsedPkts
-}
+// func GetNbParsedPkts() uint64 {
+// return nbParsedPkts
+// }
 
 // // StartSniffing starts to sniff the current device. It does nothing
 // // if the sniffing is in progress. This is a goroutine, so it returns
@@ -76,12 +73,12 @@ func StartSniffing() (EventChannel, DataChannel, TimeChannel) {
 			// wait for sniffing
 		}
 		// update the default channels
-		// defaultEventChannel = ec
-		// defaultDataChannel = dc
-		// defaultTimeChannel = tc
+		defaultEventChannel = ec
+		defaultDataChannel = dc
+		defaultTimeChannel = tc
 		return ec, dc, tc
 	}
-	fmt.Println("Sniffing")
+	log.Debug().Msg("StartSniffing requested but already sniffing")
 	return defaultEventChannel, defaultDataChannel, defaultTimeChannel
 }
 
@@ -250,6 +247,18 @@ func getValuesAndReset(pool *sync.WaitGroup) map[int]uint64 {
 	return m
 }
 
+// GetNbParsedPkts returns the current number of parsed packets
+func GetNbParsedPkts() uint64 {
+	// func GetPerf() uint64 {
+	if sniffing {
+		fmt.Println("NbParsedPAckets: sniffing")
+		defaultEventChannel <- PERF
+		n := <-defaultDataChannel
+		return n[perfIndex]
+	}
+	return nbParsedPkts
+}
+
 // Snapshot retrieve the current value of the counters. Their
 // values are then put in the counterValues container. If nil is
 // passed for a channel, then the default channel is used.
@@ -408,6 +417,11 @@ func Sniff() {
 				// reset.
 				log.Debug().Msg("Receiving FLUSH")
 				defaultDataChannel <- getValuesAndReset(&goroutinePool)
+			case PERF:
+				// perf aims to send the current number of parsed
+				// packets
+				log.Debug().Msg("Receiving PERF")
+				defaultDataChannel <- map[int]uint64{perfIndex: nbParsedPkts}
 			default:
 				log.Debug().Msgf("Receiving unknown event (%v)", e)
 			}
@@ -425,7 +439,7 @@ func Sniff() {
 			} else {
 				// if there is no packet anymore, we stop it
 				log.Info().Msgf("No packets to parse anymore (%d parsed packets)",
-					GetNbParsedPkts())
+					nbParsedPkts)
 				log.Info().Msg("Stop sniffing")
 				release(&goroutinePool, nil)
 				return
@@ -495,6 +509,11 @@ func GoSniff() (EventChannel, DataChannel, TimeChannel) {
 					// reset.
 					log.Debug().Msg("Receiving FLUSH")
 					dChannel <- getValuesAndReset(&goroutinePool)
+				case PERF:
+					// perf aims to send the current number of parsed
+					// packets
+					log.Debug().Msg("Receiving PERF")
+					defaultDataChannel <- map[int]uint64{perfIndex: nbParsedPkts}
 				default:
 					log.Debug().Msgf("Receiving unknown event (%v)", e)
 				}

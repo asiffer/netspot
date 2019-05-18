@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"netspot/miner/counters"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -18,6 +19,7 @@ import (
 var (
 	headerWidth    = 80
 	pcapTestFile   = "test/test.pcap"
+	pcapTestFile2  = "test/wifi.pcap"
 	configTestFile = "test/miner.toml"
 )
 
@@ -227,10 +229,13 @@ func TestRawStatus(t *testing.T) {
 
 func TestPcapSniffing(t *testing.T) {
 	title("Testing pcap sniffing")
+	// SetLogging(0)
 	setNormalConfig()
 	StartSniffingAndWait()
+	// time.Sleep(1 * time.Second)
 
 	checkTitle("Checking number of parsed packets... ")
+	// fmt.Println("WTF")
 	if GetNbParsedPkts() != 908 {
 		testERROR()
 		t.Error("Fail: getting number of parsed packets")
@@ -736,6 +741,7 @@ func TestSnapshot(t *testing.T) {
 	LoadFromName("IP")
 	LoadFromName("SYN")
 
+	os.Remove("test/miner_test.socket")
 	addr := net.UnixAddr{
 		Name: "test/miner_test.socket",
 		Net:  "unixgram",
@@ -757,4 +763,23 @@ func TestSnapshot(t *testing.T) {
 	var a interface{}
 	decoder.Decode(a)
 	fmt.Println(a)
+}
+
+func TestNbParsedPackets(t *testing.T) {
+	title("Checking live perf")
+	// SetLogging(0)
+	Zero()
+	SetDevice("/data/pcap/201111111400.dump")
+	LoadFromName("ACK")
+	LoadFromName("UDP")
+	LoadFromName("IP")
+	LoadFromName("SYN")
+	StartSniffing()
+	start := time.Now()
+	time.Sleep(3 * time.Second)
+	end := time.Now()
+	duration := end.Sub(start).Seconds()
+	pp := float64(GetNbParsedPkts())
+	fmt.Printf("Packet rate: %d packets/s\n", int(pp/duration))
+	StopSniffing(nil)
 }
