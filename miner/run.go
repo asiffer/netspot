@@ -140,13 +140,18 @@ func SniffAndSend(d time.Duration, reset bool, socket string) {
 }
 
 // StopSniffing stops to sniff the device
-func StopSniffing(ec EventChannel) {
+// func StopSniffing(ec EventChannel) {
+// 	if sniffing {
+// 		if ec != nil {
+// 			ec <- STOP
+// 		} else {
+// 			defaultEventChannel <- STOP
+// 		}
+// 	}
+// }
+func StopSniffing() {
 	if sniffing {
-		if ec != nil {
-			ec <- STOP
-		} else {
-			defaultEventChannel <- STOP
-		}
+		defaultEventChannel <- STOP
 	}
 }
 
@@ -249,9 +254,7 @@ func getValuesAndReset(pool *sync.WaitGroup) map[int]uint64 {
 
 // GetNbParsedPkts returns the current number of parsed packets
 func GetNbParsedPkts() uint64 {
-	// func GetPerf() uint64 {
 	if sniffing {
-		fmt.Println("NbParsedPAckets: sniffing")
 		defaultEventChannel <- PERF
 		n := <-defaultDataChannel
 		return n[perfIndex]
@@ -484,10 +487,10 @@ func GoSniff() (EventChannel, DataChannel, TimeChannel) {
 		sniffing = true
 		// pool of goroutines (for every packets)
 		var goroutinePool sync.WaitGroup
-
+		// number of ticks
 		nt := 0
-		// loop over the incoming packets
 
+		// loop over the incoming packets
 		for {
 			select {
 			// events

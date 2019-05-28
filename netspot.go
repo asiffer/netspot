@@ -17,6 +17,7 @@ import (
 	"netspot/analyzer"
 	"netspot/miner"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -46,7 +47,11 @@ func init() {
 
 //fileExists returns whether the given file exists
 func fileExists(path string) bool {
-	_, err := os.Stat(path)
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(absPath)
 	if err == nil {
 		return true
 	}

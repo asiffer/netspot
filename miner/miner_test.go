@@ -60,6 +60,11 @@ func title(s string) {
 
 }
 
+func TestGetAvailableCounters(t *testing.T) {
+	title("Available counters")
+	fmt.Println(GetAvailableCounters())
+}
+
 func TestSetDevice(t *testing.T) {
 	title("Testing device setting")
 	checkTitle(fmt.Sprintf("Setting device to %s... ", pcapTestFile))
@@ -380,7 +385,7 @@ func TestGettingCounterValue(t *testing.T) {
 	idSYN := LoadFromName("SYN")
 
 	StartSniffingAndWait()
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	checkTitle("Checking IP counter value...")
 	ipCtrValue, _ := GetCounterValue(idIP)
 	if ipCtrValue != 908 {
@@ -414,9 +419,9 @@ func TestStartStop(t *testing.T) {
 	title("Testing start/stop")
 	Zero()
 	setNormalConfig()
-	ec, _, _ := StartSniffing()
+	StartSniffing()
 	time.Sleep(1 * time.Millisecond)
-	StopSniffing(ec)
+	StopSniffing()
 	time.Sleep(10 * time.Millisecond)
 
 	checkTitle("Checking sniffing status...")
@@ -735,7 +740,7 @@ func TestLoadPattern(t *testing.T) {
 func TestSnapshot(t *testing.T) {
 	title("Checking snapshots")
 	Zero()
-	SetDevice(pcapTestFile)
+	SetDevice(pcapTestFile2)
 	LoadFromName("ACK")
 	LoadFromName("UDP")
 	LoadFromName("IP")
@@ -751,18 +756,21 @@ func TestSnapshot(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	SetLogging(0)
+	// SetLogging(0)
 	// conn, err := ln.Accept()
 	// if err != nil {
 	// 	t.Error(err)
 	// }
 	decoder := gob.NewDecoder(conn)
 
-	go SniffAndSend(50*time.Millisecond, false, addr.Name)
+	go SniffAndSend(5*time.Millisecond, false, addr.Name)
 	// b := make([]byte, 1000)
 	var a interface{}
 	decoder.Decode(a)
 	fmt.Println(a)
+	// wait to end the sniffing
+	time.Sleep(1 * time.Second)
+	// fmt.Println("Sniffing:", IsSniffing())
 }
 
 func TestNbParsedPackets(t *testing.T) {
@@ -774,12 +782,71 @@ func TestNbParsedPackets(t *testing.T) {
 	LoadFromName("UDP")
 	LoadFromName("IP")
 	LoadFromName("SYN")
+	time.Sleep(50 * time.Millisecond)
 	StartSniffing()
 	start := time.Now()
 	time.Sleep(3 * time.Second)
 	end := time.Now()
 	duration := end.Sub(start).Seconds()
 	pp := float64(GetNbParsedPkts())
+	fmt.Printf("#packets: %d\n", int(pp))
 	fmt.Printf("Packet rate: %d packets/s\n", int(pp/duration))
-	StopSniffing(nil)
+	StopSniffing()
+}
+
+func TestLiveFlush(t *testing.T) {
+	title("Checking live flush")
+	// SetLogging(0)
+	Zero()
+	SetDevice("/data/pcap/201111111400.dump")
+	LoadFromName("ACK")
+	LoadFromName("UDP")
+	LoadFromName("IP")
+	LoadFromName("SYN")
+	time.Sleep(50 * time.Millisecond)
+	StartSniffing()
+	for i := 0; i < 5; i++ {
+		time.Sleep(500 * time.Millisecond)
+		fmt.Println(Snapshot(true, nil, nil))
+	}
+	// start := time.Now()
+	// time.Sleep(3 * time.Second)
+	// end := time.Now()
+	// duration := end.Sub(start).Seconds()
+	// pp := float64(GetNbParsedPkts())
+	// fmt.Printf("#packets: %d\n", int(pp))
+	// fmt.Printf("Packet rate: %d packets/s\n", int(pp/duration))
+	StopSniffing()
+	time.Sleep(1 * time.Second)
+}
+
+func TestBasicIOSniff(t *testing.T) {
+	title("Checking io while sniffing")
+	// SetLogging(0)
+	Zero()
+	SetDevice("/data/pcap/201111111400.dump")
+	LoadFromName("ACK")
+	LoadFromName("UDP")
+	LoadFromName("IP")
+	LoadFromName("SYN")
+	time.Sleep(50 * time.Millisecond)
+	go Sniff()
+
+	time.Sleep(500 * time.Millisecond)
+	defaultEventChannel <- GET
+	fmt.Println("Data:", <-defaultDataChannel)
+
+	time.Sleep(500 * time.Millisecond)
+	defaultEventChannel <- FLUSH
+	fmt.Println("Data:", <-defaultDataChannel)
+
+	time.Sleep(500 * time.Millisecond)
+	defaultEventChannel <- PERF
+	fmt.Println("Perf:", <-defaultDataChannel)
+
+	time.Sleep(500 * time.Millisecond)
+	defaultEventChannel <- STOP
+	time.Sleep(1 * time.Second)
+	// fmt.Println("Perf:", <-defaultDataChannel)
+	// StopSniffing()
 }
