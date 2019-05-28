@@ -13,6 +13,7 @@ import (
 	"netspot/stats"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -49,6 +50,12 @@ var (
 	rawDataOutputFile   string         // the path of the file containing data
 	thresholdOutputFile string         // the path of the file containing thresholds
 	seriesName          string         // the name of the influxdb series
+	outputDir           string         // directory where raw data are stored (2 files)
+)
+
+const (
+	rawDataFileNameFormat   = "netspot_raw_%s.json"       // format to name the file where data are logged
+	thresholdFileNameFormat = "netspot_threshold_%s.json" // format to name the file where thresholds are logged
 )
 
 var err error
@@ -84,6 +91,7 @@ func init() {
 func InitConfig() {
 	// settings
 	SetPeriod(viper.GetDuration("analyzer.period"))
+	SetOutputDir(viper.GetString("analyzer.datalog.output_dir"))
 	logDataToFile = viper.GetBool("analyzer.datalog.file")
 	logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
 
@@ -301,11 +309,12 @@ func RawStatus() map[string]string {
 // InitDataLogging creates new loggers (file/influxdb). Normally, it is called when
 // start to run.
 func InitDataLogging() {
-	//SetSeriesName(seriesNameFromCurrentTime())
+	// create the name of the new incoming series
 	autoSetSeriesName()
 
 	if logDataToFile {
-		p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_raw_"+seriesName+".json")
+		p := filepath.Join(outputDir, fmt.Sprintf(rawDataFileNameFormat, seriesName))
+		// p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_raw_"+seriesName+".json")
 		f, err := os.Create(p)
 		if err != nil {
 			log.Fatal().Msgf("Error while creating raw data log file (%s)", p)
@@ -313,7 +322,8 @@ func InitDataLogging() {
 		rawDataLogger = zerolog.New(f).With().Logger()
 		rawDataOutputFile = f.Name()
 
-		p = path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_threshold_"+seriesName+".json")
+		// p = path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_threshold_"+seriesName+".json")
+		p = filepath.Join(outputDir, fmt.Sprintf(thresholdFileNameFormat, seriesName))
 		f, err = os.Create(p)
 		if err != nil {
 			log.Fatal().Msgf("Error while creating threshold log file (%s)", p)
@@ -381,16 +391,47 @@ func SetLogging(level int) {
 	log.Info().Msgf("Enabling logging (level %s)", l.String())
 }
 
+// SetOutputDir change the directory where the raw stats are saved (and thresholds)
+func SetOutputDir(dir string) {
+	if !running {
+		absPath, err := filepath.Abs(dir)
+		file, err := os.Open(absPath)
+		f, err := file.Stat()
+		switch {
+		case err != nil:
+			// handle the error and return
+			log.Error().Msgf("Error while changing data log directory (%s)", err)
+			return
+		case f.IsDir():
+			// it's a directory
+			outputDir = absPath
+		default:
+			// it's not a directory
+			outputDir = filepath.Dir(absPath)
+		}
+	} else {
+		log.Error().Msgf("Cannot change output directory while sniffing")
+	}
+}
+
 // SetPeriod sets the duration between two stat computations
 func SetPeriod(d time.Duration) {
-	period = d
-	log.Debug().Msgf("Period set to %s", d)
+	if !running {
+		period = d
+		log.Debug().Msgf("Period set to %s", d)
+	} else {
+		log.Error().Msgf("Cannot change period while sniffing")
+	}
 }
 
 // SetSeriesName sets the name of the series within InfluxDB
 func SetSeriesName(s string) {
-	seriesName = s
-	log.Debug().Msgf(`Series name set to "%s"`, s)
+	if !running {
+		seriesName = s
+		log.Debug().Msgf(`Series name set to "%s"`, s)
+	} else {
+		log.Error().Msgf("Cannot change series name while sniffing")
+	}
 }
 
 // GetPeriod returns the current duration between two stat computations
@@ -400,12 +441,14 @@ func GetPeriod() time.Duration {
 
 // GetThresholdOutputFile returns the file where the computed thresholds will be logged
 func GetThresholdOutputFile() string {
-	return thresholdOutputFile
+	// return thresholdOutputFile
+	return filepath.Join(outputDir, fmt.Sprintf(thresholdFileNameFormat, seriesName))
 }
 
 // GetRawDataOutputFile returns the file where the raw statistics will be logged
 func GetRawDataOutputFile() string {
-	return rawDataOutputFile
+	// return rawDataOutputFile
+	return filepath.Join(outputDir, fmt.Sprintf(rawDataFileNameFormat, seriesName))
 }
 
 // GetLoadedStats returns the slice of the names of the loaded statistics
