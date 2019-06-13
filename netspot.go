@@ -6,7 +6,7 @@
 package main
 
 // #cgo CFLAGS: -I/usr/include/x86_64-linux-gnu/
-import "C"
+// import "C"
 
 import (
 	"errors"
@@ -123,13 +123,11 @@ func (ns *Netspot) SetPeriod(duration string, i *int) error {
 }
 
 // SetOutputDir changes the directory of the netspot output
-// func (ns *Netspot) SetOutputDir(dir string, i *int) error {
-// 	*i = miner.SetDevice(device)
-// 	if *i == 1 {
-// 		return fmt.Errorf("Unknown device (%s)", device)
-// 	}
-// 	return nil
-// }
+func (ns *Netspot) SetOutputDir(dir string, i *int) error {
+	analyzer.SetOutputDir(dir)
+	*i = 0
+	return nil
+}
 
 // AvailableInterface returns a slice of the interfaces which can be sniffed
 func (ns *Netspot) AvailableInterface(none *int, deviceList *[]string) error {

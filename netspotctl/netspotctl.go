@@ -435,6 +435,16 @@ func execSetPeriod(duration string) {
 	}
 }
 
+func execSetOutputDir(dir string) {
+	var i int
+	err := call("Netspot.SetOutputDir", dir, &i)
+	if err == nil {
+		printfOK("Output directory set to %s", dir)
+	} else {
+		printERROR(err.Error())
+	}
+}
+
 func execIface() {
 	interfaces = availableInterfaces()
 	for _, iface := range interfaces {
@@ -442,7 +452,7 @@ func execIface() {
 	}
 }
 
-func execValues() {
+func execLive() {
 	RunUI2()
 }
 
@@ -462,8 +472,8 @@ func executor(s string) {
 		execStart()
 	case "stop":
 		execStop()
-	case "values":
-		execValues()
+	case "live":
+		execLive()
 	case "connect":
 		if len(words) > 1 {
 			execParseConnect(words[1:])
@@ -506,6 +516,8 @@ func executor(s string) {
 				}
 			case "period":
 				execSetPeriod(words[2])
+			case "directory":
+				execSetOutputDir(words[2])
 			default:
 				printERROR("Option not available")
 			}
@@ -534,7 +546,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 			{Text: "start", Description: "Start monitoring"},
 			{Text: "stop", Description: "Stop monitoring"},
 			{Text: "unload", Description: "Unload a statistics"},
-			{Text: "values", Description: "Print the current values of the statistics"},
+			{Text: "live", Description: "Print the current values of the statistics"},
 		}
 	case 2:
 		switch words[0] {
@@ -557,7 +569,8 @@ func completer(d prompt.Document) []prompt.Suggest {
 			s = []prompt.Suggest{
 				{Text: "device", Description: "Set the device to listen (file of pcap)"},
 				{Text: "promisc", Description: "Set the promiscuous mode"},
-				{Text: "period", Description: "Set the period for stat computation"}}
+				{Text: "period", Description: "Set the period for stat computation"},
+				{Text: "directory", Description: "Set the output directory"}}
 		case "iface":
 			for _, r := range interfaces {
 				s = append(s, prompt.Suggest{Text: r})

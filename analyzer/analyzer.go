@@ -298,7 +298,7 @@ func RawStatus() map[string]string {
 	}
 
 	if logDataToFile {
-		m["file logging"] = fmt.Sprintf("%v (%s)", logDataToFile, viper.GetString("analyzer.datalog.output_dir"))
+		m["file logging"] = fmt.Sprintf("%v (%s)", logDataToFile, outputDir)
 	} else {
 		m["file logging"] = "no"
 	}
@@ -406,7 +406,7 @@ func SetOutputDir(dir string) {
 			// it's a directory
 			outputDir = absPath
 		default:
-			// it's not a directory
+			// it's not a directory (but a file)
 			outputDir = filepath.Dir(absPath)
 		}
 	} else {
