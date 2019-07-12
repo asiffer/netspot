@@ -50,6 +50,7 @@ var (
 	anomalyLogger       zerolog.Logger // log anomalies
 	rawDataOutputFile   string         // the path of the file containing data
 	thresholdOutputFile string         // the path of the file containing thresholds
+	anomalyOutputFile   string         // the path of the file containing the anomalies
 	seriesName          string         // the name of the influxdb series
 	outputDir           string         // directory where raw data are stored (2 files)
 )
@@ -57,6 +58,7 @@ var (
 const (
 	rawDataFileNameFormat   = "netspot_raw_%s.json"       // format to name the file where data are logged
 	thresholdFileNameFormat = "netspot_threshold_%s.json" // format to name the file where thresholds are logged
+	anomalyFileNameFormat   = "netspot_anomaly_%s.json"   // format to name the file where anomalies are logged
 )
 
 var err error
@@ -255,24 +257,6 @@ func unload(id int) (int, error) {
 	return 0, nil
 }
 
-// checkSpotOutput analyze the output provided by (D)SPOT.
-// id is the stat identifier in statMap
-// val is the stat value
-// res is the (D)Spot output
-func checkSpotOutput(id int, val float64, res int) {
-	if res == 1 {
-		log.Warn().Str("Status", "UP_ALERT").
-			Str("Stat", statMap[id].Name()).
-			Float64("Value", val).Int("Spot", res).
-			Float64("Probability", statMap[id].DSpot().UpProbability(val)).Msg("Alarm!")
-	} else if res == -1 {
-		log.Warn().Str("Status", "DOWN_ALERT").
-			Str("Stat", statMap[id].Name()).
-			Float64("Value", val).Int("Spot", res).
-			Float64("Probability", statMap[id].DSpot().DownProbability(val)).Msg("Alarm!")
-	}
-}
-
 //------------------------------------------------------------------------------
 // EXPORTED FUNCTIONS
 //------------------------------------------------------------------------------
@@ -314,8 +298,8 @@ func InitDataLogging() {
 	autoSetSeriesName()
 
 	if logDataToFile {
+		// Data logger
 		p := filepath.Join(outputDir, fmt.Sprintf(rawDataFileNameFormat, seriesName))
-		// p := path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_raw_"+seriesName+".json")
 		f, err := os.Create(p)
 		if err != nil {
 			log.Fatal().Msgf("Error while creating raw data log file (%s)", p)
@@ -323,7 +307,7 @@ func InitDataLogging() {
 		rawDataLogger = zerolog.New(f).With().Logger()
 		rawDataOutputFile = f.Name()
 
-		// p = path.Join(viper.GetString("analyzer.datalog.output_dir"), "netspot_threshold_"+seriesName+".json")
+		// Thresholds logger
 		p = filepath.Join(outputDir, fmt.Sprintf(thresholdFileNameFormat, seriesName))
 		f, err = os.Create(p)
 		if err != nil {
@@ -331,9 +315,19 @@ func InitDataLogging() {
 		}
 		thresholdLogger = zerolog.New(f).With().Logger()
 		thresholdOutputFile = f.Name()
+
+		// Anomalies logger
+		p = filepath.Join(outputDir, fmt.Sprintf(anomalyFileNameFormat, seriesName))
+		f, err = os.Create(p)
+		if err != nil {
+			log.Fatal().Msgf("Error while creating anomaly log file (%s)", p)
+		}
+		anomalyLogger = zerolog.New(f).With().Logger()
+		anomalyOutputFile = f.Name()
 	} else {
 		rawDataLogger = zerolog.New(nil).With().Logger()
 		thresholdLogger = zerolog.New(nil).With().Logger()
+		anomalyLogger = zerolog.New(nil).With().Logger()
 	}
 }
 
@@ -451,6 +445,11 @@ func GetRawDataOutputFile() string {
 	return filepath.Join(outputDir, fmt.Sprintf(rawDataFileNameFormat, seriesName))
 }
 
+// GetAnomalyOutputFile returns the file where the anomalies will be logged
+func GetAnomalyOutputFile() string {
+	return filepath.Join(outputDir, fmt.Sprintf(anomalyFileNameFormat, seriesName))
+}
+
 // GetLoadedStats returns the slice of the names of the loaded statistics
 func GetLoadedStats() []string {
 	list := make([]string, 0)
@@ -539,14 +538,9 @@ func StatValues() map[string]float64 {
 // StartStats starts the analysis
 // func StartStats() error {
 func StartStats() error {
-	// if miner.IsSniffing() {
 	log.Info().Msg("Starting stats computation")
 	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
 	defaultEventChannel, defaultDataChannel = GoRun()
-	// } else {
-	// 	log.Error().Msg("The counters have not been launched")
-	// 	return errors.New("The counters have not been launched")
-	// }
 	return nil
 }
 
@@ -556,21 +550,40 @@ func StartStatsAndWait() error {
 	log.Info().Msg("Starting stats computation")
 	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
 	Run()
-	// if miner.IsSniffing() {
-	// 	log.Info().Msg("Starting stats computation")
-	// 	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-	// 	events = make(chan int)
-	// 	Run()
-	// } else {
-	// 	log.Error().Msg("The counters have not been launched")
-	// 	return errors.New("The counters have not been launched")
-	// }
 	return nil
 }
 
 //------------------------------------------------------------------------------
 // PARAMOUNT BUT UNEXPORTED FUNCTIONS
 //------------------------------------------------------------------------------
+
+// checkSpotOutput analyze the output provided by (D)SPOT.
+// id is the stat identifier in statMap
+// val is the stat value
+// res is the (D)Spot output
+// t is the current time given by the miner (miner.SourceTime)
+func checkSpotOutput(id int, val float64, res int, t time.Time) {
+	if res == 1 {
+		alog := anomalyLogger.Warn().Time("time", t)
+		alog.Str("Status", "UP_ALERT").Str("Stat", statMap[id].Name()).
+			Float64("Value", val).Int("Spot", res).
+			Float64("Probability", statMap[id].DSpot().UpProbability(val)).Msg("Alarm!")
+		// log.Warn().Str("Status", "UP_ALERT").
+		// 	Str("Stat", statMap[id].Name()).
+		// 	Float64("Value", val).Int("Spot", res).
+		// 	Float64("Probability", statMap[id].DSpot().UpProbability(val)).Msg("Alarm!")
+	} else if res == -1 {
+		alog := anomalyLogger.Warn().Time("time", t)
+		alog.Str("Status", "DOWN_ALERT").
+			Str("Stat", statMap[id].Name()).
+			Float64("Value", val).Int("Spot", res).
+			Float64("Probability", statMap[id].DSpot().DownProbability(val)).Msg("Alarm!")
+		// log.Warn().Str("Status", "DOWN_ALERT").
+		// 	Str("Stat", statMap[id].Name()).
+		// 	Float64("Value", val).Int("Spot", res).
+		// 	Float64("Probability", statMap[id].DSpot().DownProbability(val)).Msg("Alarm!")
+	}
+}
 
 // analyze loops over the computed stats and send it to DSpot instances
 // The stat values and the computed thresholds are logged (file and/or influxdb)
@@ -613,7 +626,7 @@ func analyze() {
 		// feed DSpot
 		res = stat.Update(val)
 		// check alert
-		checkSpotOutput(id, val, res)
+		checkSpotOutput(id, val, res, curtime)
 
 		// log data
 		dlog.Float64(name, val)
@@ -637,6 +650,7 @@ func Run() {
 	log.Info().Msg("Start running")
 	log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
 	log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
+	log.Info().Msgf("Anomalies are logged to %s", anomalyOutputFile)
 
 	// Define the clock
 	// if miner.IsDeviceInterface() {
@@ -698,6 +712,7 @@ func GoRun() (chan int, chan map[string]float64) {
 		log.Info().Msg("Start running")
 		log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
 		log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
+		log.Info().Msgf("Anomalies are logged to %s", anomalyOutputFile)
 
 		// set the tick period to the miner
 		miner.SetTickPeriod(period)

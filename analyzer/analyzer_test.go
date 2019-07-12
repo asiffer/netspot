@@ -228,7 +228,7 @@ func TestLivePcapHuge(t *testing.T) {
 	// huge
 	// pcapFile2 : 900s
 	miner.SetDevice(pcapFile2)
-	period = 200 * time.Millisecond
+	period = 50 * time.Millisecond
 
 	miner.SetTickPeriod(period)
 	// miner.StartSniffing()
@@ -237,6 +237,6 @@ func TestLivePcapHuge(t *testing.T) {
 	// }
 
 	StartStats()
-	time.Sleep(5 * time.Second)
+	time.Sleep(25 * time.Second)
 	StopStats()
 }
