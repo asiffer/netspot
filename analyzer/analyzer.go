@@ -47,6 +47,7 @@ var (
 	logDataToInfluxDB   bool           // if data/thresholds are logged to influxdb
 	rawDataLogger       zerolog.Logger // log raw statistics
 	thresholdLogger     zerolog.Logger // log raw statistics thresholds
+	anomalyLogger       zerolog.Logger // log anomalies
 	rawDataOutputFile   string         // the path of the file containing data
 	thresholdOutputFile string         // the path of the file containing thresholds
 	seriesName          string         // the name of the influxdb series
@@ -354,7 +355,6 @@ func Zero() error {
 		statID = 0
 		statValues = make(map[string]float64)
 		counterValues = make(map[string]uint64)
-		// stopChan = make(chan int)
 		defaultEventChannel = make(chan int)
 		running = false
 
