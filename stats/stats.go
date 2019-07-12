@@ -85,6 +85,114 @@ func (m *BaseStat) SetDSpotConfig(sc gospot.DSpotConfig) {
 	m.dspot = gospot.NewDSpotFromConfig(&sc)
 }
 
+// changeConfigFromMap changes an attribute of the DSpot configuration
+func (m *BaseStat) changeConfigFromMap(attributes map[string]interface{}) error {
+	log.Debug().Msgf("(%s) Changing DSpot config", m.name)
+	initialConf := m.dspot.Config()
+	var ok bool
+	var integerValue int
+	var floatValue float64
+	var boolValue bool
+
+	// message errors
+	var msg string
+	//"The following keys have created some errors: "
+
+	for key, value := range attributes {
+		ok = true
+
+		switch key {
+		case "depth", "Depth":
+			integerValue, ok = value.(int)
+			if !ok {
+				log.Error().Msgf("Error while changing depth to %v", value)
+			} else {
+				log.Debug().Msgf("Changing depth to %d", integerValue)
+				initialConf.Depth = integerValue
+			}
+		case "q", "Q":
+			floatValue, ok = value.(float64)
+			if !ok {
+				log.Error().Msgf("Error while changing q to %v", value)
+			} else {
+				log.Debug().Msgf("Changing q to %f", floatValue)
+				initialConf.Q = floatValue
+			}
+		case "n_init", "Ninit":
+			integerValue, ok = value.(int)
+			if !ok {
+				log.Error().Msgf("Error while changing n_init to %v", value)
+			} else {
+				log.Debug().Msgf("Changing n_init to %d", integerValue)
+				initialConf.Ninit = integerValue
+			}
+		case "level", "Level":
+			floatValue, ok = value.(float64)
+			if !ok {
+				log.Error().Msgf("Error while changing level to %v", value)
+			} else {
+				log.Debug().Msgf("Changing level to %f", floatValue)
+				initialConf.Level = floatValue
+			}
+		case "up", "Up":
+			boolValue, ok = value.(bool)
+			if !ok {
+				log.Error().Msgf("Error while changing up to %v", value)
+			} else {
+				log.Debug().Msgf("Changing up to %t", boolValue)
+				initialConf.Up = boolValue
+			}
+		case "down", "Down":
+			boolValue, ok = value.(bool)
+			if !ok {
+				log.Error().Msgf("Error while changing down to %v", value)
+			} else {
+				log.Debug().Msgf("Changing down to %t", boolValue)
+				initialConf.Down = boolValue
+			}
+		case "alert", "Alert":
+			boolValue, ok = value.(bool)
+			if !ok {
+				log.Error().Msgf("Error while changing alert to %v", value)
+			} else {
+				log.Debug().Msgf("Changing alert to %t", boolValue)
+				initialConf.Alert = boolValue
+			}
+		case "bounded", "Bounded":
+			boolValue, ok = value.(bool)
+			if !ok {
+				log.Error().Msgf("Error while changing bounded to %v", value)
+			} else {
+				log.Debug().Msgf("Changing bounded to %t", boolValue)
+				initialConf.Bounded = boolValue
+			}
+		case "max_excess", "MaxExcess":
+			integerValue, ok = value.(int)
+			if !ok {
+				log.Error().Msgf("Error while changing max_excess to %v", value)
+			} else {
+				log.Debug().Msgf("Changing max_excess to %d", integerValue)
+				initialConf.MaxExcess = integerValue
+			}
+		default:
+			ok = false
+		}
+
+		if !ok {
+			msg += fmt.Sprintf("%s (%v) ", key, value)
+		}
+	}
+
+	// setting the new config
+	m.dspot = gospot.NewDSpotFromConfig(&initialConf)
+
+	if len(msg) > 0 {
+		// return errors
+		return fmt.Errorf("The following keys have created some errors: %s", msg)
+	}
+	return nil
+}
+
 // setCustomConfig builds a DSpotConfig instance according to the
 // settings written in the config file
 func setCustomConfig(statname string) gospot.DSpotConfig {
@@ -167,6 +275,26 @@ func StatFromName(statname string) (StatInterface, error) {
 	conf := setCustomConfig(statname)
 	s := gospot.NewDSpotFromConfig(&conf)
 	bs := BaseStat{name: statname, dspot: s}
+	statConstructor, exists := AvailableStats[statname]
+	if exists {
+		return statConstructor(bs), nil
+	}
+	log.Error().Msg("Unknown statistics")
+	return nil, errors.New("Unknown statistics")
+}
+
+// StatFromNameWithCustomConfig returns the StatInterface related to the
+// given name. It returns an error when the desired statistic does
+// not exist. Moreover you can pass a map giving the specific values
+// to the DSpot instance which monitors the stat.
+func StatFromNameWithCustomConfig(statname string, config map[string]interface{}) (StatInterface, error) {
+	// set up the default conf (of those in the config file)
+	conf := setCustomConfig(statname)
+	s := gospot.NewDSpotFromConfig(&conf)
+	bs := BaseStat{name: statname, dspot: s}
+	// update the conf according to the passed parameters
+	bs.changeConfigFromMap(config)
+	// build the stat
 	statConstructor, exists := AvailableStats[statname]
 	if exists {
 		return statConstructor(bs), nil

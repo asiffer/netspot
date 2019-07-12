@@ -3,7 +3,6 @@
 package stats
 
 import (
-	"math"
 	"testing"
 )
 
@@ -47,10 +46,17 @@ func TestRSYN(t *testing.T) {
 
 	checkTitle("Checking computation 3/3...")
 	ctrvalues = []uint64{7, 0}
-	if !math.IsNaN(stat.Compute(ctrvalues)) {
+	// if !math.IsNaN(stat.Compute(ctrvalues)) {
+	// 	testERROR()
+	// 	t.Errorf("Expected NaN, got %f", stat.Compute(ctrvalues))
+	// } else {
+	// 	testOK()
+	// }
+	if stat.Compute(ctrvalues) != 0. {
 		testERROR()
-		t.Errorf("Expected NaN, got %f", stat.Compute(ctrvalues))
+		t.Errorf("Expected O., got %f", stat.Compute(ctrvalues))
 	} else {
 		testOK()
 	}
+
 }

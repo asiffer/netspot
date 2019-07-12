@@ -253,7 +253,7 @@ func TestBaseStat(t *testing.T) {
 	conf := setCustomConfig("R_SYN")
 	bs := &BaseStat{
 		name:  "Test",
-		dspot: gospot.NewDSpotFromConfig(conf),
+		dspot: gospot.NewDSpotFromConfig(&conf),
 	}
 
 	checkTitle("Checking name...")
@@ -323,5 +323,55 @@ func TestGetStat(t *testing.T) {
 		t.Errorf("R_ACK must be already registered")
 	} else {
 		testOK()
+	}
+}
+
+func TestChangeDSpotConfig(t *testing.T) {
+	title("Testing DSpot attributes change")
+	Ninit := 2000
+	MaxExcess := 600
+	Up := false
+	Down := true
+	Alert := false
+	Bounded := false
+	Level := 0.9999
+	Q := 2.3e-8
+
+	extra := map[string]interface{}{
+		"q":          Q,
+		"n_init":     Ninit,
+		"level":      Level,
+		"Up":         Up,
+		"Down":       Down,
+		"Alert":      Alert,
+		"bounded":    Bounded,
+		"max_excess": MaxExcess,
+	}
+	rack, _ := StatFromNameWithCustomConfig("R_ACK", extra)
+
+	conf := rack.DSpot().Config()
+	if conf.Ninit != Ninit {
+		t.Errorf("Expected Ninit equal to %d, got %d", Ninit, conf.Ninit)
+	}
+	if conf.MaxExcess != MaxExcess {
+		t.Errorf("Expected MaxExcess equal to %d, got %d", MaxExcess, conf.MaxExcess)
+	}
+	if conf.Level != Level {
+		t.Errorf("Expected Level equal to %f, got %f", Level, conf.Level)
+	}
+	if conf.Alert != Alert {
+		t.Errorf("Expected Alerts equal to %t, got %t", Alert, conf.Alert)
+	}
+	if conf.Up != Up {
+		t.Errorf("Expected Up equal to %t, got %t", Up, conf.Up)
+	}
+	if conf.Down != Down {
+		t.Errorf("Expected Down equal to %t, got %t", Down, conf.Down)
+	}
+	if conf.Bounded != Bounded {
+		t.Errorf("Expected Bounded equal to %t, got %t", Bounded, conf.Bounded)
+	}
+	if conf.Q != Q {
+		t.Errorf("Expected Q equal to %f, got %f", Q, conf.Q)
 	}
 }
