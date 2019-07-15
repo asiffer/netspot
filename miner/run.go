@@ -22,6 +22,7 @@ const (
 	// counter values (index of counters start
 	// from 0)
 	perfIndex int = -1
+	timeIndex int = -2
 )
 
 //----------------------------------------------------------------------------//
@@ -38,48 +39,24 @@ func GetSourceTime() int64 {
 	return SourceTime.UnixNano()
 }
 
-// GetNbParsedPkts returns the number of current parsed packets since
-// the initialization
-// func GetNbParsedPkts() uint64 {
-// return nbParsedPkts
-// }
-
-// // StartSniffing starts to sniff the current device. It does nothing
-// // if the sniffing is in progress. This is a goroutine, so it returns
-// // once the sniffing has started.
-// func StartSniffing() {
-// 	if !sniffing {
-// 		log.Info().Msgf("Start sniffing %s", device)
-// 		log.Debug().Msg(fmt.Sprint("Loaded counters: ", GetLoadedCounters()))
-// 		events = make(chan uint8)
-// 		go Sniff()
-// 		for !sniffing {
-// 			// wait for sniffing
-// 		}
-// 	}
-
-// }
-
 // StartSniffing starts to sniff the current device. It does nothing
 // if the sniffing is in progress. This is a goroutine, so it returns
 // once the sniffing has started.
-func StartSniffing() (EventChannel, DataChannel, TimeChannel) {
+func StartSniffing() (EventChannel, DataChannel) {
 	if !sniffing {
 		log.Info().Msgf("Start sniffing %s", device)
 		log.Debug().Msg(fmt.Sprint("Loaded counters: ", GetLoadedCounters()))
-		// events = make(chan uint8)
-		ec, dc, tc := GoSniff()
+		ec, dc := GoSniff()
 		for !sniffing {
 			// wait for sniffing
 		}
 		// update the default channels
 		defaultEventChannel = ec
 		defaultDataChannel = dc
-		defaultTimeChannel = tc
-		return ec, dc, tc
+		return ec, dc
 	}
 	log.Debug().Msg("StartSniffing requested but already sniffing")
-	return defaultEventChannel, defaultDataChannel, defaultTimeChannel
+	return defaultEventChannel, defaultDataChannel
 }
 
 // StartSniffingAndWait sniff the current device but does not
@@ -96,59 +73,86 @@ func StartSniffingAndWait() {
 	log.Info().Msg("Sniffing stopped")
 }
 
-// SniffAndSend start sniffing and returns periodically
+// // SniffAndSend start sniffing and returns periodically
+// // counter values
+// func SniffAndSend(d time.Duration, reset bool, socket string) {
+// 	// connect to the socket
+// 	conn, err := net.Dial("unixgram", socket)
+// 	if err != nil {
+// 		log.Fatal().Msg(err.Error())
+// 	}
+// 	defer conn.Close()
+// 	// initialize the data encoder. It will directly
+// 	// sned the data to the socket
+// 	encoder := gob.NewEncoder(conn)
+// 	// init the ticker
+// 	internalTicker := time.Tick(d)
+// 	// start the sniffing process (get the channels)
+// 	ec, dc, _ := GoSniff()
+
+// 	// loop
+// 	for {
+// 		select {
+// 		// wait for a tick event to send a snapshot
+// 		case <-internalTicker:
+// 			log.Debug().Msg("Tick")
+// 			if !sniffing {
+// 				// trigger the snapshot, and get data
+// 				m := SnapshotID(reset, ec, dc)
+// 				log.Debug().Msgf("%v", m)
+// 				// encode and send data
+// 				encoder.Encode(m)
+// 				// close the connection
+// 				log.Warn().Msg("Sending EOF")
+// 				conn.Write([]byte{'E', 'O', 'F'})
+// 				return
+// 			}
+// 			// trigger the snapshot, and get data
+// 			m := SnapshotID(reset, ec, dc)
+// 			log.Debug().Msgf("%v", m)
+// 			// encode and send data
+// 			encoder.Encode(m)
+// 		}
+// 	}
+// }
+
+// SniffAndSendUnix start sniffing and send periodically
 // counter values
-func SniffAndSend(d time.Duration, reset bool, socket string) {
-	// connect to the socket
+func SniffAndSendUnix(d time.Duration, reset bool, socket string) {
+	// connect to the UNIX socket
 	conn, err := net.Dial("unixgram", socket)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
 	defer conn.Close()
 	// initialize the data encoder. It will directly
-	// sned the data to the socket
+	// send the data to the UNIX socket
 	encoder := gob.NewEncoder(conn)
-	// init the ticker
-	internalTicker := time.Tick(d)
 	// start the sniffing process (get the channels)
-	ec, dc, _ := GoSniff()
+	_, dc := GoSniffAndYieldChannel(d)
 
 	// loop
 	for {
 		select {
 		// wait for a tick event to send a snapshot
-		case <-internalTicker:
-			log.Debug().Msg("Tick")
-			if !sniffing {
-				// trigger the snapshot, and get data
-				m := SnapshotID(reset, ec, dc)
+		case m := <-dc:
+			// check whether data have been sent
+			// nil means that the connection will be closed
+			if m != nil {
 				log.Debug().Msgf("%v", m)
 				// encode and send data
 				encoder.Encode(m)
+			} else {
 				// close the connection
 				log.Warn().Msg("Sending EOF")
 				conn.Write([]byte{'E', 'O', 'F'})
 				return
 			}
-			// trigger the snapshot, and get data
-			m := SnapshotID(reset, ec, dc)
-			log.Debug().Msgf("%v", m)
-			// encode and send data
-			encoder.Encode(m)
 		}
 	}
 }
 
 // StopSniffing stops to sniff the device
-// func StopSniffing(ec EventChannel) {
-// 	if sniffing {
-// 		if ec != nil {
-// 			ec <- STOP
-// 		} else {
-// 			defaultEventChannel <- STOP
-// 		}
-// 	}
-// }
 func StopSniffing() {
 	if sniffing {
 		defaultEventChannel <- STOP
@@ -213,21 +217,6 @@ func getValues(pool *sync.WaitGroup) map[int]uint64 {
 	return m
 }
 
-// func getValuesAndReset(pool *sync.WaitGroup) {
-// 	if pool != nil {
-// 		pool.Wait()
-// 	}
-// 	valmux.Lock()
-// 	for i := range counterMap {
-// 		if v, err := GetCounterValueAndReset(i); err == nil {
-// 			counterValues[i] = v
-// 		} else {
-// 			log.Error().Msg(err.Error())
-// 		}
-// 	}
-// 	valmux.Unlock()
-// }
-
 func getValuesAndReset(pool *sync.WaitGroup) map[int]uint64 {
 	m := make(map[int]uint64)
 	if pool != nil {
@@ -265,17 +254,17 @@ func GetNbParsedPkts() uint64 {
 // Snapshot retrieve the current value of the counters. Their
 // values are then put in the counterValues container. If nil is
 // passed for a channel, then the default channel is used.
-func Snapshot(reset bool, eChannel chan uint8, dChannel chan map[int]uint64) map[string]uint64 {
-	m := SnapshotID(reset, eChannel, dChannel)
-	s := make(map[string]uint64)
-	for i, v := range m {
-		// 0 is the time
-		if i > 0 {
-			s[counterMap[i].Name()] = v
-		}
-	}
-	return s
-}
+// func Snapshot(reset bool, eChannel EventChannel, dChannel DataChannel) map[string]uint64 {
+// 	m := SnapshotID(reset, eChannel, dChannel)
+// 	s := make(map[string]uint64)
+// 	for i, v := range m {
+// 		// 0 is the time
+// 		if i > 0 {
+// 			s[counterMap[i].Name()] = v
+// 		}
+// 	}
+// 	return s
+// }
 
 // // Snapshot retrieve the current value of the counters. Their
 // // values are then put in the counterValues container.
@@ -328,33 +317,33 @@ func Snapshot(reset bool, eChannel chan uint8, dChannel chan map[int]uint64) map
 // SnapshotID retrieve the current value of the counters. Their
 // values are then put in the counterValues container. If nil is
 // passed for a channel, then the default channel is used.
-func SnapshotID(reset bool, eChannel chan uint8, dChannel chan map[int]uint64) map[int]uint64 {
-	// if the channel is not given, we use the default channel
-	if dChannel == nil {
-		dChannel = defaultDataChannel
-	}
-	if eChannel == nil {
-		eChannel = defaultEventChannel
-	}
-	var e uint8
-	// send the right signal to send
-	if reset {
-		e = FLUSH
-	} else {
-		e = GET
-	}
+// func SnapshotID(reset bool, eChannel EventChannel, dChannel DataChannel) map[int]uint64 {
+// 	// if the channel is not given, we use the default channel
+// 	if dChannel == nil {
+// 		dChannel = defaultDataChannel
+// 	}
+// 	if eChannel == nil {
+// 		eChannel = defaultEventChannel
+// 	}
+// 	var e uint8
+// 	// send the right signal to send
+// 	if reset {
+// 		e = FLUSH
+// 	} else {
+// 		e = GET
+// 	}
 
-	if sniffing {
-		log.Debug().Msgf("Sending event %v", e)
-		eChannel <- e
-		return <-dChannel
-	} else if reset {
-		return getValuesAndReset(nil)
-	} else {
-		return getValues(nil)
-	}
+// 	if sniffing {
+// 		log.Debug().Str("Function", "SnapshotID").Msgf("Sending event %v", e)
+// 		eChannel <- e
+// 		return <-dChannel
+// 	} else if reset {
+// 		return getValuesAndReset(nil)
+// 	} else {
+// 		return getValues(nil)
+// 	}
 
-}
+// }
 
 // Tick returns a channel sending frequent tick (at each duration)
 // func Tick(d time.Duration) chan time.Time {
@@ -424,7 +413,12 @@ func Sniff() {
 				// perf aims to send the current number of parsed
 				// packets
 				log.Debug().Msg("Receiving PERF")
-				defaultDataChannel <- map[int]uint64{perfIndex: nbParsedPkts}
+				defaultDataChannel <- map[int]uint64{perfIndex: nbParsedPkts,
+					timeIndex: uint64(SourceTime.UnixNano())}
+			case TIME:
+				// time aims to send the current source time
+				log.Debug().Msg("Receiving TIME")
+				defaultDataChannel <- map[int]uint64{timeIndex: uint64(SourceTime.UnixNano())}
 			default:
 				log.Debug().Msgf("Receiving unknown event (%v)", e)
 			}
@@ -432,7 +426,8 @@ func Sniff() {
 		case packet, ok := <-packetSource.Packets():
 			// check whether it is the last packet or not
 			if ok {
-				updateTime(packet.Metadata().Timestamp, sendTicks, nil)
+				// update time
+				SourceTime = packet.Metadata().Timestamp
 				// add the packet parsing to the goroutine pool
 				goroutinePool.Add(1)
 				// dispatch the packet
@@ -454,13 +449,130 @@ func Sniff() {
 
 // GoSniff sniffs in a detached goroutine. It returns the event channel to
 // comunicate with it.
-func GoSniff() (EventChannel, DataChannel, TimeChannel) {
+// func GoSniff() (EventChannel, DataChannel, TimeChannel) {
+// 	// init the event channel
+// 	eChannel := make(EventChannel, 2)
+// 	// init the data channel (counters)
+// 	dChannel := make(DataChannel)
+// 	// init the time channel (send ticks)
+// 	tChannel := make(TimeChannel)
+
+// 	go func() {
+// 		// Open the handler according to the source (interface or file)
+// 		if iface {
+// 			handle, err = pcap.OpenLive(device,
+// 				snapshotLen,
+// 				promiscuous,
+// 				pcap.BlockForever)
+// 		} else {
+// 			handle, err = pcap.OpenOffline(device)
+// 		}
+// 		if err != nil {
+// 			log.Error().Msg(fmt.Sprintf("Error while opening device (%s)", err))
+// 		}
+// 		defer handle.Close()
+
+// 		// reinit the number of parse packets
+// 		nbParsedPkts = 0
+// 		// init the packet source from the handler
+// 		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+// 		// Start all the counters (if they are not running)
+// 		startAllCounters()
+// 		// now we are sniffing!
+// 		sniffing = true
+// 		// pool of goroutines (for every packets)
+// 		var goroutinePool sync.WaitGroup
+// 		// number of ticks
+// 		nt := 0
+
+// 		// loop over the incoming packets
+// 		for {
+// 			select {
+// 			// events
+// 			case e, _ := <-eChannel:
+// 				log.Debug().
+// 					Str("Function", "GoSniff").
+// 					Int("Event", len(eChannel)).
+// 					Int("Data", len(dChannel)).
+// 					Int("Time", len(tChannel)).
+// 					Msg("")
+// 				switch e {
+// 				case STOP:
+// 					// the counters are stopped
+// 					log.Info().Msg("Stop sniffing")
+// 					release(&goroutinePool, tChannel)
+// 					return
+// 				case GET:
+// 					// counter values are retrieved and sent
+// 					// to the channel.
+// 					log.Debug().Msg("Receiving GET")
+// 					dChannel <- getValues(&goroutinePool)
+// 				case FLUSH:
+// 					// counter values are retrieved and sent
+// 					// to the channel. The counters are also
+// 					// reset.
+// 					log.Debug().Msg("Receiving FLUSH")
+// 					dChannel <- getValuesAndReset(&goroutinePool)
+// 				case PERF:
+// 					// perf aims to send the current number of parsed
+// 					// packets
+// 					log.Debug().Msg("Receiving PERF")
+// 					defaultDataChannel <- map[int]uint64{perfIndex: nbParsedPkts}
+// 				default:
+// 					log.Debug().Msgf("Receiving unknown event (%v)", e)
+// 				}
+// 			// parse a packet
+// 			case packet, ok := <-packetSource.Packets():
+// 				// check whether it is the last packet or not
+// 				if ok {
+// 					SourceTime = packet.Metadata().Timestamp
+// 					// log.Debug().Msgf("Updating time (time: %s, send ticks: %v)", t, sendTicks)
+// 					if sendTicks {
+// 						if SourceTime.Sub(last) < 0 {
+// 							last = SourceTime
+// 						} else if SourceTime.Sub(last) > tickPeriod {
+// 							nt++
+// 							last = SourceTime
+// 							log.Debug().Str("Function", "GoSniff").Msg("Sending tick")
+// 							// tChannel <- packet.Metadata().Timestamp
+// 							// eChannel <- FLUSH
+// 							// Perform a FLUSH
+// 							// dChannel <- getValuesAndReset(&goroutinePool)
+// 							remoteTimeChannel <- packet.Metadata().Timestamp
+// 							log.Debug().Str("Function", "GoSniff").Msg("Sending tick done")
+// 						}
+// 					}
+// 					// updateTime(packet.Metadata().Timestamp, sendTicks, tChannel)
+// 					// add the packet parsing to the goroutine pool
+// 					goroutinePool.Add(1)
+// 					// dispatch the packet
+// 					go dispatch(&goroutinePool, packet)
+// 					// increment the number of parsed packets
+// 					nbParsedPkts++
+// 				} else {
+// 					// if there is no packet anymore, we stop it
+// 					log.Info().Msgf("No packets to parse anymore (%d parsed packets)",
+// 						nbParsedPkts)
+// 					log.Info().Msgf("%d ticks sent", nt)
+// 					log.Info().Msg("Stop sniffing")
+// 					// release(&goroutinePool, tChannel)
+// 					release(&goroutinePool, remoteTimeChannel)
+// 					return
+// 				}
+// 			}
+
+// 		}
+// 	}()
+// 	return eChannel, dChannel, tChannel
+// }
+
+// GoSniff sniffs in a detached goroutine. It returns an event channel to
+// communicate with it and a data channel to retrieve the counter values
+func GoSniff() (EventChannel, DataChannel) {
 	// init the event channel
-	eChannel := make(EventChannel)
+	eventChannel := make(EventChannel, 2)
 	// init the data channel (counters)
-	dChannel := make(DataChannel)
-	// init the time channel (send ticks)
-	tChannel := make(TimeChannel)
+	dataChannel := make(DataChannel)
 
 	go func() {
 		// Open the handler according to the source (interface or file)
@@ -494,29 +606,39 @@ func GoSniff() (EventChannel, DataChannel, TimeChannel) {
 		for {
 			select {
 			// events
-			case e := <-eChannel:
+			case e, _ := <-eventChannel:
+				log.Debug().
+					Str("Function", "GoSniff").
+					Int("Event", len(eventChannel)).
+					Int("Data", len(dataChannel)).
+					Msg("")
 				switch e {
 				case STOP:
 					// the counters are stopped
 					log.Info().Msg("Stop sniffing")
-					release(&goroutinePool, tChannel)
+					release2(&goroutinePool, dataChannel)
 					return
 				case GET:
 					// counter values are retrieved and sent
 					// to the channel.
 					log.Debug().Msg("Receiving GET")
-					dChannel <- getValues(&goroutinePool)
+					dataChannel <- getValues(&goroutinePool)
 				case FLUSH:
 					// counter values are retrieved and sent
 					// to the channel. The counters are also
 					// reset.
 					log.Debug().Msg("Receiving FLUSH")
-					dChannel <- getValuesAndReset(&goroutinePool)
+					dataChannel <- getValuesAndReset(&goroutinePool)
 				case PERF:
 					// perf aims to send the current number of parsed
 					// packets
 					log.Debug().Msg("Receiving PERF")
-					defaultDataChannel <- map[int]uint64{perfIndex: nbParsedPkts}
+					dataChannel <- map[int]uint64{perfIndex: nbParsedPkts,
+						timeIndex: uint64(SourceTime.UnixNano())}
+				case TIME:
+					// time aims to send the current source time
+					log.Debug().Msg("Receiving TIME")
+					dataChannel <- map[int]uint64{timeIndex: uint64(SourceTime.UnixNano())}
 				default:
 					log.Debug().Msgf("Receiving unknown event (%v)", e)
 				}
@@ -524,19 +646,8 @@ func GoSniff() (EventChannel, DataChannel, TimeChannel) {
 			case packet, ok := <-packetSource.Packets():
 				// check whether it is the last packet or not
 				if ok {
+					// update time
 					SourceTime = packet.Metadata().Timestamp
-					// log.Debug().Msgf("Updating time (time: %s, send ticks: %v)", t, sendTicks)
-					if sendTicks {
-						if SourceTime.Sub(last) < 0 {
-							last = SourceTime
-						} else if SourceTime.Sub(last) > tickPeriod {
-							nt++
-							last = SourceTime
-							log.Debug().Msg("Sending tick")
-							tChannel <- packet.Metadata().Timestamp
-						}
-					}
-					// updateTime(packet.Metadata().Timestamp, sendTicks, tChannel)
 					// add the packet parsing to the goroutine pool
 					goroutinePool.Add(1)
 					// dispatch the packet
@@ -549,14 +660,132 @@ func GoSniff() (EventChannel, DataChannel, TimeChannel) {
 						nbParsedPkts)
 					log.Info().Msgf("%d ticks sent", nt)
 					log.Info().Msg("Stop sniffing")
-					release(&goroutinePool, tChannel)
+					release2(&goroutinePool, dataChannel)
 					return
 				}
 			}
 
 		}
 	}()
-	return eChannel, dChannel, tChannel
+	return eventChannel, dataChannel
+}
+
+// GoSniffAndYieldChannel sniffs in a detached goroutine. It returns an event channel to
+// communicate with it and a data channel where counter values are sent through according
+// to the sending period.
+func GoSniffAndYieldChannel(period time.Duration) (EventChannel, DataChannel) {
+	// init the event channel
+	eventChannel := make(EventChannel)
+	// init the data channel (counters)
+	dataChannel := make(DataChannel)
+
+	go func() {
+		// Open the handler according to the source (interface or file)
+		if iface {
+			handle, err = pcap.OpenLive(device,
+				snapshotLen,
+				promiscuous,
+				pcap.BlockForever)
+		} else {
+			handle, err = pcap.OpenOffline(device)
+		}
+		if err != nil {
+			log.Error().Msg(fmt.Sprintf("Error while opening device (%s)", err))
+		}
+		defer handle.Close()
+
+		// reinit the number of parse packets
+		nbParsedPkts = 0
+		// init the packet source from the handler
+		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+		// Start all the counters (if they are not running)
+		startAllCounters()
+		// now we are sniffing!
+		sniffing = true
+		// pool of goroutines (for every packets)
+		var goroutinePool sync.WaitGroup
+		// number of ticks
+		nt := 0
+		// last timestamp (initialized with a forward time)
+		lastTimestamp := time.Now().Add(1 * time.Hour)
+		// bool to send data to the channel
+		send := false
+
+		// loop over the incoming packets
+		for {
+			select {
+			// events
+			case e, _ := <-eventChannel:
+				log.Debug().
+					Str("Function", "GoSniff").
+					Int("Event", len(eventChannel)).
+					Int("Data", len(dataChannel)).
+					Msg("")
+				switch e {
+				case STOP:
+					// the counters are stopped
+					log.Info().Msg("Stop sniffing")
+					// close(eventChannel)
+					release2(&goroutinePool, dataChannel)
+					return
+				case GET:
+					// counter values are retrieved and sent
+					// to the channel.
+					log.Debug().Msg("Receiving GET")
+					dataChannel <- getValues(&goroutinePool)
+				case FLUSH:
+					// counter values are retrieved and sent
+					// to the channel. The counters are also
+					// reset.
+					log.Debug().Msg("Receiving FLUSH")
+					dataChannel <- getValuesAndReset(&goroutinePool)
+				case PERF:
+					// perf aims to send the current number of parsed
+					// packets
+					log.Debug().Msg("Receiving PERF")
+					dataChannel <- map[int]uint64{perfIndex: nbParsedPkts,
+						timeIndex: uint64(SourceTime.UnixNano())}
+				case TIME:
+					// time aims to send the current source time
+					log.Debug().Msg("Receiving TIME")
+					dataChannel <- map[int]uint64{timeIndex: uint64(SourceTime.UnixNano())}
+				default:
+					log.Debug().Msgf("Receiving unknown event (%v)", e)
+				}
+			// parse a packet
+			case packet, ok := <-packetSource.Packets():
+				// check whether it is the last packet or not
+				if ok {
+					// update time and check if data must be sent through the channel
+					if lastTimestamp, send = updateAndCheckTime(packet.Metadata().Timestamp,
+						lastTimestamp,
+						period); send {
+						// send data to the channel (like FLUSH)
+						log.Debug().Str("function", "GoSniffAndYieldChannel").
+							Msg("Send data")
+						dataChannel <- getValuesAndReset(&goroutinePool)
+					}
+					// add the packet parsing to the goroutine pool
+					goroutinePool.Add(1)
+					// dispatch the packet
+					go dispatch(&goroutinePool, packet)
+					// increment the number of parsed packets
+					nbParsedPkts++
+				} else {
+					// if there is no packet anymore, we stop it
+					log.Info().Msgf("No packets to parse anymore (%d parsed packets)",
+						nbParsedPkts)
+					log.Info().Msgf("%d ticks sent", nt)
+					log.Info().Msg("Stop sniffing")
+					close(eventChannel)
+					release2(&goroutinePool, dataChannel)
+					return
+				}
+			}
+
+		}
+	}()
+	return eventChannel, dataChannel
 }
 
 //----------------------------------------------------------------------------//
@@ -627,23 +856,42 @@ func dispatch(goroutinePool *sync.WaitGroup, pkt gopacket.Packet) {
 	goroutinePool.Done()
 }
 
-func updateTime(t time.Time, send bool, tc TimeChannel) {
-	SourceTime = t
-	// log.Debug().Msgf("Updating time (time: %s, send ticks: %v)", t, sendTicks)
-	if send {
-		if SourceTime.Sub(last) < 0 {
-			last = SourceTime
-		} else if SourceTime.Sub(last) > tickPeriod {
-			last = SourceTime
-			log.Debug().Msg("Sending tick")
-			if tc != nil {
-				tc <- SourceTime
-			} else {
-				defaultTimeChannel <- SourceTime
-			}
-		}
+// func updateTime(t time.Time, send bool, tc TimeChannel) {
+// 	SourceTime = t
+// 	// log.Debug().Msgf("Updating time (time: %s, send ticks: %v)", t, sendTicks)
+// 	if send {
+// 		if SourceTime.Sub(last) < 0 {
+// 			last = SourceTime
+// 		} else if SourceTime.Sub(last) > tickPeriod {
+// 			last = SourceTime
+// 			log.Debug().Msg("Sending tick")
+// 			if tc != nil {
+// 				tc <- SourceTime
+// 			} else {
+// 				defaultTimeChannel <- SourceTime
+// 			}
+// 		}
+// 	}
+// }
+
+func updateAndCheckTime(current time.Time, last time.Time, period time.Duration) (time.Time, bool) {
+	// update the time (from the packet timestamp)
+	SourceTime = current
+
+	// if the last time stamp has not been initialized
+	// returns the new last timestamp and the boolean value saying not
+	// to send data
+	if SourceTime.Sub(last) < 0 {
+		return SourceTime, false
 	}
 
+	// send data and update last
+	if SourceTime.Sub(last) > period {
+		return SourceTime, true
+	}
+
+	// do nothing
+	return last, false
 }
 
 // release changes the state of the package.
@@ -652,16 +900,28 @@ func release(goroutinePool *sync.WaitGroup, tc TimeChannel) {
 	stopAllCounters()
 	// getValuesAndReset(nil)
 	sniffing = false
-	if sendTicks {
-		// a last tick is send to trigger the analyzer tick event
-		if tc != nil {
-			tc <- time.Now()
-		} else {
-			defaultTimeChannel <- time.Now()
-		}
-		sendTicks = false
-	}
-	closeChannels()
+	// if sendTicks {
+	// 	// a last tick is send to trigger the analyzer tick event
+	// 	if tc != nil {
+	// 		tc <- time.Now()
+	// 	} else {
+	// 		defaultTimeChannel <- time.Now()
+	// 	}
+	// 	sendTicks = false
+	// }
+	// closeChannels()
+}
+
+// release2 changes the state of the package.
+func release2(goroutinePool *sync.WaitGroup, data DataChannel) {
+	goroutinePool.Wait()
+	stopAllCounters()
+	// getValuesAndReset(nil)
+	sniffing = false
+	// send a nil value to say that nothing else will be sent
+	data <- nil
+	close(data)
+	//closeChannels()
 }
 
 func startAllCounters() error {

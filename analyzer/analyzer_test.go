@@ -14,8 +14,9 @@ import (
 var (
 	HeaderWidth = 100
 	HeaderSym   = "-"
-	pcapFile1   = "/home/asr/Documents/Work/Python/netspot/test/resources/4SICS-GeekLounge-151020.pcap"
+	pcapFile1   = "/data/pcap/4SICS-GeekLounge-151020.pcap"
 	pcapFile2   = "/data/pcap/201111111400.dump"
+	pcapFile3   = "/data/kitsune/Mirai/Mirai_pcap.pcap"
 )
 
 func title(s string) {
@@ -178,7 +179,7 @@ func TestZero(t *testing.T) {
 	Zero()
 }
 func TestLivePcapSmall(t *testing.T) {
-	// DisableLogging()
+	SetLogging(0)
 	title("Testing on a small PCAP")
 	UnloadAll()
 	LoadFromName("R_SYN")
@@ -192,7 +193,8 @@ func TestLivePcapSmall(t *testing.T) {
 	logDataToFile = true
 	miner.SetDevice(pcapFile1)
 	period = 5 * time.Minute
-	miner.SetTickPeriod(period)
+	SetPeriod(period)
+	// miner.SetTickPeriod(period)
 	// huge
 	// pcapFile2 : 900s
 	// miner.SetDevice(pcapFile2)
@@ -211,13 +213,20 @@ func TestLivePcapSmall(t *testing.T) {
 
 func TestLivePcapHuge(t *testing.T) {
 	// DisableLogging()
-	title("Testing on a huge PCAP")
+	title("Testing on Huge PCAP")
 	UnloadAll()
-	LoadFromName("R_SYN")
-	LoadFromName("AVG_PKT_SIZE")
-	LoadFromName("R_ACK")
-	LoadFromName("R_DST_SRC")
-	LoadFromName("R_ICMP")
+	// LoadFromName("R_SYN")
+	// LoadFromName("AVG_PKT_SIZE")
+	// LoadFromName("R_ACK")
+	// LoadFromName("R_DST_SRC")
+	// LoadFromName("R_ICMP")
+
+	extra := map[string]interface{}{
+		"n_init": 800,
+		"level":  0.99,
+		"q":      1e-3,
+	}
+	LoadFromNameWithCustomConfig("AVG_PKT_SIZE", extra)
 
 	// small
 	// pcapFile1 : ~420min
@@ -228,15 +237,52 @@ func TestLivePcapHuge(t *testing.T) {
 	// huge
 	// pcapFile2 : 900s
 	miner.SetDevice(pcapFile2)
-	period = 50 * time.Millisecond
-
-	miner.SetTickPeriod(period)
+	period = 200 * time.Millisecond
+	SetPeriod(period)
+	// miner.SetTickPeriod(period)
 	// miner.StartSniffing()
 	// if !miner.IsSniffing() {
 	// 	t.Error("Error: no sniffing")
 	// }
 
 	StartStats()
-	time.Sleep(25 * time.Second)
+	time.Sleep(5 * time.Second)
 	StopStats()
+}
+
+func TestLivePcapMirai(t *testing.T) {
+	title("Testing on a Mirai PCAP")
+	SetLogging(0)
+	UnloadAll()
+
+	extra := map[string]interface{}{
+		"depth":  100,
+		"n_init": 1000,
+		"level":  0.98,
+		"q":      1e-3,
+		"down":   false,
+		"up":     true,
+	}
+	LoadFromNameWithCustomConfig("AVG_PKT_SIZE", extra)
+
+	// Mirai
+	// pcapFile3 : 7137s
+	miner.SetDevice(pcapFile3)
+	period = 2 * time.Second
+	SetPeriod(period)
+	logDataToFile = true
+	SetOutputDir("/tmp")
+
+	// miner.SetTickPeriod(period)
+	// miner.StartSniffing()
+	// if !miner.IsSniffing() {
+	// 	t.Error("Error: no sniffing")
+	// }
+
+	StartStatsAndWait()
+	// StartStats()
+	// fmt.Println("START")
+	// time.Sleep(10 * time.Second)
+	// fmt.Println("STOP")
+	// StopStats()
 }

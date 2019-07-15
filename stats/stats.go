@@ -293,7 +293,9 @@ func StatFromNameWithCustomConfig(statname string, config map[string]interface{}
 	s := gospot.NewDSpotFromConfig(&conf)
 	bs := BaseStat{name: statname, dspot: s}
 	// update the conf according to the passed parameters
-	bs.changeConfigFromMap(config)
+	if config != nil {
+		bs.changeConfigFromMap(config)
+	}
 	// build the stat
 	statConstructor, exists := AvailableStats[statname]
 	if exists {

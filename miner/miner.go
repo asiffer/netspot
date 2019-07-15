@@ -59,10 +59,11 @@ var (
 var (
 	// SourceTime is the clock given by the packet capture
 	SourceTime         time.Time
-	tickPeriod         time.Duration  // time between two data sending (if stat computation)
-	last               time.Time      // time of the last data sending
-	defaultTimeChannel chan time.Time // channel sending time (at a given frequency in practice)
-	sendTicks          bool           // tells if ticks have to be sent
+	tickPeriod         time.Duration // time between two data sending (if stat computation)
+	last               time.Time     // time of the last data sending
+	defaultTimeChannel TimeChannel   // channel sending time (at a given frequency in practice)
+	sendTicks          bool          // tells if ticks have to be sent
+	remoteTimeChannel  TimeChannel
 )
 
 // Packet sniffing/parsing
@@ -72,6 +73,7 @@ var (
 	err    error
 )
 
+// Events
 const (
 	// STOP stops a counter
 	STOP uint8 = 0
@@ -81,6 +83,8 @@ const (
 	FLUSH uint8 = 3
 	// PERF triggers a snapshot of the number of parsed packets
 	PERF uint8 = 9
+	// TIME triggers a snapshot of the current source time (nanoseconds)
+	TIME uint8 = 10
 )
 
 func init() {
@@ -104,15 +108,15 @@ func init() {
 func initChannels() {
 	defaultDataChannel = make(DataChannel)
 	defaultEventChannel = make(EventChannel)
-	defaultTimeChannel = make(TimeChannel)
+	// defaultTimeChannel = make(TimeChannel, CHANNELCAPACITY)
 }
 
 // closeChannels closes the default event channel and the
 // default data channel
 func closeChannels() {
-	close(defaultDataChannel)
-	close(defaultEventChannel)
-	close(defaultTimeChannel)
+	// close(defaultDataChannel)
+	// close(defaultEventChannel)
+	// close(defaultTimeChannel)
 }
 
 // Zero aims to zero the internal state of the miner. So it removes all

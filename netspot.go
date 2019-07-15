@@ -267,8 +267,8 @@ func (ns *Netspot) Stop(none *int, i *int) error {
 // InitConsoleWriter initializes the console outputing details about the
 // netspot events.
 func InitConsoleWriter() {
-	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMicro}
-
+	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: zerolog.TimeFormatUnix}
+	// output := zerolog.ConsoleWriter{Out: os.Stderr}
 	output.FormatLevel = func(i interface{}) string {
 		switch fmt.Sprintf("%s", i) {
 		case "warn":

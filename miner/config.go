@@ -111,8 +111,15 @@ func SetDevice(dev string) int {
 	return 0
 }
 
+// // SetTickPeriod defines time between two ticks
+// func SetTickPeriod(d time.Duration) {
+// 	tickPeriod = d
+// 	sendTicks = true
+// }
+
 // SetTickPeriod defines time between two ticks
-func SetTickPeriod(d time.Duration) {
-	tickPeriod = d
-	sendTicks = true
-}
+// func SetTickPeriod(d time.Duration, c TimeChannel) {
+// 	tickPeriod = d
+// 	sendTicks = true
+// 	remoteTimeChannel = c
+// }
