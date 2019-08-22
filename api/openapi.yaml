@@ -1,0 +1,348 @@
+#OpenAPI documentation of NetSpot REST API
+openapi: 3.0.2
+info:
+  title: 'NetSpot API'
+  description: 'A simple IDS with statistical learning'
+  contact:
+    name: 'maintainer'
+    email: 'alban.siffer@amossys.fr'
+  license:
+    name: 'GPLv3'
+    url: 'https://www.gnu.org/licenses/gpl-3.0.html'
+  version: '1.4'
+
+#Endpoints
+paths:
+  /api/config:
+    get:
+      summary: Return the current configuration
+      responses:
+        '200':
+          description: The configuration of NetSpot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+        '405':
+          description: The HTTP method is incorrect
+    post:
+      summary: Set a new configuration
+      requestBody:
+        description: A basic JSON
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Config'
+      responses:
+        '200':
+          description: The configuration of NetSpot is well updated
+        '400':
+          description: The JSON is invalid (bad format or bad key)
+        '405':
+          description: The HTTP method is incorrect (it must not occur)
+
+  /api/stats/loaded:
+    get:
+      summary: 'Return the statistics currently loaded'
+      responses:
+        '200':
+          description: 'The configuration of NetSpot'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loaded'
+        '405':
+          description: 'The HTTP method is incorrect'
+
+  /api/stats/available:
+    get:
+      summary: Return the available statistics
+      responses:
+        '200':
+          description: The available statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Available'
+        '405':
+          description: The HTTP method is incorrect
+
+  /api/stats/load:
+    post:
+      summary: Load new statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Load'
+      responses:
+        '200':
+          description: The statistics are well loaded
+        '400':
+          description: The JSON is invalid (bad format or bad key)
+        '405':
+          description: The HTTP method is incorrect
+
+  /api/stats/unload:
+    post:
+      summary: Unload already loaded statistics
+      requestBody:
+        # description: A basic JSON
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Unload'
+            examples:
+              array: 
+                value: 
+                  stats: ["R_SYN", "R_ICMP"]
+              single: 
+                value: 
+                  stats: "R_SYN"
+              
+      responses:
+        '200':
+          description: The statistics are well unloaded
+        '400':
+          description: The JSON is invalid (bad format or bad key)
+        '405':
+          description: The HTTP method is incorrect
+
+  /api/stats/values:
+    get:
+      summary: Return the current values of the loaded statistics
+      responses:
+        '200':
+          description: The statistics values
+          content:
+            application/json: # the keys are the stats
+              example:
+                "R_SYN": 0.74
+                "R_ACK": 0.012
+        '405':
+          description: The HTTP method is incorrect
+
+  /api/stats/status:
+    get:
+      summary: Return the DSPOT status of a single statistic
+      parameters:
+        - name: stat
+          in: query
+          schema:
+            type: string
+            example: "R_SYN"
+          required: true
+          description: Name of the statistic
+      responses:
+        '200':
+          description: The DSPOT status of the given statistic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '405':
+          description: The HTTP method is incorrect
+
+  /api/ifaces/available:
+    get:
+      summary: 'Return the available interfaces'
+      responses:
+        '200':
+          description: All the interfaces
+          content:
+            application/json: # the keys are the stats
+              example:
+                ifaces: ["eth0", "wlp2s0", "docker0"]
+
+  /api/run:
+    post:
+      summary: 'Perform a running action'
+      requestBody:
+        # description: A basic JSON
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Run'
+            examples:
+              array: 
+                value: 
+                  stats: ["R_SYN", "R_ICMP"]
+              single: 
+                value: 
+                  stats: "R_SYN"
+      responses:
+        '200':
+          description: The action related to the command is performed
+        '400':
+          description: The JSON is invalid (bad format or bad key)
+        '405':
+          description: The HTTP method is incorrect
+
+
+# the components contains mainly schemas presenting JSON formats
+components:
+  schemas:
+    Load:
+      title: Statistics to load
+      type: object
+      properties:
+        stats:
+          description: List of statistics to load
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: string
+      example:
+        stats: ["R_ACK", "R_SYN", "PERF"]
+
+    Loaded:
+      title: Statistics currently loaded
+      type: object
+      properties:
+        loaded:
+          description: List of the statistics currently loaded
+          type: array
+          items:
+            type: string
+      example:
+        loaded: ["R_ACK", "R_ICMP", "PERF"]
+
+    Available:
+      title: Available statistics
+      type: object
+      properties:
+        available:
+          description: List if available statistics
+          type: array
+          items:
+            type: string
+      example:
+        available: ["R_ACK", "R_ICMP", "PERF", "R_DST_SRC", "R_SYN", "AVG_PKT_SIZE"]
+          
+    Unload:
+      title: Statistics to unload (possibly all)
+      type: object
+      properties:
+        stats:
+          description: Statistics to unload
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: string
+          example: ["R_SYN", "R_ICMP"]
+
+    Config:
+      title: The configuration
+      type: object
+      properties:
+        device:
+          type: string
+          description: packet source (interface or capture file)
+          example: "any"
+        promiscuous: 
+          type: boolean
+          description: Promiscuous mode
+          example: true
+        period:
+          type: string
+          description: Time between two stats computations
+          example: "2s"
+        output:
+          type: string
+          description: Folder where the data/threshold/anomaly files are stored
+          example: "/tmp"
+        file:
+          type: boolean
+          description: Save data/threshold/anomaly to files
+          example: true
+        influxdb:
+          type: boolean
+          description: Save data/threshold to influxdb
+          example: false
+      example:
+        device: "eth0"
+        promiscuous: false
+        period: "1s"
+        output: "/data"
+        file: true
+        influxdb: false
+    
+    Run:
+      title: A running action
+      type: object
+      properties:
+        command:
+          type: string
+          description: Command to send to the server
+          example: "start"
+          enum: ["start", "stop", "reload", "zero"]
+    
+    Status:
+      title: A DSPOT status
+      type: object
+      properties:
+        drift:
+          type: number
+          format: float64
+          description: Current average value
+        n:
+          type: integer
+          format: int
+          description: Number of normal observations (not the alarms)
+        ex_up:
+          type: integer
+          format: int
+          description: Current number of up excesses
+        ex_down:
+          type: integer
+          format: int
+          description: Current number of down excesses
+        Nt_up:
+          type: integer
+          format: int
+          description: Total number of up excesses
+        Nt_down:
+          type: integer
+          format: int
+          description: Total number of down excesses
+        al_up:
+          type: number
+          description: Number of up alarms
+          format: float64
+        al_down:
+          type: number
+          description: Number of down alarms
+          format: float64
+        t_up:
+          type: number
+          description: Transitional up threshold
+          format: float64
+        t_down:
+          type: number
+          description: Transitional down threshold
+          format: float64
+        z_up:
+          type: number
+          description: Up alert threshold
+          format: float64
+        z_down:
+          type: number
+          description: Down alert threshold
+          format: float64
+      example:
+        n: 9950
+        ex_up: 120
+        ex_down: 0
+        Nt_up: 120
+        Nt_down: 0
+        al_up: 0
+        al_down: 0
+        t_up: 2.233
+        z_up: 4.767
+
