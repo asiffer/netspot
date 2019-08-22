@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/asiffer/gospot"
-	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
@@ -34,7 +33,7 @@ func testERROR() {
 }
 
 func init() {
-	zerolog.SetGlobalLevel(zerolog.NoLevel)
+	// zerolog.SetGlobalLevel(zerolog.NoLevel)
 }
 
 func title(s string) {

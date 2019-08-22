@@ -44,7 +44,8 @@ func checkTitle(s string) {
 }
 
 func init() {
-	DisableLogging()
+	// DisableLogging()
+	InitLogger()
 }
 
 func testOK() {
@@ -244,16 +245,52 @@ func TestLivePcapHuge(t *testing.T) {
 	// if !miner.IsSniffing() {
 	// 	t.Error("Error: no sniffing")
 	// }
+	StartStats()
+	time.Sleep(4 * time.Second)
+	StopStats()
+	time.Sleep(1 * time.Second)
+}
+
+func TestLivePerfs(t *testing.T) {
+	title("Testing live perfs")
+	UnloadAll()
+	Zero()
+
+	extra := map[string]interface{}{
+		"n_init": 800,
+		"level":  0.98,
+		"q":      1e-3,
+	}
+	LoadFromNameWithCustomConfig("AVG_PKT_SIZE", extra)
+	LoadFromNameWithCustomConfig("R_SYN", extra)
+	LoadFromNameWithCustomConfig("R_ACK", extra)
+	LoadFromName("R_ICMP")
+	LoadFromName("PERF")
+
+	logDataToFile = true
+	SetOutputDir("/home/asr/Documents/Work/go/src/netspot/analyzer/")
+	time.Sleep(10 * time.Millisecond)
+	// small
+	// pcapFile1 : ~420min
+	// logDataToFile = true
+	// miner.SetDevice(pcapFile1)
+	// period = 5 * time.Minute
+	// huge
+	// pcapFile2 : 900s
+	miner.SetDevice(pcapFile2)
+	period = 3 * time.Second
+	SetPeriod(period)
 
 	StartStats()
 	time.Sleep(5 * time.Second)
 	StopStats()
+	time.Sleep(2 * time.Second)
 }
 
 func TestLivePcapMirai(t *testing.T) {
 	title("Testing on a Mirai PCAP")
-	SetLogging(0)
-	UnloadAll()
+	SetLogging(1)
+	Zero()
 
 	extra := map[string]interface{}{
 		"depth":  100,
@@ -264,11 +301,12 @@ func TestLivePcapMirai(t *testing.T) {
 		"up":     true,
 	}
 	LoadFromNameWithCustomConfig("AVG_PKT_SIZE", extra)
+	LoadFromName("PERF")
 
 	// Mirai
 	// pcapFile3 : 7137s
 	miner.SetDevice(pcapFile3)
-	period = 2 * time.Second
+	period = 10 * time.Second
 	SetPeriod(period)
 	logDataToFile = true
 	SetOutputDir("/tmp")

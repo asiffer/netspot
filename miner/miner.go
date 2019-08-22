@@ -32,6 +32,11 @@ type DataChannel chan map[int]uint64
 // TimeChannel defines a channel to send time ticks
 type TimeChannel chan time.Time
 
+// Logger
+var (
+	minerLogger zerolog.Logger
+)
+
 // Storing/Accessing the counters
 var (
 	counterMap          map[int]counters.BaseCtrInterface // Map id->counter
@@ -40,7 +45,13 @@ var (
 	mux, valmux         sync.RWMutex                      // Locker for the counter map access
 	defaultEventChannel EventChannel                      // to receive events
 	defaultDataChannel  DataChannel                       // internal channel to send snapshots
+	// builtinCounterMap   map[int]string
 )
+
+// var (
+// 	// Miner built-in counters
+// 	builtinCounters []string
+// )
 
 // Status
 var (
@@ -51,8 +62,8 @@ var (
 	snapshotLen      int32         // the maximum size to read for each packet
 	promiscuous      bool          // promiscuous mode of the interface
 	timeout          time.Duration // time to wait if nothing happens
-	nbParsedPkts     uint64        // the number of parsed packets
-	sniffing         bool          // tells if the package is currently sniffing
+	// nbParsedPkts     uint64        // the number of parsed packets
+	sniffing bool // tells if the package is currently sniffing
 )
 
 // Time
@@ -81,25 +92,27 @@ const (
 	GET uint8 = 1
 	// FLUSH trigger a snapshot of the counters and reset them
 	FLUSH uint8 = 3
-	// PERF triggers a snapshot of the number of parsed packets
-	PERF uint8 = 9
-	// TIME triggers a snapshot of the current source time (nanoseconds)
-	TIME uint8 = 10
 )
 
-func init() {
-	// devices
-	AvailableDevices = GetAvailableDevices()
+// Specific IDs
+// const (
+// 	// SourceTimeID is the default id of the SOURCE_TIME built-in counter
+// 	SourceTimeID int = 1000
+// 	// RealTimeID is the default id of the REAL_TIME built-in counter
+// 	RealTimeID int = 1001
+// 	// PacketsID is the default id of the PACKETS built-in counter
+// 	PacketsID int = 1002
+// )
 
+func init() {
 	// Default configuration
 	viper.SetDefault("miner.device", "any")
 	viper.SetDefault("miner.snapshot_len", int32(65535))
 	viper.SetDefault("miner.promiscuous", true)
 	viper.SetDefault("miner.timeout", 30*time.Second)
-}
-
-func init() {
+	// Default configuration
 	zerolog.SetGlobalLevel(zerolog.Disabled)
+	// Reset all variables
 	Zero()
 }
 
@@ -108,33 +121,39 @@ func init() {
 func initChannels() {
 	defaultDataChannel = make(DataChannel)
 	defaultEventChannel = make(EventChannel)
-	// defaultTimeChannel = make(TimeChannel, CHANNELCAPACITY)
 }
 
-// closeChannels closes the default event channel and the
-// default data channel
-func closeChannels() {
-	// close(defaultDataChannel)
-	// close(defaultEventChannel)
-	// close(defaultTimeChannel)
+// InitLogger initializes a specific logger for the miner package
+func InitLogger() {
+	minerLogger = log.With().Str("module", "MINER").Logger()
 }
+
+// func loadBuiltinCounters() {
+// 	for _, ctr := range builtinCounters {
+// 		id := LoadFromName(ctr)
+// 		// keep the id in the memory
+// 		builtinCounterMap[ctr] = id
+// 	}
+// }
+
+// registerAsBuiltin registers a miner built-in counter to the
+// counter subpackage. It adds it to the built-in counter list
+// func registerAsBuiltin(name string, sc counters.CounterConstructor) {
+// 	counters.Register(name, sc)
+// 	builtinCounters = append(builtinCounters, name)
+// }
 
 // Zero aims to zero the internal state of the miner. So it removes all
-// the loaded counters, reset some variables and read the config file.
+// the loaded counters, reset some variables
+// [and read the config file](NOT ANYMORE).
 func Zero() error {
 	if !IsSniffing() {
 		AvailableDevices = GetAvailableDevices()
 
-		SetDevice(viper.GetString("miner.device"))
-		SetSnapshotLen(viper.GetInt32("miner.snapshot_len"))
-		SetPromiscuous(viper.GetBool("miner.promiscuous"))
-		SetTimeout(viper.GetDuration("miner.timeout"))
 		initChannels()
 
 		// sniff variables
 		sniffing = false
-		// reset the number of parsed packets
-		nbParsedPkts = 0
 
 		// time variables
 		SourceTime = time.Now()
@@ -143,15 +162,15 @@ func Zero() error {
 		last = SourceTime
 
 		// counter loader
+		// builtinCounterMap = make(map[int]string)
 		counterMap = make(map[int]counters.BaseCtrInterface)
 		counterID = 0 // 0 is never used
-		// counterValues = make(map[int]uint64)
 
 		// everything is ok
-		log.Info().Msg("Miner package (re)loaded")
+		minerLogger.Info().Msg("Miner package (re)loaded")
 		return nil
 	}
-	log.Error().Msg("Cannot reload, sniffing in progress")
+	minerLogger.Error().Msg("Cannot reload, sniffing in progress")
 	return errors.New("Cannot reload, sniffing in progress")
 }
 
@@ -199,6 +218,15 @@ func isAlreadyLoaded(ctrname string) bool {
 	}
 	return false
 }
+
+// func isBuiltin(ctrname string) bool {
+// 	for _, ctr := range builtinCounters {
+// 		if ctrname == ctr {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func contains(list []string, str string) bool {
 	for _, s := range list {

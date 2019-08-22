@@ -116,7 +116,7 @@ func PushRecord(statValues map[string]float64, seriesName string, t time.Time) e
 	return nil
 }
 
-// Flush send the batch of points to influxdb.
+// Flush sends the batch of points to influxdb.
 func Flush() error {
 	err := client.Write(batch)
 	if err != nil {

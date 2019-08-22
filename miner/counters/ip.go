@@ -24,7 +24,7 @@ type IPCtr struct {
 func NewIPCtr() IPCtr {
 	return IPCtr{
 		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan *layers.IPv4, 100)}
+		Lay:     make(chan *layers.IPv4)}
 }
 
 // LayPipe returns the IPv4 layer channel of the IP counter

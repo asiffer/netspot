@@ -22,6 +22,11 @@ const (
 	FLUSH uint8 = 3
 )
 
+const (
+	// CHANSIZE is the size of the counters channel
+	CHANSIZE int = 10
+)
+
 // CounterConstructor is a generic counter constructor
 type CounterConstructor func() BaseCtrInterface
 
@@ -123,13 +128,17 @@ func Run(ctr BaseCtrInterface) {
 		if icmpctr, ok := ctr.(ICMPCtrInterface); ok {
 			RunICMPCtr(icmpctr)
 		}
+	case PktCtrInterface:
+		if pktctr, ok := ctr.(PktCtrInterface); ok {
+			RunPktCtr(pktctr)
+		}
 	case PatternCtrInterface:
 		if patternctr, ok := ctr.(PatternCtrInterface); ok {
 			RunPatternCtr(patternctr)
 		}
-	default:
-		if ctr != nil {
-			log.Error().Msgf("The type of the counter '%s' is unknown", ctr.Name())
-		}
+		// default:
+		// 	if ctr != nil {
+		// 		log.Error().Msgf("The type of the counter '%s' is unknown", ctr.Name())
+		// 	}
 	}
 }

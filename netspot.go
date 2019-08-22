@@ -5,23 +5,16 @@
 // is controlled by a client `netspotctl`.
 package main
 
-// #cgo CFLAGS: -I/usr/include/x86_64-linux-gnu/
-// import "C"
-
 import (
-	"errors"
 	"fmt"
-	"net"
-	"net/http"
-	"net/rpc"
 	"netspot/analyzer"
+	"netspot/api"
 	"netspot/miner"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -29,15 +22,52 @@ import (
 	"github.com/urfave/cli"
 )
 
+// ServerConfig is a basic structure which stores
+// the configuration of the server
+type ServerConfig struct {
+	// LogLevel defines the logging level. Possible values are:
+	// - panic (zerolog.PanicLevel, 5)
+	// - fatal (zerolog.FatalLevel, 4)
+	// - error (zerolog.ErrorLevel, 3)
+	// - warn (zerolog.WarnLevel, 2)
+	// - info (zerolog.InfoLevel, 1)
+	// - debug (zerolog.DebugLevel, 0)
+	LogLevel int
+	// HTTP activates the HTTP REST endpoint
+	HTTP bool
+	// HTTPAddress defines the ip address and tcp port
+	// of the HTTP endpoint
+	HTTPAddress string
+	// TLS activates HTTPS on HTTP endpoint
+	TLS bool
+	// CertFile is the server public certificate
+	CertFile string
+	// KeyFile is the server private key
+	KeyFile string
+	// RPC activates the Golang RPC server
+	RPC bool
+	// RPCAddress defines the ip address and tcp port
+	// of the RPC endpoint
+	RPCAddress string
+}
+
 var (
-	app         *cli.App
-	minerEvents chan int
+	app          *cli.App
+	serverConfig ServerConfig
 )
 
-// Netspot is the object to build the API
-type Netspot struct{}
-
 func init() {
+	// default config
+	viper.SetDefault("server.log_level", zerolog.InfoLevel)
+	viper.SetDefault("server.http", true)
+	viper.SetDefault("server.http_addr", "127.0.0.1:11000")
+	viper.SetDefault("server.tls", false)
+	viper.SetDefault("server.cert", "./cert.pem")
+	viper.SetDefault("server.key", "./key.pem")
+	viper.SetDefault("server.rpc", false)
+	viper.SetDefault("server.rpc_addr", "127.0.0.1:11001")
+
+	// init console
 	InitConsoleWriter()
 }
 
@@ -59,205 +89,6 @@ func fileExists(path string) bool {
 		return false
 	}
 	return true
-}
-
-//------------------------------------------------------------------------------
-// HTTP API
-//------------------------------------------------------------------------------
-
-// Zero resets the analyzer and the miner. It returns
-// - 0 if everything is ok
-// - 1 when the miner did not reset
-// - 2 when the analyzer did not reset
-func (ns *Netspot) Zero(none *int, i *int) error {
-	err := analyzer.Zero()
-	if err != nil {
-		*i = 2
-		return err
-	}
-	err = miner.Zero()
-	if err != nil {
-		*i = 1
-		return err
-	}
-	*i = 0
-	return nil
-}
-
-// SetDevice change the device to sniff (interface of pcap)
-func (ns *Netspot) SetDevice(device string, i *int) error {
-	*i = miner.SetDevice(device)
-	if *i == 1 {
-		return fmt.Errorf("Unknown device (%s)", device)
-	}
-	return nil
-}
-
-// SetPromiscuous changes the promiscuous mode (relevant to iface only)
-func (ns *Netspot) SetPromiscuous(b bool, i *int) error {
-	if miner.IsPromiscuous() == b {
-		*i = -1
-		if b {
-			return errors.New("Promiscuous mode already activated")
-		}
-		return errors.New("Promiscuous mode already desactivated")
-
-	}
-	*i = miner.SetPromiscuous(b)
-	if *i != 0 {
-		return errors.New("Unhandled error")
-	}
-	return nil
-}
-
-// SetPeriod changes period of stat computation
-func (ns *Netspot) SetPeriod(duration string, i *int) error {
-	d, e := time.ParseDuration(duration)
-	if e != nil {
-		*i = -1
-		return e
-	}
-	*i = 0
-	analyzer.SetPeriod(d)
-	return e
-}
-
-// SetOutputDir changes the directory of the netspot output
-func (ns *Netspot) SetOutputDir(dir string, i *int) error {
-	analyzer.SetOutputDir(dir)
-	*i = 0
-	return nil
-}
-
-// AvailableInterface returns a slice of the interfaces which can be sniffed
-func (ns *Netspot) AvailableInterface(none *int, deviceList *[]string) error {
-	for _, s := range miner.GetAvailableDevices() {
-		*deviceList = append(*deviceList, s)
-	}
-	return nil
-}
-
-// Load loads a stat from the given name. It returns the id of the stat (it may be useless).
-func (ns *Netspot) Load(statName string, i *int) error {
-	id, err := analyzer.LoadFromName(statName)
-	*i = id
-	return err
-}
-
-// Alive returns true. If you can call this function, it means that the
-// server is running.
-func (ns *Netspot) Alive(none *int, b *bool) error {
-	*b = true
-	return nil
-}
-
-// ListLoaded returns a slice of the statistics which are curently loaded
-func (ns *Netspot) ListLoaded(none *int, statList *[]string) error {
-	for _, s := range analyzer.GetLoadedStats() {
-		*statList = append(*statList, s)
-	}
-	return nil
-}
-
-// ListAvailable returns a slice of the statistics which can be loaded (already
-// loaded statistics are also present in this list)
-func (ns *Netspot) ListAvailable(none *int, statList *[]string) error {
-	for _, s := range analyzer.GetAvailableStats() {
-		*statList = append(*statList, s)
-	}
-	return nil
-}
-
-// StatStatus returns a raw status of the DSpot instance monitoring the given
-// statistic.
-func (ns *Netspot) StatStatus(statName string, rawstatus *string) error {
-	status, err := analyzer.StatStatus(statName)
-	if err != nil {
-		return err
-	}
-	*rawstatus = status.String()
-	return nil
-
-}
-
-// StatValues return a current snapshot of the stat values (and their thresholds)
-func (ns *Netspot) StatValues(none *int, values *map[string]float64) error {
-	val := analyzer.StatValues()
-	for s, v := range val {
-		(*values)[s] = v
-	}
-	return nil
-
-}
-
-// Unload removes a loaded statistics. See analyzer.UnloadFromName to get
-// the detail of the return values.
-func (ns *Netspot) Unload(statName string, i *int) error {
-	id, err := analyzer.UnloadFromName(statName)
-	*i = id
-	return err
-}
-
-// UnloadAll removes a loaded statistics. See analyzer.UnloadFromName to get
-// the detail of the return values.
-func (ns *Netspot) UnloadAll(none string, i *int) error {
-	analyzer.UnloadAll()
-	if analyzer.GetNumberOfLoadedStats() != 0 {
-		*i = -1
-		return errors.New("Statistics remain")
-	}
-	*i = 0
-	return nil
-}
-
-// Config returns the configurations of the miner and the analyzer.
-func (ns *Netspot) Config(none *int, s *string) error {
-	bold := color.New(color.FgWhite, color.Bold)
-	format := "%20s   %s\n"
-	confAnalyzer := analyzer.RawStatus()
-	confMiner := miner.RawStatus()
-
-	*s += bold.Sprint("Miner\n")
-	for k, v := range confMiner {
-		*s += fmt.Sprintf(format, k, v)
-	}
-
-	*s += "\n" + bold.Sprint("Analyzer\n")
-	for k, v := range confAnalyzer {
-		*s += fmt.Sprintf(format, k, v)
-	}
-
-	return nil
-}
-
-// Start runs the miner and then the stats
-func (ns *Netspot) Start(none *int, i *int) error {
-	if analyzer.IsRunning() {
-		*i = 3
-		return errors.New("The statistics are currently computed")
-	}
-
-	if miner.IsSniffing() {
-		*i = 2
-		return errors.New("The sniffer is already running")
-	}
-
-	// start the analyzer (it also starts the miner)
-	analyzer.StartStats()
-	*i = 0
-	return nil
-}
-
-// Stop stops the stat computation (and the miner too)
-func (ns *Netspot) Stop(none *int, i *int) error {
-	if !analyzer.IsRunning() {
-		*i = 1
-		return errors.New("The statistics are not currently monitored")
-	}
-	// stop the analyzer. It also stops the miner.
-	analyzer.StopStats()
-	*i = 0
-	return nil
 }
 
 //------------------------------------------------------------------------------
@@ -287,9 +118,25 @@ func InitConsoleWriter() {
 			return fmt.Sprintf("%s", i)
 		}
 	}
+
 	output.FormatMessage = func(i interface{}) string {
+		s, ok := i.(string)
+		if !ok {
+			log.Debug().Msgf("Console format error with message: %v", i)
+		}
+		size := len(s)
+		if size < 50 {
+			return fmt.Sprintf("%-50s", i)
+		}
+		if size < 80 {
+			return fmt.Sprintf("%-80s", i)
+		}
+		if size < 100 {
+			return fmt.Sprintf("%-100s", i)
+		}
 		return fmt.Sprintf("%s", i)
 	}
+
 	output.FormatFieldName = func(i interface{}) string {
 		field := fmt.Sprintf("%s", i)
 		switch field {
@@ -311,18 +158,25 @@ func InitConsoleWriter() {
 		case int32, int16, int8, int:
 			return fmt.Sprintf("%d", i)
 		default:
-			return strings.ToUpper(fmt.Sprintf("%s", i))
+			return "\033[1m" + strings.ToUpper(fmt.Sprintf("%s", i)) + "\033[0m"
 		}
 	}
 
-	output.PartsOrder = []string{"time", "level", "message"}
+	output.PartsOrder = []string{"time", "level", "caller", "message"}
 	log.Logger = log.Output(output)
 	zerolog.TimeFieldFormat = time.StampNano
+
+	// At the beginning the debug level is set
+	zerolog.SetGlobalLevel(0)
+	// initialize the sub-loggers
+	analyzer.InitLogger()
+	miner.InitLogger()
+	api.InitLogger()
 }
 
-// InitConfig set the global config file to read. It must be done before the subpackages
+// LoadConfig set the global config file to read. It must be done before the subpackages
 // are initialized.
-func InitConfig(file string) {
+func LoadConfig(file string) {
 	if !fileExists(file) {
 		log.Warn().Msgf("Config file %s does not exist. Falling back to default configuration", file)
 	}
@@ -333,10 +187,64 @@ func InitConfig(file string) {
 		log.Info().Msgf("Config file changed: %s", e.Name)
 	})
 	viper.ReadInConfig()
+
+	// server configuration
 	log.Info().Msg("Config loaded")
 }
 
-// InitSubpackages initialize the config of the miner and the analyzer.
+// InitConfig set the server configuration from the config file
+func InitConfig() {
+	serverConfig = ServerConfig{
+		LogLevel:    viper.GetInt("server.log_level"),
+		HTTP:        viper.GetBool("server.http"),
+		HTTPAddress: viper.GetString("server.http_addr"),
+		TLS:         viper.GetBool("server.tls"),
+		CertFile:    viper.GetString("server.cert"),
+		KeyFile:     viper.GetString("server.key"),
+		RPC:         viper.GetBool("server.rpc"),
+		RPCAddress:  viper.GetString("server.rpc_addr"),
+	}
+}
+
+// UpdateServerConfigFromCli override the options passed in the config file
+// with the options passed in CLI
+func UpdateServerConfigFromCli(c *cli.Context) {
+	// logging level
+	if c.IsSet("log-level") {
+		serverConfig.LogLevel = c.Int("log-level")
+	}
+
+	// HTTP
+	if c.IsSet("no-http") {
+		serverConfig.HTTP = false
+	}
+	if c.IsSet("http") {
+		serverConfig.HTTPAddress = c.String("http")
+	}
+
+	// RPC
+	if c.IsSet("no-rpc") {
+		serverConfig.RPC = false
+	}
+	if c.IsSet("rpc") {
+		serverConfig.RPCAddress = c.String("rpc")
+	}
+
+	// TLS
+	if c.IsSet("tls") {
+		serverConfig.TLS = true
+	}
+	if c.IsSet("cert") {
+		serverConfig.CertFile = c.String("cert")
+	}
+	if c.IsSet("key") {
+		serverConfig.KeyFile = c.String("key")
+	}
+
+}
+
+// InitSubpackages initialize the config of the miner and
+// the analyzer.
 func InitSubpackages() {
 	miner.InitConfig()
 	analyzer.InitConfig()
@@ -344,21 +252,53 @@ func InitSubpackages() {
 
 // StartServer (it receives the cli arguments)
 func StartServer(c *cli.Context) {
-	zerolog.SetGlobalLevel(zerolog.Level(c.Int("log-level")))
-	InitConfig(c.String("config"))
+	// load config
+	if c.IsSet("config") {
+		LoadConfig(c.String("config"))
+	} else {
+		LoadConfig("./netspot.toml")
+	}
+
+	// Initialize the server configuration
+	InitConfig()
+
+	// add passed cli arguments
+	UpdateServerConfigFromCli(c)
+
+	// set the logging level (cli override config file)
+	zerolog.SetGlobalLevel(zerolog.Level(serverConfig.LogLevel))
+
+	// Initialize the subpackages
 	InitSubpackages()
 
-	ns := new(Netspot)
-	rpc.Register(ns)
-	rpc.HandleHTTP()
+	// com channel
+	com := make(chan error)
 
-	addr := fmt.Sprintf("%s:%d", c.String("address"), c.Int("port"))
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatal().Msgf("listen error: %s", err.Error())
+	// if the flag -no-rpc has not been set AND
+	// the config file does not activate RPC
+	if serverConfig.RPC {
+		go api.RunRPC(c.String("rpc"), com)
 	}
-	log.Info().Msgf("Listening on %s", addr)
-	http.Serve(listener, nil)
+
+	if serverConfig.HTTP {
+		if serverConfig.TLS {
+			// with TLS
+			go api.RunHTTPS(c.String("http"),
+				serverConfig.CertFile,
+				serverConfig.KeyFile,
+				com)
+		} else {
+			// without TLS
+			go api.RunHTTP(c.String("http"), com)
+		}
+
+	}
+
+	// wait
+	if err := <-com; err != nil {
+		log.Fatal().Msgf("server error: %v", err)
+	}
+
 }
 
 // InitApp starts NetSpot
@@ -366,7 +306,7 @@ func InitApp() {
 	app = cli.NewApp()
 	app.Name = "NetSpot"
 	app.Usage = "A basic IDS with statistical learning"
-	app.Version = "1.0"
+	app.Version = "1.3"
 
 	// CLI arguments
 	app.Flags = []cli.Flag{
@@ -376,14 +316,34 @@ func InitApp() {
 			Usage: "Load configuration from `FILE`",
 		},
 		cli.StringFlag{
-			Name:  "address, a",
-			Value: "localhost",
-			Usage: "NetSpot server listening address",
+			Name:  "http",
+			Value: "localhost:11000",
+			Usage: "NetSpot server HTTP endpoint",
 		},
-		cli.IntFlag{
-			Name:  "port, p",
-			Value: 11000,
-			Usage: "NetSpot server listening port",
+		cli.StringFlag{
+			Name:  "rpc",
+			Value: "localhost:11001",
+			Usage: "NetSpot server RPC endpoint",
+		},
+		cli.BoolFlag{
+			Name:  "no-rpc",
+			Usage: "Disable the golang RPC endpoint",
+		},
+		cli.BoolFlag{
+			Name:  "no-http",
+			Usage: "Disable the HTTP endpoint",
+		},
+		cli.BoolFlag{
+			Name:  "tls",
+			Usage: "Activate TLS on HTTP endpoint",
+		},
+		cli.StringFlag{
+			Name:  "cert",
+			Usage: "Path to the public certificate",
+		},
+		cli.StringFlag{
+			Name:  "key",
+			Usage: "Path to the private key",
 		},
 		cli.IntFlag{
 			Name:  "log-level, l",

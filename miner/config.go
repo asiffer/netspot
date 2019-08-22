@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -23,25 +22,35 @@ func InitConfig() {
 	SetPromiscuous(viper.GetBool("miner.promiscuous"))
 	SetTimeout(viper.GetDuration("miner.timeout"))
 
-	log.Debug().Msg(fmt.Sprint("Available counters: ", counters.GetAvailableCounters()))
-	log.Info().Msg("Miner package configured")
+	minerLogger.Debug().Msg(fmt.Sprint("Available counters: ", counters.GetAvailableCounters()))
+	minerLogger.Info().Msg("Miner package configured")
 }
 
 // RawStatus returns the current status of the miner through a
 // basic map. It is designed to a future print.
 func RawStatus() map[string]string {
-	m := make(map[string]string)
-	// m["parsed packets"] = fmt.Sprintf("%d", nbParsedPkts)
-	m["promiscuous"] = fmt.Sprintf("%v", promiscuous)
-	m["timeout"] = fmt.Sprint(timeout)
-	m["device"] = device
-	m["snapshot length"] = fmt.Sprintf("%d", snapshotLen)
-	return m
+	return map[string]string{
+		"promiscuous":     fmt.Sprintf("%v", promiscuous),
+		"timeout":         fmt.Sprint(timeout),
+		"device":          device,
+		"snapshot_length": fmt.Sprintf("%d", snapshotLen),
+	}
+}
+
+// GenericStatus returns the current status of the analyzer through a
+// basic map. It is designed to JSON marshalling.
+func GenericStatus() map[string]interface{} {
+	return map[string]interface{}{
+		"promiscuous":     promiscuous,
+		"timeout":         timeout,
+		"device":          device,
+		"snapshot_length": snapshotLen,
+	}
 }
 
 // DisableLogging sets the global zerolog log level to 0
 func DisableLogging() {
-	log.Warn().Msg("Disabling logging")
+	minerLogger.Warn().Msg("Disabling logging")
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 }
 
@@ -49,7 +58,7 @@ func DisableLogging() {
 func SetLogging(level int) {
 	l := zerolog.Level(level)
 	zerolog.SetGlobalLevel(l)
-	log.Warn().Msgf("Enabling logging (level %s)", l.String())
+	minerLogger.Warn().Msgf("Enabling logging (level %s)", l.String())
 }
 
 // GetNumberOfDevices returns the number of available devices (interfaces)
@@ -72,21 +81,21 @@ func IsPromiscuous() bool {
 // will receives packets  that are not intended for it.
 func SetPromiscuous(b bool) int {
 	promiscuous = b
-	log.Debug().Msgf("Promiscuous set to %v", b)
+	minerLogger.Debug().Msgf("Promiscuous set to %v", b)
 	return 0
 }
 
 // SetSnapshotLen sets the maximum size of packets which are captured
 func SetSnapshotLen(sl int32) int {
 	snapshotLen = sl
-	log.Debug().Msgf("Snapshot length set to %d", sl)
+	minerLogger.Debug().Msgf("Snapshot length set to %d", sl)
 	return 0
 }
 
 // SetTimeout set the timeout to the desired duration
 func SetTimeout(d time.Duration) {
 	timeout = d
-	log.Debug().Msgf("Timeout set to %s", d)
+	minerLogger.Debug().Msgf("Timeout set to %s", d)
 }
 
 // GetDevice returns the current device (interface name or capture file)
@@ -104,10 +113,10 @@ func SetDevice(dev string) int {
 		device = dev
 		iface = false
 	} else {
-		log.Error().Msgf("Unknown device (%s)", dev)
+		minerLogger.Error().Msgf("Unknown device (%s)", dev)
 		return 1
 	}
-	log.Info().Msgf(`Set device to "%s"`, dev)
+	minerLogger.Info().Msgf(`Set device to "%s"`, dev)
 	return 0
 }
 

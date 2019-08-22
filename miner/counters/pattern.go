@@ -125,7 +125,7 @@ func clean(s string) string {
 // with the model ip/mask:port->ip/mask:port
 // ('->' and ':' are mandatory)
 func ParsePattern(s string) (*Pattern, error) {
-	s = clean(s) // remove unknown characetrs
+	s = clean(s) // remove unknown characters
 	ep := strings.Split(s, endpointsSeparator)
 	if len(ep) != 2 {
 		return nil, fmt.Errorf("Separator %s not found",

@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"netspot/miner/counters"
-
-	"github.com/rs/zerolog/log"
 )
 
 //----------------------------------------------------------------------------//
@@ -22,7 +20,7 @@ func counterFromName(name string) counters.BaseCtrInterface {
 	if exists {
 		return cc()
 	}
-	log.Error().Msg("Unknown counter")
+	minerLogger.Error().Msg("Unknown counter")
 	return nil
 }
 
@@ -30,16 +28,20 @@ func load(ctr counters.BaseCtrInterface) (int, error) {
 	if ctr != nil {
 		if isAlreadyLoaded(ctr.Name()) {
 			msg := fmt.Sprintf("Counter %s already loaded", ctr.Name())
-			log.Debug().Msgf("Counter %s already loaded", ctr.Name())
+			minerLogger.Debug().Msgf("Counter %s already loaded", ctr.Name())
 			return -2, errors.New(msg)
 		}
+
 		counterID = counterID + 1
 		counterMap[counterID] = ctr
-		log.Debug().Msgf("Loading counter %s", ctr.Name())
-		return counterID, nil
 
+		// if isBuiltin(ctr.Name()) {
+		// 	builtinCounterMap[counterID] = ctr.Name()
+		// }
+		minerLogger.Debug().Msgf("Loading counter %s", ctr.Name())
+		return counterID, nil
 	}
-	log.Error().Msg("Cannot load null counter")
+	minerLogger.Error().Msg("Cannot load null counter")
 	return -1, errors.New("Cannot load null counter")
 }
 
@@ -55,8 +57,12 @@ func GetNumberOfLoadedCounters() int {
 
 // Unload removes the counter identified by its id
 func Unload(id int) {
-	log.Debug().Msgf("Unloading counter %s", counterMap[id].Name())
+	minerLogger.Debug().Msgf("Unloading counter %s", counterMap[id].Name())
 	delete(counterMap, id)
+	// if _, exists := builtinCounterMap[id]; exists {
+	// 	delete(builtinCounterMap, id)
+	// }
+
 }
 
 // UnloadAll remove all the loaded counters
@@ -76,7 +82,7 @@ func UnloadFromName(ctrname string) int {
 		return -1
 	}
 	Unload(id)
-	log.Debug().Msgf("Unloading %s", ctrname)
+	minerLogger.Debug().Msgf("Unloading %s", ctrname)
 	return 0
 
 }
@@ -131,6 +137,15 @@ func ResetAll() {
 	}
 	mux.Unlock()
 
+}
+
+// GetNbParsedPackets returns the current number of parsed packets
+// if the corresponding counter is loaded
+func GetNbParsedPackets() (uint64, error) {
+	if isAlreadyLoaded("PKTS") {
+		return GetCounterValue(idFromName("PKTS"))
+	}
+	return 0, fmt.Errorf("%s", "The PKTS counter is not loaded")
 }
 
 //----------------------------------------------------------------------------//

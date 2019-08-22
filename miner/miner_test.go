@@ -44,7 +44,7 @@ func testWARNING() {
 }
 
 func init() {
-	DisableLogging()
+	InitLogger()
 }
 
 func title(s string) {
@@ -168,8 +168,7 @@ func checkTapConfig(t *testing.T) {
 	checkTitle("Checking device...")
 	if GetDevice() != "test/test.pcap" {
 		testERROR()
-		fmt.Println(GetDevice())
-		t.Error("Fail: setting device (file)")
+		t.Errorf("Fail: setting device (expected test.pcap, got %s)", GetDevice())
 	} else {
 		testOK()
 	}
@@ -177,7 +176,7 @@ func checkTapConfig(t *testing.T) {
 	checkTitle("Checking snapshot length...")
 	if snapshotLen != 9999 {
 		testERROR()
-		t.Error("Fail: setting snapshot length")
+		t.Errorf("Fail: setting snapshot length (expected 9999, got %d)", snapshotLen)
 	} else {
 		testOK()
 	}
@@ -185,7 +184,7 @@ func checkTapConfig(t *testing.T) {
 	checkTitle("Checking timeout...")
 	if timeout != 7*time.Second {
 		testERROR()
-		t.Error("Fail: setting timeout")
+		t.Errorf("Fail: setting timeout (expected 7s, got %v)", timeout)
 	} else {
 		testOK()
 	}
@@ -193,7 +192,7 @@ func checkTapConfig(t *testing.T) {
 	checkTitle("Checking promiscuous...")
 	if !IsPromiscuous() {
 		testERROR()
-		t.Error("Fail: setting promiscuous")
+		t.Errorf("Fail: setting promiscuous (expected true, got %t)", IsPromiscuous())
 	} else {
 		testOK()
 	}
@@ -216,9 +215,9 @@ func TestRawStatus(t *testing.T) {
 	}
 
 	checkTitle("Checking snapshot length...")
-	if m["snapshot length"] != "9999" {
+	if m["snapshot_length"] != "9999" {
 		testERROR()
-		t.Error("Fail: setting snapshot length")
+		t.Errorf("Fail: setting snapshot length (expected 9999, got %s)", m["snapshot length"])
 	} else {
 		testOK()
 	}
@@ -243,12 +242,15 @@ func TestPcapSniffing(t *testing.T) {
 	title("Testing pcap sniffing")
 	// SetLogging(0)
 	setNormalConfig()
+	LoadFromName("TIME")
+	LoadFromName("PKTS")
+
 	StartSniffingAndWait()
 	// time.Sleep(1 * time.Second)
 
 	checkTitle("Checking number of parsed packets... ")
 	// fmt.Println("WTF")
-	if GetNbParsedPkts() != 908 {
+	if n, err := GetNbParsedPackets(); n != 908 || err != nil {
 		testERROR()
 		t.Error("Fail: getting number of parsed packets")
 	} else {
@@ -278,17 +280,18 @@ func TestZero(t *testing.T) {
 	viper.ReadInConfig()
 	InitConfig()
 	pcapSniffing()
+	InitConfig()
 
 	Zero()
 	checkTapConfig(t)
 
-	checkTitle("Checking number of parsed packets...")
-	if nbParsedPkts != 0 {
-		testERROR()
-		t.Error("Fail: resetting number of parsed packets")
-	} else {
-		testOK()
-	}
+	// checkTitle("Checking number of parsed packets...")
+	// if n, err := GetNbParsedPackets(); n != 0 || err != nil {
+	// 	testERROR()
+	// 	t.Error("Fail: resetting number of parsed packets")
+	// } else {
+	// 	testOK()
+	// }
 
 	checkTitle("Checking counter map and counter id...")
 	if counterID != 0 {
@@ -567,6 +570,7 @@ func TestTick(t *testing.T) {
 	// to := time.Tick(2 * time.Second)
 	nticks := 0
 	// StartSniffing()
+	// SetLogging(0)
 	_, data := GoSniffAndYieldChannel(500 * time.Microsecond)
 	checkTitle("Correct number of ticks...")
 	for m := range data {
@@ -820,9 +824,12 @@ func TestNbParsedPackets(t *testing.T) {
 	time.Sleep(3 * time.Second)
 	end := time.Now()
 	duration := end.Sub(start).Seconds()
-	pp := float64(GetNbParsedPkts())
-	fmt.Printf("#packets: %d\n", int(pp))
-	fmt.Printf("Packet rate: %d packets/s\n", int(pp/duration))
+
+	if pp, err := GetNbParsedPackets(); err == nil {
+		fmt.Printf("#packets: %d\n", pp)
+		fmt.Printf("Packet rate: %d packets/s\n", int(float64(pp)/duration))
+	}
+
 	StopSniffing()
 }
 
@@ -867,13 +874,13 @@ func TestBasicIOSniff(t *testing.T) {
 	defaultEventChannel <- FLUSH
 	fmt.Println("Data:", <-defaultDataChannel)
 
-	time.Sleep(500 * time.Millisecond)
-	defaultEventChannel <- PERF
-	fmt.Println("Perf:", <-defaultDataChannel)
+	// time.Sleep(500 * time.Millisecond)
+	// defaultEventChannel <- PERF
+	// fmt.Println("Perf:", <-defaultDataChannel)
 
-	time.Sleep(500 * time.Millisecond)
-	defaultEventChannel <- TIME
-	fmt.Println("Time:", <-defaultDataChannel)
+	// time.Sleep(500 * time.Millisecond)
+	// defaultEventChannel <- TIME
+	// fmt.Println("Time:", <-defaultDataChannel)
 
 	time.Sleep(500 * time.Millisecond)
 	defaultEventChannel <- STOP
@@ -902,13 +909,13 @@ func TestBasicIOSniff2(t *testing.T) {
 	event <- FLUSH
 	fmt.Println("Data:", <-data)
 
-	time.Sleep(500 * time.Millisecond)
-	event <- PERF
-	fmt.Println("Perf:", <-data)
+	// time.Sleep(500 * time.Millisecond)
+	// event <- PERF
+	// fmt.Println("Perf:", <-data)
 
-	time.Sleep(500 * time.Millisecond)
-	event <- TIME
-	fmt.Println("Time:", <-data)
+	// time.Sleep(500 * time.Millisecond)
+	// event <- TIME
+	// fmt.Println("Time:", <-data)
 
 	time.Sleep(500 * time.Millisecond)
 	event <- STOP
@@ -937,13 +944,13 @@ func TestBasicIOSniff3(t *testing.T) {
 	event <- FLUSH
 	fmt.Println("Data:", <-data)
 
-	time.Sleep(500 * time.Millisecond)
-	event <- PERF
-	fmt.Println("Perf:", <-data)
+	// time.Sleep(500 * time.Millisecond)
+	// event <- PERF
+	// fmt.Println("Perf:", <-data)
 
-	time.Sleep(500 * time.Millisecond)
-	event <- TIME
-	fmt.Println("Time:", <-data)
+	// time.Sleep(500 * time.Millisecond)
+	// event <- TIME
+	// fmt.Println("Time:", <-data)
 
 	time.Sleep(500 * time.Millisecond)
 	event <- STOP

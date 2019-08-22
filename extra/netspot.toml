@@ -1,18 +1,47 @@
 # netspot config file
 
+[server]
+# log_level defines the verbosity of the server logs 
+# (from 0: debug, to 5: panic)
+log_level = 1
+
+# http activates the HTTP REST endpoint
+http = true
+
+# http_addr defines the ip address and tcp port
+# of the HTTP endpoint
+http_addr = "127.0.0.1:11000"
+
+# activate TLS (v1.2 only) on the HTTP endpoint (certificate and key must be provided)
+# If the certificate is signed by a certificate authority, the cert file 
+# should be the concatenation of the server's certificate, any intermediates,
+# and the CA's certificate. 
+tls = false
+cert = "extra/cert.pem"
+key = "extra/key.pem"
+
+# rpc activates the Golang RPC server. It directly exposes some methods
+# which are easy to call from a go-written client. 
+rpc = false
+
+# rpc_addr defines the ip address and tcp port
+# of the RPC endpoint
+rpc_addr = "127.0.0.1:11001"
+
 [analyzer]
 # time between two statistics computations
 period = "1s"
 # stats to load at startup
 #stats = ["AVG_PKT_SIZE"]
-stats = ["R_SYN", "R_ACK"]
+stats = ["PERF", "R_SYN", "R_ACK"]
 #stats = []
 
-[analyzer.datalog]
+[data]
 # send data to influxdb database
 influxdb = false
-# log data to files
+# log data/thresholds/anomalies to files
 file = true
+# output_dir is the directory which contains the logs
 output_dir = "/tmp" # file mode only
 
 [miner]

@@ -55,10 +55,23 @@ var (
 	outputDir           string         // directory where raw data are stored (2 files)
 )
 
+// Formats of the log files
 const (
 	rawDataFileNameFormat   = "netspot_raw_%s.json"       // format to name the file where data are logged
 	thresholdFileNameFormat = "netspot_threshold_%s.json" // format to name the file where thresholds are logged
 	anomalyFileNameFormat   = "netspot_anomaly_%s.json"   // format to name the file where anomalies are logged
+)
+
+// Events to get data
+const (
+	// STAT aims to get the stats values
+	STAT int = 1
+	// PERF aims to get the current miner performances
+	PERF int = 2
+)
+
+var (
+	analyzerLogger zerolog.Logger // Logger of the module
 )
 
 var err error
@@ -71,22 +84,13 @@ var err error
 func init() {
 	// default config
 	viper.SetDefault("analyzer.period", 2*time.Second)
-	viper.SetDefault("analyzer.datalog.influxdb", false)
-	viper.SetDefault("analyzer.datalog.file", true)
-	viper.SetDefault("analyzer.datalog.output_dir", "/tmp")
+	viper.SetDefault("data.influxdb", false)
+	viper.SetDefault("data.file", true)
+	viper.SetDefault("data.output_dir", "/tmp")
 	viper.SetDefault("analyzer.stats", []string{})
-}
+	// Reset all variables
+	Zero()
 
-// init initializes package global variables
-func init() {
-	counterID = make(map[string]int)
-	statMap = make(map[int]stats.StatInterface)
-	statID = 0
-	statValues = make(map[string]float64)
-	counterValues = make(map[string]uint64)
-	defaultEventChannel = make(chan int)
-	defaultDataChannel = make(chan map[string]float64)
-	running = false
 }
 
 // InitConfig initialize the loggers and load the stats according to
@@ -94,9 +98,9 @@ func init() {
 func InitConfig() {
 	// settings
 	SetPeriod(viper.GetDuration("analyzer.period"))
-	SetOutputDir(viper.GetString("analyzer.datalog.output_dir"))
-	logDataToFile = viper.GetBool("analyzer.datalog.file")
-	logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
+	SetOutputDir(viper.GetString("data.output_dir"))
+	logDataToFile = viper.GetBool("data.file")
+	logDataToInfluxDB = viper.GetBool("data.influxdb")
 
 	if logDataToInfluxDB {
 		influxdb.InitConfig()
@@ -106,8 +110,13 @@ func InitConfig() {
 		LoadFromName(s)
 	}
 
-	log.Info().Msgf("Available stats: %s", GetAvailableStats())
-	log.Info().Msg("Analyzer package configured")
+	analyzerLogger.Debug().Msgf("Available stats: %s", GetAvailableStats())
+	analyzerLogger.Info().Msg("Analyzer package configured")
+}
+
+// InitLogger initialize the sublogger for ANALYZER
+func InitLogger() {
+	analyzerLogger = log.With().Str("module", "ANALYZER").Logger()
 }
 
 //------------------------------------------------------------------------------
@@ -127,7 +136,7 @@ func find(sl []string, str string) int {
 
 // SPECIFIC --------------------------------------------------------------------
 
-// autoSetSeriesName automaticcaly sets the name of the series for the
+// autoSetSeriesName automatically sets the name of the series for the
 // incoming sniff
 func autoSetSeriesName() {
 	// Interface: device_time
@@ -149,33 +158,6 @@ func release() {
 	running = false
 	// close(defaultEventChannel)
 }
-
-// func updateAndReset() {
-// 	// m, _ := miner.SnapAndReset()
-// 	m := miner.Snapshot(true, nil, nil)
-// 	// if err != nil {
-// 	for name, val := range m {
-// 		counterValues[name] = val
-// 		log.Debug().Msg(fmt.Sprint(counterValues))
-// 	}
-
-// }
-// log.Error().Msg(err.Error())
-// mux.Lock()
-// var val uint64
-// var err error
-// for ctrname, ctrid := range counterID {
-// 	val, err = miner.GetCounterValue(ctrid)
-// 	if err != nil {
-// 		log.Error().Msgf("The ID of %s (%d) is wrong for the miner", ctrname, ctrid)
-// 	} else {
-// 		counterValues[ctrname] = val
-// 		miner.Reset(ctrid)
-// 	}
-// }
-// log.Debug().Msg(fmt.Sprint(counterValues))
-// mux.Unlock()
-// }
 
 func isLoaded(statname string) int {
 	for i, stat := range statMap {
@@ -204,7 +186,7 @@ func load(stat stats.StatInterface) (int, error) {
 	var id int
 	if stat != nil {
 		if isLoaded(stat.Name()) > 0 {
-			log.Debug().Msgf("Stat %s already loaded", stat.Name())
+			analyzerLogger.Debug().Msgf("Stat %s already loaded", stat.Name())
 			msg := fmt.Sprintf("Stat %s already loaded", stat.Name())
 			return -2, errors.New(msg)
 		}
@@ -218,7 +200,7 @@ func load(stat stats.StatInterface) (int, error) {
 		// increment the stat container
 		statID = statID + 1
 		statMap[statID] = stat
-		log.Debug().Msgf("Loading stat %s", stat.Name())
+		analyzerLogger.Debug().Msgf("Loading stat %s", stat.Name())
 		return statID, nil
 	}
 	return -1, errors.New("Cannot load null stat")
@@ -246,6 +228,7 @@ func unload(id int) (int, error) {
 			}
 		}
 	}
+	fmt.Println(counters2remove)
 	// We remove all the useless counters
 	for _, ctr := range counters2remove {
 		delete(counterID, ctr)
@@ -276,19 +259,23 @@ func StatStatus(s string) (gospot.DSpotStatus, error) {
 func RawStatus() map[string]string {
 	m := make(map[string]string)
 	m["period"] = fmt.Sprint(period)
-	if logDataToInfluxDB {
-		m["influxdb logging"] = fmt.Sprintf("%v (%s)", logDataToInfluxDB, influxdb.GetAddress())
-	} else {
-		m["influxdb logging"] = "no"
-	}
-
-	if logDataToFile {
-		m["file logging"] = fmt.Sprintf("%v (%s)", logDataToFile, outputDir)
-	} else {
-		m["file logging"] = "no"
-	}
+	m["influxdb"] = fmt.Sprintf("%t", logDataToInfluxDB)
+	m["file"] = fmt.Sprintf("%t", logDataToFile)
+	m["output"] = outputDir
 	m["statistics"] = fmt.Sprint(GetLoadedStats())
 	return m
+}
+
+// GenericStatus returns the current status of the analyzer through a
+// basic map. It is designed to JSON marshalling.
+func GenericStatus() map[string]interface{} {
+	return map[string]interface{}{
+		"period":     period,
+		"influxdb":   logDataToInfluxDB,
+		"file":       logDataToFile,
+		"output":     outputDir,
+		"statistics": GetLoadedStats(),
+	}
 }
 
 // InitDataLogging creates new loggers (file/influxdb). Normally, it is called when
@@ -302,7 +289,7 @@ func InitDataLogging() {
 		p := filepath.Join(outputDir, fmt.Sprintf(rawDataFileNameFormat, seriesName))
 		f, err := os.Create(p)
 		if err != nil {
-			log.Fatal().Msgf("Error while creating raw data log file (%s)", p)
+			analyzerLogger.Fatal().Msgf("Error while creating raw data log file (%s)", p)
 		}
 		rawDataLogger = zerolog.New(f).With().Logger()
 		rawDataOutputFile = f.Name()
@@ -311,7 +298,7 @@ func InitDataLogging() {
 		p = filepath.Join(outputDir, fmt.Sprintf(thresholdFileNameFormat, seriesName))
 		f, err = os.Create(p)
 		if err != nil {
-			log.Fatal().Msgf("Error while creating threshold log file (%s)", p)
+			analyzerLogger.Fatal().Msgf("Error while creating threshold log file (%s)", p)
 		}
 		thresholdLogger = zerolog.New(f).With().Logger()
 		thresholdOutputFile = f.Name()
@@ -320,7 +307,7 @@ func InitDataLogging() {
 		p = filepath.Join(outputDir, fmt.Sprintf(anomalyFileNameFormat, seriesName))
 		f, err = os.Create(p)
 		if err != nil {
-			log.Fatal().Msgf("Error while creating anomaly log file (%s)", p)
+			analyzerLogger.Fatal().Msgf("Error while creating anomaly log file (%s)", p)
 		}
 		anomalyLogger = zerolog.New(f).With().Logger()
 		anomalyOutputFile = f.Name()
@@ -331,33 +318,30 @@ func InitDataLogging() {
 	}
 }
 
-// Zero aims to zero the internal state of the miner. So it removes all
-// the loaded stats, initialize some variables and read the config file.
-// In particular it creates a new series name, so the data logs will be placed in
-// new files/db.series
+// Zero aims to zero the internal state of the analyzer. So it removes all
+// the loaded stats, initialize some variables [and read the config file](NOT ANYMORE).
 func Zero() error {
-	if !IsRunning() {
-		// SetPeriod(viper.GetDuration("analyzer.period"))
-		// stats := viper.GetStringSlice("an")
-		// // period = viper.GetDuration("analyzer.period")
-		// logDataToFile = viper.GetBool("analyzer.datalog.file")
-		// logDataToInfluxDB = viper.GetBool("analyzer.datalog.influxdb")
-
-		// package variables
-		counterID = make(map[string]int)
-		statMap = make(map[int]stats.StatInterface)
-		statID = 0
-		statValues = make(map[string]float64)
-		counterValues = make(map[string]uint64)
-		defaultEventChannel = make(chan int)
-		running = false
-
-		InitConfig()
-		log.Info().Msg("Analyzer package reloaded")
-		return nil
+	if IsRunning() {
+		analyzerLogger.Error().Msg("Cannot reload, monitoring in progress")
+		return errors.New("Cannot reload, monitoring in progress")
 	}
-	log.Error().Msg("Cannot reload, monitoring in progress")
-	return errors.New("Cannot reload, monitoring in progress")
+
+	// Reset the miner
+	miner.Zero()
+
+	// package variables
+	counterID = make(map[string]int)
+	statMap = make(map[int]stats.StatInterface)
+	statID = 0
+	statValues = make(map[string]float64)
+	counterValues = make(map[string]uint64)
+	defaultEventChannel = make(chan int)
+	running = false
+
+	// InitConfig()
+	analyzerLogger.Info().Msg("Analyzer package (re)loaded")
+	return nil
+
 }
 
 // Config return the configuration of the analyzer/miner
@@ -368,7 +352,7 @@ func Config() map[string]interface{} {
 // DisableLogging disable the log output. Warning! It disables the log
 // for all the modules using zerolog
 func DisableLogging() {
-	log.Info().Msg("Disabling logging")
+	analyzerLogger.Info().Msg("Disabling logging")
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 }
 
@@ -382,39 +366,97 @@ func DisableLogging() {
 func SetLogging(level int) {
 	l := zerolog.Level(level)
 	zerolog.SetGlobalLevel(l)
-	log.Info().Msgf("Enabling logging (level %s)", l.String())
+	analyzerLogger.Info().Msgf("Enabling logging (level %s)", l.String())
+}
+
+// SetFileLogging (des)activate the data/thresholds/anomaly logging
+// into files (files are saved in the outputDir directory)
+func SetFileLogging(flog bool) error {
+	if running {
+		analyzerLogger.Error().Msgf("Cannot change file logging while sniffing")
+		return errors.New("Sniffing in progress")
+	}
+	logDataToFile = flog
+	analyzerLogger.Debug().Msgf("File logging set to %t", flog)
+	return nil
+}
+
+// SetInfluxDBLogging (des)activate the data/thresholds logging
+// into influxdb (! anomalies are not logged into influxdb !)
+func SetInfluxDBLogging(ilog bool) error {
+	if running {
+		analyzerLogger.Error().Msgf("Cannot change influxdb logging while sniffing")
+		return errors.New("Sniffing in progress")
+	}
+
+	// both are true
+	if logDataToInfluxDB && ilog {
+		return errors.New("InfluxDB logging is already activated")
+	}
+
+	// Here ilog != logDataToInfluxDB
+	if ilog {
+		logDataToInfluxDB = true
+		// we have to init (see InitConfig function)
+		influxdb.InitConfig()
+	} else {
+		logDataToInfluxDB = false
+		// close the connection
+		err := influxdb.Close()
+		if err != nil {
+			analyzerLogger.Error().Msgf("Error while closing InfluxDB connection (%s)", err)
+			return err
+		}
+	}
+	analyzerLogger.Debug().Msgf("InfluxDB logging set to %t", ilog)
+	return nil
 }
 
 // SetOutputDir change the directory where the raw stats are saved (and thresholds)
-func SetOutputDir(dir string) {
-	if !running {
-		absPath, err := filepath.Abs(dir)
-		file, err := os.Open(absPath)
-		f, err := file.Stat()
-		switch {
-		case err != nil:
-			// handle the error and return
-			log.Error().Msgf("Error while changing data log directory (%s)", err)
-			return
-		case f.IsDir():
-			// it's a directory
-			outputDir = absPath
-		default:
-			// it's not a directory (but a file)
-			outputDir = filepath.Dir(absPath)
-		}
-	} else {
-		log.Error().Msgf("Cannot change output directory while sniffing")
+func SetOutputDir(dir string) error {
+	if running {
+		analyzerLogger.Error().Msgf("Cannot change output directory while sniffing")
+		return errors.New("Sniffing in progress")
 	}
+
+	absPath, err := filepath.Abs(dir)
+	if err != nil {
+		analyzerLogger.Error().Msgf("Error while changing data log directory (%s)", err)
+		return err
+	}
+
+	file, err := os.Open(absPath)
+	if err != nil {
+		analyzerLogger.Error().Msgf("Error while changing data log directory (%s)", err)
+		return err
+	}
+
+	f, err := file.Stat()
+	if err != nil {
+		analyzerLogger.Error().Msgf("Error while changing data log directory (%s)", err)
+		return err
+	}
+
+	// setting the directory
+	if f.IsDir() {
+		// it's a directory
+		outputDir = absPath
+	} else {
+		// it's not a directory (but a file)
+		outputDir = filepath.Dir(absPath)
+	}
+
+	analyzerLogger.Debug().Msgf("Output directory set to %s", outputDir)
+	return nil
 }
 
 // SetPeriod sets the duration between two stat computations
 func SetPeriod(d time.Duration) {
 	if !running {
 		period = d
-		log.Debug().Msgf("Period set to %s", d)
+		analyzerLogger.Debug().Msgf("Period set to %s", d)
 	} else {
-		log.Error().Msgf("Cannot change period while sniffing")
+		analyzerLogger.Error().Msgf("Cannot change period while sniffing")
 	}
 }
 
@@ -422,9 +464,9 @@ func SetPeriod(d time.Duration) {
 func SetSeriesName(s string) {
 	if !running {
 		seriesName = s
-		log.Debug().Msgf(`Series name set to "%s"`, s)
+		analyzerLogger.Debug().Msgf(`Series name set to "%s"`, s)
 	} else {
-		log.Error().Msgf("Cannot change series name while sniffing")
+		analyzerLogger.Error().Msgf("Cannot change series name while sniffing")
 	}
 }
 
@@ -495,8 +537,7 @@ func LoadFromNameWithCustomConfig(statname string, config map[string]interface{}
 	if err != nil {
 		return -1, err
 	}
-	id, err := load(stat)
-	return id, err
+	return load(stat)
 }
 
 // UnloadFromName removes the statistics, so it will not be monitored.
@@ -535,24 +576,36 @@ func IsRunning() bool {
 func StopStats() {
 	if running {
 		defaultEventChannel <- 0
-		log.Info().Msg("Stopping stats computation")
+		analyzerLogger.Info().Msg("Stopping stats computation")
 	}
 }
 
 // StatValues return a current snapshot of the stat values (and their thresholds)
 func StatValues() map[string]float64 {
 	if running {
-		defaultEventChannel <- 1
+		defaultEventChannel <- STAT
 		return <-defaultDataChannel
 	}
 	return nil
 }
 
+// Perfs return the current miner performances
+// func Perfs() map[string]float64 {
+// 	if running {
+// 		defaultEventChannel <- PERF
+// 		return <-defaultDataChannel
+// 	}
+// 	return nil
+// }
+
 // StartStats starts the analysis
 // func StartStats() error {
 func StartStats() error {
-	log.Info().Msg("Starting stats computation")
-	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
+	if len(GetLoadedStats()) == 0 {
+		return errors.New("No stats loaded")
+	}
+	analyzerLogger.Info().Msg("Starting stats computation")
+	analyzerLogger.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
 	defaultEventChannel, defaultDataChannel = GoRun()
 	return nil
 }
@@ -560,8 +613,11 @@ func StartStats() error {
 // StartStatsAndWait starts the analysis. It will stop only when no packets
 // have to be processed (ex: pcap file)
 func StartStatsAndWait() error {
-	log.Info().Msg("Starting stats computation")
-	log.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
+	if len(GetLoadedStats()) == 0 {
+		return errors.New("No stats loaded")
+	}
+	analyzerLogger.Info().Msg("Starting stats computation")
+	analyzerLogger.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
 	Run()
 	return nil
 }
@@ -581,20 +637,12 @@ func checkSpotOutput(id int, val float64, res int, t time.Time) {
 		alog.Str("Status", "UP_ALERT").Str("Stat", statMap[id].Name()).
 			Float64("Value", val).Int("Spot", res).
 			Float64("Probability", statMap[id].DSpot().UpProbability(val)).Msg("Alarm!")
-		// log.Warn().Str("Status", "UP_ALERT").
-		// 	Str("Stat", statMap[id].Name()).
-		// 	Float64("Value", val).Int("Spot", res).
-		// 	Float64("Probability", statMap[id].DSpot().UpProbability(val)).Msg("Alarm!")
 	} else if res == -1 {
 		alog := anomalyLogger.Warn().Time("time", t)
 		alog.Str("Status", "DOWN_ALERT").
 			Str("Stat", statMap[id].Name()).
 			Float64("Value", val).Int("Spot", res).
 			Float64("Probability", statMap[id].DSpot().DownProbability(val)).Msg("Alarm!")
-		// log.Warn().Str("Status", "DOWN_ALERT").
-		// 	Str("Stat", statMap[id].Name()).
-		// 	Float64("Value", val).Int("Spot", res).
-		// 	Float64("Probability", statMap[id].DSpot().DownProbability(val)).Msg("Alarm!")
 	}
 }
 
@@ -617,24 +665,25 @@ func analyze() {
 		name = stat.Name()
 
 		// log thresholds
-		upTh = stat.DSpot().GetUpperThreshold()
-		downTh = stat.DSpot().GetLowerThreshold()
+		if dspot := stat.DSpot(); dspot != nil {
+			upTh = dspot.GetUpperThreshold()
+			downTh = dspot.GetLowerThreshold()
 
-		fmt.Println(upTh)
-		// if upTh is NaN, it means that up data are not monitored or
-		// the calibration has not finished
-		if !math.IsNaN(upTh) {
-			tlog.Float64(name+"_UP", upTh)
-			statValues[name+"_UP"] = upTh
+			// fmt.Println(upTh)
+			// if upTh is NaN, it means that up data are not monitored or
+			// the calibration has not finished
+			if !math.IsNaN(upTh) {
+				tlog.Float64(name+"_UP", upTh)
+				statValues[name+"_UP"] = upTh
+			}
+
+			// if downTh is NaN, it means that down data are not monitored or
+			// the calibration has not finished
+			if !math.IsNaN(downTh) {
+				tlog.Float64(name+"_DOWN", downTh)
+				statValues[name+"_DOWN"] = downTh
+			}
 		}
-
-		// if downTh is NaN, it means that down data are not monitored or
-		// the calibration has not finished
-		if !math.IsNaN(downTh) {
-			tlog.Float64(name+"_DOWN", downTh)
-			statValues[name+"_DOWN"] = downTh
-		}
-
 		// compute the statistics
 		val = stat.Compute(getcounterValues(stat.Requirement()))
 
@@ -645,14 +694,21 @@ func analyze() {
 			// check alert
 			checkSpotOutput(id, val, res, curtime)
 		}
-
 		// log data
 		dlog.Float64(name, val)
 		statValues[name] = val
 
 	}
 	smux.Unlock()
-	log.Debug().Msg(fmt.Sprint(statValues))
+
+	debug := analyzerLogger.Debug()
+	for name, value := range statValues {
+		debug.Float64(name, value)
+	}
+	debug.Msg("")
+	// analyzerLogger.Debug().Msgf("%v", statValues)
+
+	// flush
 	dlog.Msg("")
 	tlog.Msg("")
 	// if data have to be sent to InfluxDB
@@ -661,15 +717,19 @@ func analyze() {
 	}
 }
 
+func startRunningInfo() {
+	analyzerLogger.Info().Msg("Start running")
+	analyzerLogger.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
+	analyzerLogger.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
+	analyzerLogger.Info().Msgf("Anomalies are logged to %s", anomalyOutputFile)
+}
+
 // Run open the device to listen
 func Run() {
 	// initialize files/influxdb to log data and thresholds
 	InitDataLogging()
-	log.Info().Msg("Start running")
-	log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
-	log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
-	log.Info().Msgf("Anomalies are logged to %s", anomalyOutputFile)
-
+	// display basic information
+	startRunningInfo()
 	// number of records
 	records := 0
 	// set the running state
@@ -678,11 +738,12 @@ func Run() {
 	minerEvent, minerData := miner.GoSniffAndYieldChannel(period)
 	// loop
 	for {
-		log.Debug().
-			Str("Function", "Sniff").
-			Int("minerEvent", len(minerEvent)).
-			Int("minerData", len(minerData)).
-			Msg("")
+		// Aimed to debug the channels
+		// analyzerLogger.Debug().
+		// 	Str("Function", "Run").
+		// 	Int("minerEvent", len(minerEvent)).
+		// 	Int("minerData", len(minerData)).
+		// 	Msg("")
 
 		select {
 		case e := <-defaultEventChannel:
@@ -690,7 +751,7 @@ func Run() {
 				release()
 				// stop the miner
 				minerEvent <- miner.STOP
-				log.Info().Msg("Stopping stats computation (controller)")
+				analyzerLogger.Info().Msg("Stopping stats computation (controller)")
 				return
 			}
 		case m := <-minerData:
@@ -698,15 +759,15 @@ func Run() {
 				// retrieve the counter values
 				for name, id := range counterID {
 					counterValues[name] = m[id]
-					log.Debug().Msg(fmt.Sprint(counterValues))
+					// analyzerLogger.Debug().Msg(fmt.Sprint(counterValues))
 				}
 				records++
 				// analyze the stats values (feed dspot, log data/thresholds)
 				analyze()
 			} else {
 				release()
-				log.Warn().Msg("Stopping stats computation (miner)")
-				log.Info().Msgf("Number of records: %d", records)
+				analyzerLogger.Warn().Msg("Stopping stats computation (miner)")
+				analyzerLogger.Info().Msgf("Number of records: %d", records)
 				return
 			}
 		}
@@ -721,27 +782,26 @@ func GoRun() (chan int, chan map[string]float64) {
 	go func() {
 		// initialize files/influxdb to log data and thresholds
 		InitDataLogging()
-		log.Info().Msg("Start running")
-		log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
-		log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
-		log.Info().Msgf("Anomalies are logged to %s", anomalyOutputFile)
+		// display basic information
+		startRunningInfo()
 		// set the running state
 		running = true
 		// sniff
 		minerEvent, minerData := miner.GoSniffAndYieldChannel(period)
 		// loop
 		for {
-			log.Debug().
-				Str("Function", "Sniff").
-				Int("minerEvent", len(minerEvent)).
-				Int("minerData", len(minerData)).
-				Msg("")
+			// Aimed to debug the channels
+			// analyzerLogger.Debug().
+			// 	Str("Function", "GoRun").
+			// 	Int("minerEvent", len(minerEvent)).
+			// 	Int("minerData", len(minerData)).
+			// 	Msg("")
 
 			select {
 			case e := <-eventChannel:
 				switch e {
 				case 0: // stop order
-					log.Info().Msg("Receiving STOP message")
+					analyzerLogger.Info().Msg("Receiving STOP message")
 					// stop the miner
 					minerEvent <- miner.STOP
 					// release all
@@ -749,33 +809,33 @@ func GoRun() (chan int, chan map[string]float64) {
 					running = false
 					// close(eventChannel)
 					//
-					log.Info().Msg("Stopping stats computation (controller)")
+					analyzerLogger.Info().Msg("Stopping stats computation (controller)")
 					return
-				case 1: // send data
+				case STAT: // send data
 					smux.Lock()
 					snapshot := make(map[string]float64)
 					for s, v := range statValues {
 						snapshot[s] = v
 					}
 					smux.Unlock()
-					fmt.Println(snapshot)
 					dataChannel <- snapshot
+					// case PERF: // send PERF signal (perfs are sent to minerData)
+					// 	minerEvent <- miner.PERF
 				}
 			case m := <-minerData:
 				if m != nil {
 					// retrieve the counter values
 					for name, id := range counterID {
 						counterValues[name] = m[id]
-						log.Debug().Msg(fmt.Sprint(counterValues))
+						// analyzerLogger.Debug().Msg(fmt.Sprint(counterValues))
 					}
 					// analyze the stats values (feed dspot, log data/thresholds)
 					analyze()
+
 				} else {
 					// release
 					running = false
-					// close(eventChannel)
-					//
-					log.Warn().Msg("Stopping stats computation (miner)")
+					analyzerLogger.Warn().Msg("Stopping stats computation (miner)")
 					return
 				}
 			}
@@ -783,121 +843,6 @@ func GoRun() (chan int, chan map[string]float64) {
 	}()
 	return eventChannel, dataChannel
 }
-
-// // GoRun open the device to listen
-// func GoRun() (chan int, chan map[string]float64) {
-// 	eventChannel := make(chan int)
-// 	dataChannel := make(chan map[string]float64)
-
-// 	go func() {
-// 		// initialize files/influxdb to log data and thresholds
-// 		InitDataLogging()
-// 		log.Info().Msg("Start running")
-// 		log.Info().Msgf("Raw data are logged to %s", rawDataOutputFile)
-// 		log.Info().Msgf("Thresholds are logged to %s", thresholdOutputFile)
-// 		log.Info().Msgf("Anomalies are logged to %s", anomalyOutputFile)
-
-// 		// set the tick period to the miner
-// 		// miner.SetTickPeriod(period)
-// 		// set the running state
-// 		running = true
-// 		// sniff
-// 		minerEvent, minerData, minerTime := miner.GoSniff()
-// 		// loop
-// 		for {
-// 			log.Debug().
-// 				Str("Function", "GoSniff").
-// 				Int("eventChannel", len(eventChannel)).
-// 				Int("dataChannel", len(dataChannel)).
-// 				Int("minerTime", len(minerTime)).
-// 				Msg("")
-// 			select {
-// 			case e := <-eventChannel:
-// 				switch e {
-// 				case 0: // stop order
-// 					log.Info().Msg("Receiving STOP message")
-// 					// stop the miner
-// 					minerEvent <- miner.STOP
-// 					// release all
-// 					release()
-// 					log.Info().Msg("Stopping stats computation (controller)")
-// 					return
-// 				case 1: // send data
-// 					smux.Lock()
-// 					snapshot := make(map[string]float64)
-// 					for s, v := range statValues {
-// 						snapshot[s] = v
-// 					}
-// 					smux.Unlock()
-// 					fmt.Println(snapshot)
-// 					dataChannel <- snapshot
-// 				}
-// 			case <-minerTime:
-// 				if !miner.IsSniffing() {
-// 					release()
-// 					log.Warn().Msg("Stopping stats computation (miner)")
-// 					return
-// 				}
-// 				// get the stats values (call miner counters etc.)
-// 				// counters are reset
-// 				m := miner.Snapshot(true, minerEvent, minerData)
-// 				for name, val := range m {
-// 					counterValues[name] = val
-// 					log.Debug().Msg(fmt.Sprint(counterValues))
-// 				}
-// 				// analyze the stats values (feed dspot, log data/thresholds/anomalies)
-// 				analyze()
-// 			}
-// 		}
-// 	}()
-// 	return eventChannel, dataChannel
-// }
-
-// // run open the device to listen
-// func run() {
-// 	var ticker <-chan time.Time
-// 	var e int
-
-// 	// initialize files/influxdb to log data and thresholds
-// 	InitDataLogging()
-
-// 	// Define the clock
-// 	if miner.IsDeviceInterface() {
-// 		//seriesName = miner.GetDevice() + "_" + seriesNameFromCurrentTime()
-// 		// live ticker
-// 		ticker = time.Tick(period)
-// 	} else {
-// 		// the series name is then the name of the file
-// 		//seriesName = path.Base(miner.GetDevice())
-// 		// the timestamps of the capture define the clock
-// 		ticker = miner.Tick(period)
-// 	}
-
-// 	// set the running state
-// 	running = true
-
-// 	// loop
-// 	for {
-// 		select {
-// 		case e = <-events:
-// 			if e == 0 { // stop order
-// 				release()
-// 				log.Info().Msg("Stopping stats computation (controller)")
-// 				return
-// 			}
-// 		case <-ticker:
-// 			if !miner.IsSniffing() {
-// 				release()
-// 				log.Warn().Msg("Stopping stats computation (miner)")
-// 				return
-// 			}
-// 			// get the stats values (call miner counters etc.)
-// 			updateAndReset()
-// 			// analyze the stats values (feed dspot, log data/thresholds)
-// 			analyze()
-// 		}
-// 	}
-// }
 
 //------------------------------------------------------------------------------
 // MAIN
