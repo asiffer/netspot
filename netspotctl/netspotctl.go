@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// NullArgs denotes an empty type
 type NullArgs struct{}
 
 var (
@@ -123,6 +124,7 @@ func InitConsoleWriter() {
 	zerolog.TimeFieldFormat = time.StampNano
 }
 
+// Init readthe config file and set the options
 func Init() {
 	// var err error
 	viper.SetConfigName("netspotctl")
@@ -131,7 +133,7 @@ func Init() {
 	viper.AddConfigPath(".")
 
 	viper.SetDefault("netspot.host", "localhost")
-	viper.SetDefault("netspot.port", 11000)
+	viper.SetDefault("netspot.port", 11001)
 
 	viper.ReadInConfig()
 	host := viper.GetString("netspot.host")
@@ -218,12 +220,12 @@ func availableInterfaces() []string {
 // net package includes a dedicated function. So these two function
 // add timeout functionnality.
 
-// Dial with Timeout
+// DialHTTPTimeout dials with Timeout
 func DialHTTPTimeout(network, address string, timeout time.Duration) (*rpc.Client, error) {
 	return DialHTTPPathTimeout(network, address, rpc.DefaultRPCPath, timeout)
 }
 
-// DialHTTPPath connects to an HTTP RPC server
+// DialHTTPPathTimeout connects to an HTTP RPC server
 // at the specified network address and path.
 func DialHTTPPathTimeout(network, address, path string, timeout time.Duration) (*rpc.Client, error) {
 	var err error
@@ -453,7 +455,8 @@ func execIface() {
 }
 
 func execLive() {
-	RunUI2()
+	// RunUI2()
+	fmt.Println("This feature is not implemented yet...")
 }
 
 func executor(s string) {

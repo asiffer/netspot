@@ -1,6 +1,6 @@
 name: netspot
 version: "1.3"
-summary: A basic IDS with statistical learning
+summary: A simple IDS with statistical learning
 description: |
   NetSpot is a basic network intrusion dection system
   which aims to detect abnormal behaviours from network
@@ -10,9 +10,6 @@ base: core18
 
 grade: devel
 confinement: devmode
-
-# architectures:
-#   - build-on: amd64
 
 parts:
   netspot:

@@ -2,11 +2,17 @@
 
 ![NetSpot_logo](assets/bat.png)
 
-`netspot` is a basic *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
+`netspot` is a simple *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
 The `netspot` ML core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour.
 
-`netspot` works as a server and can be controlled trough an HTTP API.
+`netspot` works as a server and can be controlled trough an HTTP REST API (a `Go` RPC endpoint is also available).
 The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
+
+## Get started
+
+### Installation
+
+
 
 ## Architecture overview
 

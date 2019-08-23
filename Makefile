@@ -36,12 +36,15 @@ $(info SRC_DIR="$(SRC_DIR)")
 
 # golang compiler
 #GO := /usr/local/go/bin/go
-GO := env GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
+GO := GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
 
 # build directories
 BIN_DIR := $(SRC_DIR)/bin
-PKG_DIR := $(SRC_DIR)/dist
-PKG_BUILD_DIR = $(PKG_DIR)/$(OS)/$(ARCH)
+DIST_DIR := $(SRC_DIR)/dist
+DOCKER_DIR := $(DIST_DIR)/docker
+DEBIAN_DIR := $(DIST_DIR)/debian
+SNAP_DIR := $(DIST_DIR)/snap
+# PKG_BUILD_DIR = $(PKG_DIR)/$(OS)/$(ARCH)
 
 # installation
 DESTDIR :=
@@ -80,7 +83,6 @@ build: build_netspot build_netspotctl
 
 install: install_bin install_config install_service # post_install
 
-package: build pre_debian debian
 
 
 # atomic actions
@@ -91,7 +93,7 @@ netspot_deps:
 
 netspotctl_deps:
 	@echo "\033[34m[Retrieving netspotctl build dependencies]\033[0m"
-	@for dep in $(GO_DEP_NETSPOT) ; do echo "Getting "$$dep"... "; go get -u github.com/$$dep; done
+	@for dep in $(GO_DEP_NETSPOTCTL) ; do echo "Getting "$$dep"... "; go get -u github.com/$$dep; done
 
 build_netspot:
 	@echo "\033[34m[Building netspot]\033[0m"
@@ -141,48 +143,25 @@ install_service:
 	@install $(EXTRA_DIR)/netspot.service $(INSTALL_SERVICE_DIR)/
 	@echo $(OK)
 
-# post_install:
-# 	@echo -n "Creating user 'netspot'...           "
-# 	@adduser --no-create-home --disabled-password --disabled-login netspot
-# 	@echo $(OK)
-# 	@echo -n "Setting CAP_NET_RAW, CAP_NET_ADMIN capabilities... "
-# 	@setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $(INSTALL_BIN_DIR)/netspot
-# 	@echo $(OK)
+debian: build
+	mkdir -p $(DEBIAN_DIR)
+	dpkg-buildpackage
+	cp -u ../*.deb $(DEBIAN_DIR)
 
-
-# pre_debian:
-# 	@mkdir -p $(PKG_DIR)
-# 	@mkdir -p $(PKG_DIR)/$(OS)
-# 	@mkdir -p $(PKG_DIR)/$(OS)/$(ARCH)
-
-# debian:
-# 	@echo "\033[34m[Packaging]\033[0m"
-# 	@echo "Running fpm...                       "
-# 	@fpm -f -s dir \
-# 			-t deb \
-# 			-n $(PACKAGE_NAME) \
-# 			-v $(VERSION) \
-# 			-a $(ARCH) \
-# 			-m "alban.siffer@irisa.fr" \
-# 			-p $(PKG_BUILD_DIR)/ \
-# 			--category "network" \
-# 			--description $(PACKAGE_DESC) \
-# 			--deb-suggests "influxdb" \
-# 			--deb-suggests "grafana" \
-# 			--deb-systemd $(EXTRA_DIR)/netspot.service \
-# 			--after-install $(EXTRA_DIR)/post-install.sh \
-# 			$(BIN_DIR)/netspot=$(INSTALL_BIN_DIR)/ \
-# 			$(BIN_DIR)/netspotctl=$(INSTALL_BIN_DIR)/ \
-# 			$(EXTRA_DIR)/netspot.toml=$(INSTALL_CONF_DIR)/ \
-# 			$(EXTRA_DIR)/netspotctl.toml=$(CTL_INSTALL_CONF_DIR)/
-# 	@echo $(OK)"\n"
 
 docker:
 # Build a docker image according to the OS and the architecture
 # They can be modified through ARCH and OS
-	docker build -t $(MAINTAINER)/netspot-$(ARCH) --build-arg GOARCH=$(ARCH) --build-arg GOOS=$(OS) ./
+	# It is likely to ask root privileges
+	docker build --rm -t $(MAINTAINER)/netspot-$(ARCH) --build-arg GOARCH=$(ARCH) --build-arg GOOS=$(OS) ./
 	docker tag $(MAINTAINER)/netspot-$(ARCH) $(MAINTAINER)/netspot-$(ARCH):$(VERSION)
-	docker save -o images/docker-netspot-$(ARCH)_$(VERSION).tar.gz $(MAINTAINER)/netspot-$(ARCH):$(VERSION)
+	mkdir -p $(DOCKER_DIR)
+	docker save -o $(DOCKER_DIR)/docker-netspot-$(ARCH)_$(VERSION).tar.gz $(MAINTAINER)/netspot-$(ARCH):$(VERSION)
+
+snap:
+	snapcraft
+	mkdir -p $(SNAP_DIR)
+	mv *.snap $(SNAP_DIR)
 
 purge:
-	rm -rf $(PKG_DIR)
+	# rm -rf $(PKG_DIR)
