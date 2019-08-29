@@ -507,7 +507,9 @@ func executor(s string) {
 		if len(words) > 2 {
 			switch words[1] {
 			case "device":
-				execSetDevice(words[2])
+				// A full path (with spaces) must be wholly taken
+				execSetDevice(strings.Join(words[2:], " "))
+				// execSetDevice(words[2])
 			case "promisc":
 				switch words[2] {
 				case "yes", "Yes", "true", "True", "y", "Y":
