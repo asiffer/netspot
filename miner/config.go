@@ -5,6 +5,7 @@ package miner
 import (
 	"fmt"
 	"netspot/miner/counters"
+	"path/filepath"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -109,12 +110,15 @@ func SetDevice(dev string) int {
 	if contains(AvailableDevices, dev) {
 		device = dev
 		iface = true
-	} else if fileExists(dev) {
-		device = dev
-		iface = false
 	} else {
-		minerLogger.Error().Msgf("Unknown device (%s)", dev)
-		return 1
+		dev, err := filepath.Abs(dev)
+		if fileExists(dev) && err == nil {
+			device = dev
+			iface = false
+		} else {
+			minerLogger.Error().Msgf("Unknown device (%s)", dev)
+			return 1
+		}
 	}
 	minerLogger.Info().Msgf(`Set device to "%s"`, dev)
 	return 0
