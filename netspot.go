@@ -64,7 +64,7 @@ func init() {
 	viper.SetDefault("server.tls", false)
 	viper.SetDefault("server.cert", "./cert.pem")
 	viper.SetDefault("server.key", "./key.pem")
-	viper.SetDefault("server.rpc", false)
+	viper.SetDefault("server.rpc", true)
 	viper.SetDefault("server.rpc_addr", "127.0.0.1:11001")
 
 	// init console
@@ -120,11 +120,17 @@ func InitConsoleWriter() {
 	}
 
 	output.FormatMessage = func(i interface{}) string {
+		if i == nil {
+			return ""
+		}
 		s, ok := i.(string)
 		if !ok {
 			log.Debug().Msgf("Console format error with message: %v", i)
 		}
 		size := len(s)
+		if size < 20 {
+			return fmt.Sprintf("%-20s", i)
+		}
 		if size < 50 {
 			return fmt.Sprintf("%-50s", i)
 		}

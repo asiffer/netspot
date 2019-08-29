@@ -116,10 +116,10 @@ install_config:
 	@mkdir -p $(CTL_INSTALL_CONF_DIR)
 	@echo $(OK)
 	@echo -n "Installing netspot config file...    "
-	@install $(EXTRA_DIR)/netspot.toml $(INSTALL_BIN_DIR)/
+	@install $(EXTRA_DIR)/netspot.toml $(INSTALL_CONF_DIR)/
 	@echo $(OK)
 	@echo -n "Installing netspotctl config file... "
-	@install $(EXTRA_DIR)/netspotctl.toml $(INSTALL_BIN_DIR)/
+	@install $(EXTRA_DIR)/netspotctl.toml $(INSTALL_CONF_DIR)/
 	@echo $(OK)
 
 install_bin:

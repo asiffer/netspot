@@ -22,7 +22,7 @@ key = "extra/key.pem"
 
 # rpc activates the Golang RPC server. It directly exposes some methods
 # which are easy to call from a go-written client. 
-rpc = false
+rpc = true
 
 # rpc_addr defines the ip address and tcp port
 # of the RPC endpoint

@@ -701,11 +701,12 @@ func analyze() {
 	}
 	smux.Unlock()
 
+	// Debug stat values
 	debug := analyzerLogger.Debug()
 	for name, value := range statValues {
 		debug.Float64(name, value)
 	}
-	debug.Msg("")
+	debug.Msg("Stat values")
 	// analyzerLogger.Debug().Msgf("%v", statValues)
 
 	// flush
