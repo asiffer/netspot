@@ -23,8 +23,8 @@ const (
 )
 
 const (
-	// CHANSIZE is the size of the counters channel
-	CHANSIZE int = 10
+// CHANSIZE is the size of the counters channel
+// CHANSIZE int = 10
 )
 
 // CounterConstructor is a generic counter constructor
@@ -112,6 +112,10 @@ func (ctr *BaseCtr) SwitchRunningOff() {
 // Run starts a counter, making it waiting for new incoming layers
 func Run(ctr BaseCtrInterface) {
 	switch ctr.(type) {
+	case ARPCtrInterface:
+		if ipctr, ok := ctr.(ARPCtrInterface); ok {
+			RunARPCtr(ipctr)
+		}
 	case IPCtrInterface:
 		if ipctr, ok := ctr.(IPCtrInterface); ok {
 			RunIPCtr(ipctr)
