@@ -360,6 +360,7 @@ func GoSniff() (EventChannel, DataChannel) {
 					// counter values are retrieved and sent
 					// to the channel. The counters are also
 					// reset.
+					goroutinePool.Wait()
 					minerLogger.Debug().Msg("Receiving FLUSH")
 					dataChannel <- getValuesAndReset(&goroutinePool)
 				// case PERF:
@@ -535,6 +536,8 @@ func GoSniffAndYieldChannel(period time.Duration) (EventChannel, DataChannel) {
 // dispatch sends the incoming packet to the loaded
 // counters
 func dispatch(goroutinePool *sync.WaitGroup, pkt gopacket.Packet) {
+	// NEW
+	var arp *layers.ARP
 	var ip *layers.IPv4
 	var tcp *layers.TCP
 	var udp *layers.UDP
@@ -562,10 +565,19 @@ func dispatch(goroutinePool *sync.WaitGroup, pkt gopacket.Packet) {
 				// do nothing
 			}
 		}
+	} else {
+		// NEW
+		arp, _ = pkt.Layer(layers.LayerTypeARP).(*layers.ARP)
 	}
 
 	for _, ctr := range counterMap {
 		switch ctr.(type) {
+		// NEW
+		case counters.ARPCtrInterface:
+			if arp != nil {
+				arpctr, _ := ctr.(counters.ARPCtrInterface)
+				arpctr.LayPipe() <- arp
+			}
 		case counters.IPCtrInterface:
 			if ip != nil {
 				ipctr, _ := ctr.(counters.IPCtrInterface)
