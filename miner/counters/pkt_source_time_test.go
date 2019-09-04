@@ -10,7 +10,7 @@ import (
 
 func TestTimeCounter(t *testing.T) {
 	title("Testing Time counter")
-	ctr := &TIME{PktCtr: NewPktCtr(), Counter: 0}
+	ctr := &SOURCE_TIME{PktCtr: NewPktCtr(), Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "TIME" {
 		testERROR()
