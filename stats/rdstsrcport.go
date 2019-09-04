@@ -25,6 +25,7 @@ func (stat *RDstSrcPort) Name() string {
 
 // Requirement returns teh requested counters to compute the stat
 func (stat *RDstSrcPort) Requirement() []string {
+	// return []string{"NB_UNIQ_SRC_PORT", "NB_UNIQ_DST_PORT"}
 	return []string{"NB_UNIQ_DST_PORT", "NB_UNIQ_SRC_PORT"}
 }
 
