@@ -113,8 +113,8 @@ func (ctr *BaseCtr) SwitchRunningOff() {
 func Run(ctr BaseCtrInterface) {
 	switch ctr.(type) {
 	case ARPCtrInterface:
-		if ipctr, ok := ctr.(ARPCtrInterface); ok {
-			RunARPCtr(ipctr)
+		if arpctr, ok := ctr.(ARPCtrInterface); ok {
+			RunARPCtr(arpctr)
 		}
 	case IPCtrInterface:
 		if ipctr, ok := ctr.(IPCtrInterface); ok {
