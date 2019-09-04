@@ -24,7 +24,7 @@ type TCPCtr struct {
 func NewTCPCtr() TCPCtr {
 	return TCPCtr{
 		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan *layers.TCP, CHANSIZE)}
+		Lay:     make(chan *layers.TCP)}
 }
 
 // LayPipe returns the TCP layer channel of the TCP counter

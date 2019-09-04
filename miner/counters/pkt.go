@@ -15,7 +15,7 @@ type PktCtrInterface interface {
 	LayPipe() chan gopacket.Packet
 }
 
-// PktCtr is the generic IP counter (inherits from BaseCtr)
+// PktCtr is the generic Pkt counter (inherits from BaseCtr)
 type PktCtr struct {
 	BaseCtr
 	Lay chan gopacket.Packet
@@ -25,15 +25,15 @@ type PktCtr struct {
 func NewPktCtr() PktCtr {
 	return PktCtr{
 		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan gopacket.Packet, CHANSIZE)}
+		Lay:     make(chan gopacket.Packet)}
 }
 
-// LayPipe returns the IPv4 layer channel of the IP counter
+// LayPipe returns the layer channel of the counter
 func (ctr *PktCtr) LayPipe() chan gopacket.Packet {
 	return ctr.Lay
 }
 
-// RunPktCtr starts an IP counter
+// RunPktCtr starts a PKT counter
 func RunPktCtr(ctr PktCtrInterface) {
 	ctr.SwitchRunningOn()
 	for {
