@@ -52,7 +52,9 @@ func (stat *Traffic) Compute(ctrvalues []uint64) float64 {
 	if deltaTime == 0 || nbPackets == 0 {
 		output = 0.
 	} else {
-		output = float64(nbPackets) / (1e-9 * float64(deltaTime))
+		// try to compute pkt/ms
+		output = 1e6 * float64(nbPackets) / float64(deltaTime)
+		// output = float64(nbPackets) / (1e-9 * float64(deltaTime))
 	}
 
 	stat.lastTime = ctrvalues[1]

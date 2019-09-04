@@ -3,6 +3,7 @@
 package stats
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
@@ -38,7 +39,7 @@ func TestTRAFFIC(t *testing.T) {
 	}
 
 	checkTitle("Checking computation 2/3...")
-	ctrvalues = []uint64{17, 100000000}
+	ctrvalues = []uint64{17, 100000}
 	statVal = stat.Compute(ctrvalues)
 	if statVal != 170. {
 		testERROR()
@@ -48,11 +49,12 @@ func TestTRAFFIC(t *testing.T) {
 	}
 
 	checkTitle("Checking computation 3/3...")
-	ctrvalues = []uint64{25, 200000000}
+	ctrvalues = []uint64{25, 300000}
 	statVal = stat.Compute(ctrvalues)
-	if statVal != 250. {
+	if statVal != 125.0 {
 		testERROR()
-		t.Errorf("Expected 250., got %f", statVal)
+		t.Errorf("Expected 125.0, got %f", statVal)
+		fmt.Println(statVal)
 	} else {
 		testOK()
 	}
