@@ -1,5 +1,5 @@
 [Unit]
-Description=NetSpot: A basic IDS with statistical learning
+Description=NetSpot: A simple IDS with statistical learning
 
 [Service]
 ExecStart=/usr/bin/netspot -c /etc/netspot/netspot.toml -l 1 
