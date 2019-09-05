@@ -1,4 +1,6 @@
-# netspot config file
+# -------------------------------------------------------------------------------------- #
+# ----------------------------- NetSpot configuration file ----------------------------- #
+# -------------------------------------------------------------------------------------- #
 
 [server]
 # log_level defines the verbosity of the server logs 
@@ -28,6 +30,15 @@ rpc = true
 # of the RPC endpoint
 rpc_addr = "127.0.0.1:11001"
 
+[miner]
+# name of the interface to listen or dump/pcap file path
+device = "eno1"
+# device = "/path/to/pcap/file"
+# interface only
+promiscuous = true
+snapshot_len = 65535
+timeout = "20s"
+
 [analyzer]
 # time between two statistics computations
 period = "1s"
@@ -44,16 +55,6 @@ file = true
 # output_dir is the directory which contains the logs
 output_dir = "/tmp" # file mode only
 
-[miner]
-# name of the interface to listen or dump/pcap file path
-#device = "enp2s0"
-#device = "enx84a93e22a3fb"
-device = "/data/kitsune/Mirai/Mirai_pcap.pcap"
-# interface only
-promiscuous = true
-snapshot_len = 65535
-timeout = "20s"
-
 [influxdb]
 # influxdb server details
 addr = "127.0.0.1"
@@ -66,12 +67,11 @@ batch_size = 10
 # the agent_name is just a tag for influxdb
 agent_name = "unknown"
 
-
 [dspot]
 # default values of DSpot
 depth = 200
-q = 1e-4
-n_init = 2500
+q = 5e-5
+n_init = 2000
 level = 0.99
 up = true
 down = false
