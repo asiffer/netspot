@@ -1,13 +1,15 @@
 # netspot
 
-![NetSpot_logo](assets/netspot.png)
+<!-- ![NetSpot_logo](assets/netspot.png) -->
 
-<img src="assets/netspot.png" alt="drawing" width="200"/>
+<img src="assets/netspot.png" alt="drawing" width="300"/>
 
 `netspot` is a simple *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
 The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic. As *a good sketch is better than a long speech*, we illustrate what `netspot` does below.
 
-![NetSpot_logo](assets/plot.png)
+<img src="assets/plot.png" alt="drawing" width="80%" align="center"/>
+
+<!-- ![NetSpot_logo](assets/plot.png) -->
 
 `netspot` works as a server and can be controlled trough an HTTP REST API (a `Go` RPC endpoint is also available).
 The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
