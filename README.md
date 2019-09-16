@@ -1,6 +1,5 @@
 # netspot
 
-<!-- ![NetSpot_logo](assets/netspot.png) -->
 
 <img src="assets/netspot.png" alt="drawing" width="300"/>
 
@@ -13,6 +12,9 @@ The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statisti
 
 `netspot` works as a server and can be controlled trough an HTTP REST API (a `Go` RPC endpoint is also available).
 The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
+
+{:toc}
+
 
 ## Installation
 
@@ -50,9 +52,9 @@ docker run --rm --name=netspot \
                 asiffer/netspot-amd64:1.3
 ```
 
-### Snap package
+<!-- ### Snap package
 
-Finally, `netspot` can also be installed through a `snap` package.
+Finally, `netspot` can also be installed through a `snap` package. -->
 
 
 ## REST API
@@ -107,6 +109,10 @@ When a `SPOT` instance finds an abnormal value, it merely logs it (currently to 
 This tool is available through a debian package. Next I will show how to implement Counters/Stats and how to use the controller.
 
 ## Notes
+
+### Version 1.3
+
+The IDS 
 
 ### Version 1.2
 
