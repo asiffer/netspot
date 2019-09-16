@@ -63,7 +63,9 @@ Finally, `netspot` can also be installed through a `snap` package. -->
 
 ## Architecture overview
 
-![miner](assets/archi.svg)
+<img src="assets/archi.svg" alt="Architecture" width="900" align="middle"/>
+
+<!-- ![miner](assets/archi.svg) -->
 
 At the lowest level, `netspot` parse packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
 The source can either be an network interface or a .pcap file (network capture).
