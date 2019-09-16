@@ -91,6 +91,13 @@ func fileExists(path string) bool {
 	return true
 }
 
+func removeCharacters(s string, char []string) string {
+	for _, c := range char {
+		s = strings.Replace(s, c, "", -1)
+	}
+	return s
+}
+
 //------------------------------------------------------------------------------
 // INTERNAL FUNCTIONS
 //------------------------------------------------------------------------------
@@ -171,6 +178,7 @@ func InitConsoleWriter() {
 	output.PartsOrder = []string{"time", "level", "caller", "message"}
 	log.Logger = log.Output(output)
 	zerolog.TimeFieldFormat = time.StampNano
+	// zerolog.TimeFieldFormat = time.RFC3339Nano
 
 	// At the beginning the debug level is set
 	zerolog.SetGlobalLevel(0)
@@ -195,7 +203,7 @@ func LoadConfig(file string) {
 	viper.ReadInConfig()
 
 	// server configuration
-	log.Info().Msg("Config loaded")
+	log.Info().Msgf("Config loaded (%s)", file)
 }
 
 // InitConfig set the server configuration from the config file
@@ -249,6 +257,27 @@ func UpdateServerConfigFromCli(c *cli.Context) {
 
 }
 
+// UpdateInternalConfigFromCli updates the Miner and the Analyzer
+// according to input CLI parameters
+func UpdateInternalConfigFromCli(c *cli.Context) {
+	// device
+	if c.IsSet("device") || c.IsSet("d") {
+		miner.SetDevice(c.String("device"))
+	}
+
+	// period
+	if c.IsSet("period") || c.IsSet("p") {
+		analyzer.SetPeriod(c.Duration("period"))
+	}
+
+	// stats
+	if c.IsSet("load-stat") || c.IsSet("s") {
+		for _, s := range c.StringSlice("load-stats") {
+			analyzer.LoadFromName(s)
+		}
+	}
+}
+
 // InitSubpackages initialize the config of the miner and
 // the analyzer.
 func InitSubpackages() {
@@ -259,10 +288,10 @@ func InitSubpackages() {
 // StartServer (it receives the cli arguments)
 func StartServer(c *cli.Context) {
 	// load config
-	if c.IsSet("config") {
+	if c.IsSet("config") || c.IsSet("c") {
 		LoadConfig(c.String("config"))
 	} else {
-		LoadConfig("./netspot.toml")
+		LoadConfig("/etc/netspot/netspot.toml")
 	}
 
 	// Initialize the server configuration
@@ -277,6 +306,16 @@ func StartServer(c *cli.Context) {
 	// Initialize the subpackages
 	InitSubpackages()
 
+	// NEW: update internal config from cli parameters
+	UpdateInternalConfigFromCli(c)
+
+	// NEW: Direct run (Offline mode, no server)
+	if c.IsSet("run") {
+		analyzer.StartStatsAndWait()
+		return
+	}
+
+	// SERVER CASE
 	// com channel
 	com := make(chan error)
 
@@ -311,8 +350,15 @@ func StartServer(c *cli.Context) {
 func InitApp() {
 	app = cli.NewApp()
 	app.Name = "NetSpot"
-	app.Usage = "A basic IDS with statistical learning"
+	app.Usage = "A simple IDS with statistical learning"
 	app.Version = "1.3"
+	app.Description = `NetSpot is a simple 
+	Intrusion Detection System (IDS) which monitors network 
+	statistics and detect abnormal events. It mainly relies on the SPOT algorithm 
+	(https://asiffer.github.io/libspot/) which flags extreme events on high 
+	throughput streaming data. `
+	app.Description = removeCharacters(app.Description, []string{"\n", "\t"})
+	app.Description += "\nNOTE: The command line options override the parameters set in the configuration file."
 
 	// CLI arguments
 	app.Flags = []cli.Flag{
@@ -341,7 +387,7 @@ func InitApp() {
 		},
 		cli.BoolFlag{
 			Name:  "tls",
-			Usage: "Activate TLS on HTTP endpoint",
+			Usage: "Activate TLS on HTTP endpoint (HTTPS)",
 		},
 		cli.StringFlag{
 			Name:  "cert",
@@ -355,6 +401,25 @@ func InitApp() {
 			Name:  "log-level, l",
 			Value: 1,
 			Usage: "Minimum logging level (0: Debug, 1: Info, 2: Warn, 3: Error)",
+		},
+		// NEW
+		cli.BoolFlag{
+			Name:  "run",
+			Usage: "Directly starts netspot once config is loaded (offline mode, no server)",
+		},
+		cli.StringFlag{
+			Name:  "device, d",
+			Usage: "Interface or .pcap file to analyze",
+		},
+		cli.DurationFlag{
+			Name:     "period, p",
+			Usage:    "Time between two stats computations",
+			Value:    2 * time.Second,
+			Required: false,
+		},
+		cli.StringSliceFlag{
+			Name:  "load-stat, s",
+			Usage: "Statistic to load",
 		},
 	}
 

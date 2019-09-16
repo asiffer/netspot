@@ -1,16 +1,57 @@
 # NetSpot
 
-![NetSpot_logo](assets/bat.png)
+![NetSpot_logo](assets/netspot.png)
 
 `netspot` is a simple *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
-The `netspot` ML core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour.
+The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic. As *a good sketch is better than a long speech*, we illustrate what `netspot` does below.
+
+![NetSpot_logo](assets/plot.png)
 
 `netspot` works as a server and can be controlled trough an HTTP REST API (a `Go` RPC endpoint is also available).
 The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
 
-## Get started
+## Installation
 
-### Installation
+### From sources
+
+You naturally have to clone the git repository and build the executables. The building process requires the `Go` compiler
+and some dependencies that you can get with `make deps`.
+
+```bash
+# clone
+git clone github.com/asiffer/netspot.git
+cd netspot
+# get dependencies
+make deps
+# build
+make
+# install (it may require root privileges)
+make install
+```
+The installation step put the two executables in `$(DESTDIR)/usr/bin`, the configuration file in `$(DESTDIR)/etc/netspot` and the `systemd` service file in `$(DESTDIR)/lib/systemd/system`. By default `$(DESTDIR)` is empty.
+
+### Debian package
+
+A debian package is also available on the release section. Two architectures are available `amd64` and `armhf` (for a Raspberry Pi for instance).
+
+### Docker container
+
+A `docker` image (based on `alpine`) also exists. Some options can naturally be added to start a new container.
+
+```sh
+docker run --rm --name=netspot \
+                --net=host \
+                -p 11000:11000 \
+                -p 11001:11001 \
+                asiffer/netspot-amd64:1.3
+```
+
+### Snap package
+
+Finally, `netspot` can also be installed through a `snap` package.
+
+
+## REST API
 
 
 

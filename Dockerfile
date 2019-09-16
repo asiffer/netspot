@@ -35,11 +35,12 @@ RUN make netspot_deps
 RUN make build_netspot ARCH=$ARCH OS=$OS
 
 FROM alpine:latest
+RUN apk add libpcap
 WORKDIR /usr/bin/
 COPY --from=builder /go/src/netspot/bin/* .
 RUN mkdir -p /etc/netspot
 COPY extra/*.toml /etc/netspot/
 CMD ["/usr/bin/netspot"]
 
-# server port for REST API (no golang RPC)
-EXPOSE 11000
+# server port for HTTP REST API (and golang RPC)
+EXPOSE 11000 11001
