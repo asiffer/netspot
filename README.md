@@ -1,6 +1,8 @@
-# NetSpot
+# netspot
 
 ![NetSpot_logo](assets/netspot.png)
+
+<img src="assets/netspot.png" alt="drawing" width="200"/>
 
 `netspot` is a simple *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
 The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic. As *a good sketch is better than a long speech*, we illustrate what `netspot` does below.
