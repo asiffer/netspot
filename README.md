@@ -1,26 +1,32 @@
 # netspot
 
 
-<img src="assets/netspot.png" alt="drawing" width="300"/>
+## Table of contents
+- [The SPOT algorithm through a single picture](#the-spot-algorithm-through-a-single-picture)
+- [Installation](#installation)
+	- [From sources](#from-sources)
+    - [Debian package](#debian-package)
+    - [Docker container](#docker-container)
+- [Get started](#get-started)
+- [REST API](#rest-api)
+- [Architecture overview](#architecture-overview)
+    - [Miner](#miner)
+    - [Analyzer](#analyzer)
+    - [Alarms](#alarms)
+- [Notes](#notes)
 
-`netspot` is a simple *anomaly-based* network IDS written in `Go` (based on [`GoPacket`](https://github.com/google/gopacket)). 
-The `netspot` core uses [`SPOT`](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic. As *a good sketch is better than a long speech*, we illustrate what `netspot` does below.
 
-<img src="assets/plot.png" alt="drawing" width="80%" align="center"/>
+## The SPOT algorithm through a single picture
 
-<!-- ![NetSpot_logo](assets/plot.png) -->
+As *a good sketch is better than a long speech*, we illustrate what the [`SPOT`](https://asiffer.github.io/libspot/) algorithm does below.
 
-`netspot` works as a server and can be controlled trough an HTTP REST API (a `Go` RPC endpoint is also available).
-The current package embeds a client: `netspotctl` but the latter could be in a different package in the future.
-
-{:toc}
-
+<center><img src="assets/plot.png" alt="drawing" width="90%"/></center>
 
 ## Installation
 
 ### From sources
 
-You naturally have to clone the git repository and build the executables. The building process requires the `Go` compiler
+You naturally have to clone the git repository and build the executables. The building process requires the `Go` compiler (I use the version `1.10.4` on linux/amd64 and `1.12.9` on linux/arm)
 and some dependencies that you can get with `make deps`.
 
 ```bash
@@ -44,26 +50,31 @@ A debian package is also available on the release section. Two architectures are
 
 A `docker` image (based on `alpine`) also exists. Some options can naturally be added to start a new container.
 
-```sh
+```bash
 docker run --rm --name=netspot \
                 --net=host \
                 -p 11000:11000 \
                 -p 11001:11001 \
+                -v netspot.toml:/etc/netspot/netspot.toml \
                 asiffer/netspot-amd64:1.3
 ```
 
-<!-- ### Snap package
 
-Finally, `netspot` can also be installed through a `snap` package. -->
+## Get started
+
+
 
 
 ## REST API
 
+The current implementation of `netspot` embeds a `Go` client. However, `netspot` can be managed by other clients since it exposes a REST API.
 
+The description of the API respects the [OpenAPI](https://swagger.io/specification/) standard and can be found [here](api/openapi.yaml). 
+The endpoints are detailed in the [api](api/) folder.
 
 ## Architecture overview
 
-<img src="assets/archi.svg" alt="Architecture" width="900" align="middle"/>
+<center><img src="assets/archi.svg" alt="Architecture" width="90%" /></center>
 
 <!-- ![miner](assets/archi.svg) -->
 
@@ -76,14 +87,15 @@ Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. Th
 
 A logging system stores the stat values and the corresponding thresholds either to files or to an [influxdb](https://www.influxdata.com/) instance.
 
-## Miner
+### Miner
 
 The goal of the `miner` is threefold:
 * parse incoming packets
 * dispatch layers to the concerned counters
 * send snapshots along time (at the desired frequency)
 
-![miner](assets/miner.svg)
+<!-- ![miner](assets/miner.svg) -->
+<center><img src="assets/miner.svg" alt="Miner" width="90%" /></center>
 
 The dispatching is done concurrently to increase performances. However when a snapshot has to be done, packets parsing is paused and we wait for all the counters to finish to process the last layers they receive. It seems like it's long, but actually it's quite fast.
 
@@ -97,7 +109,8 @@ but `netspot` is designed to be modular, so every user is free to developed its
 
 
 
-### Statistics
+### Analyzer
+
 Above the counters we can build network statistics on fixed-time intervals \(t\). For instance with the counters #SYN and #IP, the ratio of SYN packets can be computed: R_SYN = #SYN/#IP.
 
 Every statistic embeds a `SPOT` instance to monitor itself. Like the counters, you can define all the desired statistics in so far as the required counters are implemented.
@@ -106,15 +119,17 @@ Every statistic embeds a `SPOT` instance to monitor itself. Like the counters, y
 
 When a `SPOT` instance finds an abnormal value, it merely logs it (currently to a file or to InfluxDB).
 
-## Usage
-
-This tool is available through a debian package. Next I will show how to implement Counters/Stats and how to use the controller.
 
 ## Notes
 
 ### Version 1.3
 
-The IDS 
+The IDS is quite ready for a release!
+* New counters and new stats
+* New HTTP API with OpenAPI spec
+* Cleaner code
+* New distributions options (Debian package, Docker image, `armhf` binaries)
+
 
 ### Version 1.2
 

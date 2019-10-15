@@ -1,7 +1,7 @@
-#OpenAPI documentation of NetSpot REST API
+#OpenAPI documentation of netspot REST API
 openapi: 3.0.2
 info:
-  title: "NetSpot API"
+  title: "netspot API"
   description: "A simple IDS with statistical learning"
   contact:
     name: "maintainer"
@@ -10,6 +10,14 @@ info:
     name: "GPLv3"
     url: "https://www.gnu.org/licenses/gpl-3.0.html"
   version: "1.3"
+servers:
+  - url: "{protocol}://localhost:11000"
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
 
 #Endpoints
 paths:
@@ -18,7 +26,7 @@ paths:
       summary: Return the current configuration
       responses:
         "200":
-          description: The configuration of NetSpot
+          description: The configuration of netspot
           content:
             application/json:
               schema:
@@ -28,7 +36,7 @@ paths:
     post:
       summary: Set a new configuration
       requestBody:
-        description: A basic JSON
+        description: The configuration of netspot
         required: true
         content:
           application/json:
@@ -36,7 +44,7 @@ paths:
               $ref: "#/components/schemas/Config"
       responses:
         "200":
-          description: The configuration of NetSpot is well updated
+          description: The configuration of netspot is well updated
         "400":
           description: The JSON is invalid (bad format or bad key)
         "405":
@@ -47,7 +55,7 @@ paths:
       summary: "Return the statistics currently loaded"
       responses:
         "200":
-          description: "The configuration of NetSpot"
+          description: "The configuration of netspot"
           content:
             application/json:
               schema:
@@ -119,9 +127,8 @@ paths:
           description: The statistics values
           content:
             application/json: # the keys are the stats
-              example:
-                "R_SYN": 0.74
-                "R_ACK": 0.012
+              schema:
+                $ref: "#/components/schemas/Stat-Values"
         "405":
           description: The HTTP method is incorrect
 
@@ -133,7 +140,9 @@ paths:
           in: query
           schema:
             type: string
-            example: "R_SYN"
+          examples:
+            one:
+              value: "R_SYN"
           required: true
           description: Name of the statistic
       responses:
@@ -153,9 +162,9 @@ paths:
         "200":
           description: All the interfaces
           content:
-            application/json: # the keys are the stats
-              example:
-                ifaces: ["eth0", "wlp2s0", "docker0"]
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Available-Interfaces"
 
   /api/run:
     post:
@@ -167,13 +176,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Run"
-            examples:
-              array:
-                value:
-                  stats: ["R_SYN", "R_ICMP"]
-              single:
-                value:
-                  stats: "R_SYN"
       responses:
         "200":
           description: The action related to the command is performed
@@ -216,13 +218,25 @@ components:
       type: object
       properties:
         available:
-          description: List if available statistics
+          description: List of available statistics
           type: array
           items:
             type: string
       example:
         available:
           ["R_ACK", "R_ICMP", "PERF", "R_DST_SRC", "R_SYN", "AVG_PKT_SIZE"]
+
+    Available-Interfaces:
+      title: Sniffable interfaces
+      type: object
+      properties:
+        ifaces:
+          description: List of available interfaces
+          type: array
+          items:
+            type: string
+      example:
+        ifaces: ["eth0", "wlp2s0", "docker0"]
 
     Unload:
       title: Statistics to unload (possibly all)
@@ -235,7 +249,8 @@ components:
               items:
                 type: string
             - type: string
-          example: ["R_SYN", "R_ICMP"]
+      example:
+        stats: ["R_SYN", "R_ICMP"]
 
     Config:
       title: The configuration
@@ -280,8 +295,20 @@ components:
         command:
           type: string
           description: Command to send to the server
-          example: "start"
           enum: ["start", "stop", "reload", "zero"]
+      example:
+        command: "start"
+
+    Stat-Values:
+      title: Statistics values
+      type: object
+      additionalProperties:
+        type: number
+        format: double
+        description: Statistic value
+      example:
+        "R_SYN": 0.74
+        "R_ACK": 0.012
 
     Status:
       title: A DSPOT status
@@ -289,7 +316,7 @@ components:
       properties:
         drift:
           type: number
-          format: float64
+          format: double
           description: Current average value
         n:
           type: integer
@@ -312,29 +339,29 @@ components:
           format: int
           description: Total number of down excesses
         al_up:
-          type: number
+          type: integer
           description: Number of up alarms
-          format: float64
+          format: int
         al_down:
-          type: number
+          type: integer
           description: Number of down alarms
-          format: float64
+          format: int
         t_up:
           type: number
           description: Transitional up threshold
-          format: float64
+          format: double
         t_down:
           type: number
           description: Transitional down threshold
-          format: float64
+          format: double
         z_up:
           type: number
           description: Up alert threshold
-          format: float64
+          format: double
         z_down:
           type: number
           description: Down alert threshold
-          format: float64
+          format: double
       example:
         n: 9950
         ex_up: 120

@@ -14,14 +14,14 @@ $(info GO="$(GOEXEC)")
 $(info GOPATH="$(GOPATH)")
 
 # environment
-ARCH := 
-OS := 
+ARCH =
+OS =
 ifndef ARCH
-	ARCH := $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
+  ARCH := $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
 endif
 
 ifndef OS
-	OS := $(shell $(GOEXEC) env | grep GOOS= | sed -e 's/GOOS=//' -e 's/"//g' )
+  OS := $(shell $(GOEXEC) env | grep GOOS= | sed -e 's/GOOS=//' -e 's/"//g' )
 endif
 
 # Print environment variable
@@ -73,6 +73,9 @@ GO_DEP_NETSPOTCTL := 	"rs/zerolog" \
 
 # fancyness
 OK := "[\033[32mOK\033[0m]"
+
+# PHONY actions
+.PHONY: build debian docker snap
 
 # main actions
 default: build
@@ -149,9 +152,9 @@ debian: build
 	cp -u ../*.deb $(DEBIAN_DIR)
 
 
-docker:
-# Build a docker image according to the OS and the architecture
-# They can be modified through ARCH and OS
+docker: build
+	# Build a docker image according to the OS and the architecture
+	# They can be modified through ARCH and OS
 	# It is likely to ask root privileges
 	docker build --rm -t $(MAINTAINER)/netspot-$(ARCH) --build-arg GOARCH=$(ARCH) --build-arg GOOS=$(OS) ./
 	docker tag $(MAINTAINER)/netspot-$(ARCH) $(MAINTAINER)/netspot-$(ARCH):$(VERSION)

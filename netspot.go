@@ -270,12 +270,18 @@ func UpdateInternalConfigFromCli(c *cli.Context) {
 		analyzer.SetPeriod(c.Duration("period"))
 	}
 
+	// output directory
+	if c.IsSet("output-dir") || c.IsSet("o") {
+		analyzer.SetOutputDir(c.String("output-dir"))
+	}
+
 	// stats
 	if c.IsSet("load-stat") || c.IsSet("s") {
 		for _, s := range c.StringSlice("load-stats") {
 			analyzer.LoadFromName(s)
 		}
 	}
+
 }
 
 // InitSubpackages initialize the config of the miner and
@@ -346,13 +352,13 @@ func StartServer(c *cli.Context) {
 
 }
 
-// InitApp starts NetSpot
+// InitApp starts netspot
 func InitApp() {
 	app = cli.NewApp()
-	app.Name = "NetSpot"
+	app.Name = "netspot"
 	app.Usage = "A simple IDS with statistical learning"
 	app.Version = "1.3"
-	app.Description = `NetSpot is a simple 
+	app.Description = `netspot is a simple 
 	Intrusion Detection System (IDS) which monitors network 
 	statistics and detect abnormal events. It mainly relies on the SPOT algorithm 
 	(https://asiffer.github.io/libspot/) which flags extreme events on high 
@@ -370,12 +376,12 @@ func InitApp() {
 		cli.StringFlag{
 			Name:  "http",
 			Value: "localhost:11000",
-			Usage: "NetSpot server HTTP endpoint",
+			Usage: "netspot server HTTP endpoint",
 		},
 		cli.StringFlag{
 			Name:  "rpc",
 			Value: "localhost:11001",
-			Usage: "NetSpot server RPC endpoint",
+			Usage: "netspot server RPC endpoint",
 		},
 		cli.BoolFlag{
 			Name:  "no-rpc",
@@ -410,6 +416,10 @@ func InitApp() {
 		cli.StringFlag{
 			Name:  "device, d",
 			Usage: "Interface or .pcap file to analyze",
+		},
+		cli.StringFlag{
+			Name:  "output-dir, o",
+			Usage: "Output directory where records will be saved",
 		},
 		cli.DurationFlag{
 			Name:     "period, p",
