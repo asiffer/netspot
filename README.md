@@ -2,7 +2,7 @@
 
 <table style="width: 100%; display: block;">
 <tr>
-<img src="assets/netspot.png" alt="drawing" width="300" align="left" style="display: block"/>
+<img src="assets/netspot.png" alt="drawing" width="300" align="left" style="display: block; margin: 10px;"/>
 </tr>
 <tr>
 <code>netspot</code> is a simple <it>anomaly-based</it> network IDS written in <code>Go</code> (based on <a href="https://github.com/google/gopacket"><code>GoPacket</code></a>).
