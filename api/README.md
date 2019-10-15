@@ -6,6 +6,7 @@
 *Return the current configuration*
 
 **Responses**
+
 | Code | Description | Content | Return |
 |------|-------------|---------|--------|
 | **200** | The configuration of netspot | `application/json` | [Config](#config) |
@@ -15,10 +16,12 @@
 
 *Set a new configuration*
 
-**Request body**: A basic JSON (required)
+**Request body**: The configuration of netspot (required)
+
 Content (`application/json`): [Config](#config)
 
 **Responses**
+
 |  Code | Description  |
 | ------|------------- |
 |  **200** | The configuration of netspot is well updated  |
@@ -30,6 +33,7 @@ Content (`application/json`): [Config](#config)
 *Return the statistics currently loaded*
 
 **Responses**
+
 | Code | Description | Content | Return |
 |------|-------------|---------|--------|
 | **200** | The configuration of netspot | `application/json` | [Loaded](#loaded) |
@@ -40,6 +44,7 @@ Content (`application/json`): [Config](#config)
 *Return the available statistics*
 
 **Responses**
+
 | Code | Description | Content | Return |
 |------|-------------|---------|--------|
 | **200** | The available statistics | `application/json` | [Available](#available) |
@@ -50,9 +55,11 @@ Content (`application/json`): [Config](#config)
 *Load new statistics*
 
 **Request body** (required)
+
 Content (`application/json`): [Load](#load)
 
 **Responses**
+
 |  Code | Description  |
 | ------|------------- |
 |  **200** | The statistics are well loaded  |
@@ -64,9 +71,11 @@ Content (`application/json`): [Load](#load)
 *Unload already loaded statistics*
 
 **Request body** (required)
+
 Content (`application/json`): [Unload](#unload)
 
 **Responses**
+
 |  Code | Description  |
 | ------|------------- |
 |  **200** | The statistics are well unloaded  |
@@ -78,6 +87,7 @@ Content (`application/json`): [Unload](#unload)
 *Return the current values of the loaded statistics*
 
 **Responses**
+
 | Code | Description | Content | Return |
 |------|-------------|---------|--------|
 | **200** | The statistics values | `application/json` | [Stat-Values](#stat-values) |
@@ -92,6 +102,7 @@ Content (`application/json`): [Unload](#unload)
 | `stat` | `string` | Name of the statistic | True |
 
 **Responses**
+
 | Code | Description | Content | Return |
 |------|-------------|---------|--------|
 | **200** | The DSPOT status of the given statistic | `application/json` | [Status](#status) |
@@ -102,6 +113,7 @@ Content (`application/json`): [Unload](#unload)
 *Return the available interfaces*
 
 **Responses**
+
 | Code | Description | Content | Return |
 |------|-------------|---------|--------|
 | **200** | All the interfaces | `application/json` | [Available-Interfaces](#available-interfaces) |
@@ -111,9 +123,11 @@ Content (`application/json`): [Unload](#unload)
 *Perform a running action*
 
 **Request body** (required)
+
 Content (`application/json`): [Run](#run)
 
 **Responses**
+
 |  Code | Description  |
 | ------|------------- |
 |  **200** | The action related to the command is performed  |
