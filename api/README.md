@@ -1,9 +1,7 @@
 ## Routes
 
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">
-GET /api/config
-</div>
+<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/config</div>
 
 *Return the current configuration*
 
@@ -146,17 +144,13 @@ Content (`application/json`): [Run](#run)
 | `stats` | `array<string>`, `string` | List of statistics to load |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'stats': ['R_ACK', 'R_SYN', 'PERF'],
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Loaded
@@ -167,17 +161,13 @@ Content (`application/json`): [Run](#run)
 | `loaded` | `array<string>` | List of the statistics currently loaded |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'loaded': ['R_ACK', 'R_ICMP', 'PERF'],
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Available
@@ -188,11 +178,9 @@ Content (`application/json`): [Run](#run)
 | `available` | `array<string>` | List of available statistics |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'available': [ 'R_ACK',
                  'R_ICMP',
                  'PERF',
@@ -201,9 +189,7 @@ Content (`application/json`): [Run](#run)
                  'AVG_PKT_SIZE'],
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Available-Interfaces
@@ -214,19 +200,15 @@ Content (`application/json`): [Run](#run)
 | `ifaces` | `array<string>` | List of available interfaces |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'ifaces': [ 'eth0',
               'wlp2s0',
               'docker0'],
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Unload
@@ -237,17 +219,13 @@ Content (`application/json`): [Run](#run)
 | `stats` | `array<string>`, `string` | Statistics to unload |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'stats': ['R_SYN', 'R_ICMP'],
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Config
@@ -263,11 +241,9 @@ Content (`application/json`): [Run](#run)
 | `influxdb` | `boolean` | Save data/threshold to influxdb |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'device': 'eth0',
   'file': True,
   'influxdb': False,
@@ -276,9 +252,7 @@ Content (`application/json`): [Run](#run)
   'promiscuous': False,
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Run
@@ -289,17 +263,13 @@ Content (`application/json`): [Run](#run)
 | `command` | `string` | Command to send to the server (start, stop, reload, zero) |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'command': 'start',
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Stat-Values
@@ -310,17 +280,13 @@ Content (`application/json`): [Run](#run)
 | * | `number` (`double`) | Statistic value |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'R_ACK': 0.012, 'R_SYN': 0.74,
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
 ### Status
@@ -342,11 +308,9 @@ Content (`application/json`): [Run](#run)
 | `z_down` | `number` (`double`) | Down alert threshold |
 
 
-<div class="wb-tabs">
-	<div class="tabpanels">
-		<details id="details-panel1">
-			<summary>Example</summary>
-			<pre><code class='language-json'>{
+<details>
+    <summary>Example</summary>
+    <pre><code class='language-json'>{
   'Nt_down': 0,
   'Nt_up': 120,
   'al_down': 0,
@@ -358,8 +322,6 @@ Content (`application/json`): [Run](#run)
   'z_up': 4.767,
 }
 </code></pre>
-        </details>
-    </div>
-</div>
+</details>
 
 
