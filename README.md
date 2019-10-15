@@ -1,6 +1,6 @@
 # netspot
 
-<table>
+<table style="width: 100%; display: block;">
 <tr>
 <img src="assets/netspot.png" alt="drawing" width="300" align="left" style="display: block"/>
 </tr>
