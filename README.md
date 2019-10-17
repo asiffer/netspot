@@ -100,11 +100,19 @@ By default, `netspot` exposes two endpoints:
 - **HTTP** (`127.0.0.1:11000`)
 - **Go RPC** (`127.0.0.1:11001`)
 
-While the HTTP API is rather general, the RPC endpoint is likely to be useful only for Go clients (like the built-in `netspotctl` client).
+While the HTTP API is rather general, the RPC endpoint is likely to be useful only for Go clients (like the built-in client: `netspotctl`).
 
 You can modify or desactivate the endpoints through CLI flags.
 ```bash
 netspot --no-rpc --http 127.0.0.1:15000
+```
+
+### HTTPS
+
+TLS can be set up on the HTTP endpoint. For this purpose, you need to provide a certificate and a key. You can create a RSA key and a self-signed certificate with `openssl` for instance:
+
+```bash
+openssl req -newkey rsa:4096 -nodes -keyout key.pem -x509 -out cert.pem
 ```
 
 ### Managing with the built-in client

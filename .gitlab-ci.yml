@@ -42,9 +42,10 @@ build-arm:
   script:
     - cd /go/src/netspot
     - go env
+    - env
     - pwd
     - make deps
-    - GOOS=linux GOARCH=arm make build
+    - CROSS_COMPILE=/usr/bin/arm-linux-gnueabi- GOOS=linux GOARCH=arm make build
   artifacts:
     paths:
       - bin/netspot
