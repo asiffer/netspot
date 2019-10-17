@@ -45,7 +45,7 @@ build-arm:
     - env
     - pwd
     - make deps
-    - CROSS_COMPILE=/usr/bin/arm-linux-gnueabi- GOOS=linux GOARCH=arm make build
+    - GOOS=linux GOARCH=arm GOARM=7 make build
   artifacts:
     paths:
       - bin/netspot
