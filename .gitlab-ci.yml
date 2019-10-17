@@ -37,9 +37,10 @@ build-arm:
     - sudo make install
   script:
     - cd /go/src/netspot
+    - go env
     - pwd
     - make deps
-    - CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm CGO_LDFLAGS="-L/tmp/libpcap-$PCAPV -I/tmp/libpcap-$PCAPV" make build
+    - CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm CGO_LDFLAGS="-L/tmp/libpcap-$PCAPV" CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$PCAPV/" make build
   artifacts:
     paths:
       - bin/netspot

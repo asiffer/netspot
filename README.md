@@ -100,6 +100,13 @@ By default, `netspot` exposes two endpoints:
 - **HTTP** (`127.0.0.1:11000`)
 - **Go RPC** (`127.0.0.1:11001`)
 
+While the HTTP API is rather general, the RPC endpoint is likely to be used by Go clients (like the built-in `netspotctl` client).
+
+You can modify or desactivate the endpoints through CLI flags.
+```bash
+netspot --no-rpc --http 127.0.0.1:15000
+```
+
 ### Managing with the built-in client
 
 
