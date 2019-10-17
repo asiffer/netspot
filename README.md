@@ -77,7 +77,13 @@ docker run --rm --name=netspot \
 
 ## Get started
 
+### Starting the server
 
+```bash
+
+```
+
+### Managing with the built-in client
 
 
 ## REST API
@@ -91,7 +97,6 @@ The endpoints are detailed in the [api](api/) folder.
 
 <center><img src="assets/archi.svg" alt="Architecture" width="90%" /></center>
 
-<!-- ![miner](assets/archi.svg) -->
 
 At the lowest level, `netspot` parse packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
 The source can either be an network interface or a .pcap file (network capture).

@@ -1,9 +1,35 @@
-## Routes
+<style>
+
+.get {
+    display: block;
+    width: 100%;
+    color: white;
+    font-size: 1.25em;
+    padding: 0.25em 1em;
+    font-weight: bold; 
+    font-family: 'Liberation Mono';
+    background-color: #29BEB0;
+    margin-bottom: 0.5em;
+    border-radius: 8px;
+}
+
+.post {
+    display: block;
+    width: 100%;
+    color: white;
+    font-size: 1.25em;
+    padding: 0.25em 1em;
+    font-weight: bold; 
+    font-family: 'Liberation Mono';
+    background-color: #F55449;
+    margin-bottom: 0.5em;
+    border-radius: 8px;
+}
+
+</style>## Routes
 
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">
-GET /api/config
-</div>
+<div class="get">GET /api/config</div>
 
 *Return the current configuration*
 
@@ -14,7 +40,7 @@ GET /api/config
 | **200** | The configuration of netspot | `application/json` | [Config](#config) |
 | **405** | The HTTP method is incorrect |  |  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #F55449; margin-bottom: 0.5em; border-radius: 8px;">POST /api/config</div>
+<div class="post">POST /api/config</div>
 
 *Set a new configuration*
 
@@ -30,7 +56,7 @@ Content (`application/json`): [Config](#config)
 |  **400** | The JSON is invalid (bad format or bad key)  |
 |  **405** | The HTTP method is incorrect (it must not occur)  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/stats/loaded</div>
+<div class="get">GET /api/stats/loaded</div>
 
 *Return the statistics currently loaded*
 
@@ -41,7 +67,7 @@ Content (`application/json`): [Config](#config)
 | **200** | The configuration of netspot | `application/json` | [Loaded](#loaded) |
 | **405** | The HTTP method is incorrect |  |  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/stats/available</div>
+<div class="get">GET /api/stats/available</div>
 
 *Return the available statistics*
 
@@ -52,7 +78,7 @@ Content (`application/json`): [Config](#config)
 | **200** | The available statistics | `application/json` | [Available](#available) |
 | **405** | The HTTP method is incorrect |  |  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #F55449; margin-bottom: 0.5em; border-radius: 8px;">POST /api/stats/load</div>
+<div class="post">POST /api/stats/load</div>
 
 *Load new statistics*
 
@@ -68,7 +94,7 @@ Content (`application/json`): [Load](#load)
 |  **400** | The JSON is invalid (bad format or bad key)  |
 |  **405** | The HTTP method is incorrect  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #F55449; margin-bottom: 0.5em; border-radius: 8px;">POST /api/stats/unload</div>
+<div class="post">POST /api/stats/unload</div>
 
 *Unload already loaded statistics*
 
@@ -84,7 +110,7 @@ Content (`application/json`): [Unload](#unload)
 |  **400** | The JSON is invalid (bad format or bad key)  |
 |  **405** | The HTTP method is incorrect  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/stats/values</div>
+<div class="get">GET /api/stats/values</div>
 
 *Return the current values of the loaded statistics*
 
@@ -95,7 +121,7 @@ Content (`application/json`): [Unload](#unload)
 | **200** | The statistics values | `application/json` | [Stat-Values](#stat-values) |
 | **405** | The HTTP method is incorrect |  |  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/stats/status</div>
+<div class="get">GET /api/stats/status</div>
 
 *Return the DSPOT status of a single statistic*
 
@@ -110,7 +136,7 @@ Content (`application/json`): [Unload](#unload)
 | **200** | The DSPOT status of the given statistic | `application/json` | [Status](#status) |
 | **405** | The HTTP method is incorrect |  |  |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/ifaces/available</div>
+<div class="get">GET /api/ifaces/available</div>
 
 *Return the available interfaces*
 
@@ -120,7 +146,7 @@ Content (`application/json`): [Unload](#unload)
 |------|-------------|---------|--------|
 | **200** | All the interfaces | `application/json` | [Available-Interfaces](#available-interfaces) |
 
-<div style="display: block; width: 100%; color: white; font-size: 1.25em; padding: 0.25em 1em; font-weight: bold; font-family: Liberation Mono; background-color: #F55449; margin-bottom: 0.5em; border-radius: 8px;">POST /api/run</div>
+<div class="post">POST /api/run</div>
 
 *Perform a running action*
 
