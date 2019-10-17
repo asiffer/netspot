@@ -38,6 +38,7 @@ $(info SRC_DIR="$(SRC_DIR)")
 # golang compiler
 #GO := /usr/local/go/bin/go
 GO := GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
+GO_BUILD_EXTRA_FLAGS := 
 
 # build directories
 BIN_DIR := $(SRC_DIR)/bin
@@ -103,13 +104,13 @@ build_netspot:
 	@echo "\033[34m[Building netspot]\033[0m"
 	@export GOPATH=$(GOPATH)
 	@echo -n "Building go package...               "
-	@$(GO) build -o $(BIN_DIR)/netspot $(SRC_DIR)/netspot.go
+	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -o $(BIN_DIR)/netspot $(SRC_DIR)/netspot.go
 	@echo $(OK)
 
 build_netspotctl:
 	@echo "\033[34m[Building netspotctl]\033[0m"
 	@echo -n "Building go package...               "
-	@$(GO) build -o $(BIN_DIR)/netspotctl $(SRC_DIR)/netspotctl/*.go 
+	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -o $(BIN_DIR)/netspotctl $(SRC_DIR)/netspotctl/*.go 
 	@echo $(OK)
 
 

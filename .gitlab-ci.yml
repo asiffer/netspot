@@ -44,7 +44,8 @@ build-arm:
     - env
     - pwd
     - make deps
-    - CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 make build
+    - export GB_EXTRA="--ldflags '-linkmode external -extldflags "'"'"-static"'"'"'"
+    - CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 make build GO_BUILD_EXTRA_FLAGS="${GB_EXTRA}"
   artifacts:
     paths:
       - bin/netspot
