@@ -32,9 +32,8 @@ build-arm:
     - wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
     - tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
     - cd libpcap-$LIBPCAP_VERSION
-    - export CC=arm-linux-gnueabi-gcc
-    - ./configure --host=arm-linux --with-pcap=linux
-    - make
+    - CC=arm-linux-gnueabi-gcc ./configure --host=arm-linux --with-pcap=linux
+    - CC=arm-linux-gnueabi-gcc make
     - sudo make install
   script:
     - cd /go/src/netspot
