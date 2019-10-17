@@ -26,26 +26,22 @@ build-arm:
     LIBPCAP_VERSION: "1.9.1"
   before_script:
     - apt-get update
-    - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabi byacc flex
+    - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabihf byacc flex
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
     - wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
     - tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
     - cd libpcap-$LIBPCAP_VERSION
-    - export CGO_ENABLED=1
-    - export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
-    - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
-    - ./configure --host=arm-linux --with-pcap=linux
-    - CC=arm-linux-gnueabi-gcc make
+    - CC=arm-linux-gnueabihf-gcc ./configure --host=arm-linux --with-pcap=linux
+    - CC=arm-linux-gnueabihf-gcc make
     - sudo make install
   script:
     - cd /go/src/netspot
-    - go env
-    - env
-    - pwd
+    - export CGO_ENABLED=1
+    - export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
+    - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
     - make deps
-    - export GB_EXTRA="--ldflags '-linkmode external -extldflags "'"'"-static"'"'"'"
-    - CC=arm-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 make build GO_BUILD_EXTRA_FLAGS="${GB_EXTRA}"
+    - CC=arm-linux-gnueabihf-gcc GOOS=linux GOARCH=arm GOARM=7 make build
   artifacts:
     paths:
       - bin/netspot
