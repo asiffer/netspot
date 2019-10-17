@@ -228,7 +228,7 @@ func unload(id int) (int, error) {
 			}
 		}
 	}
-	fmt.Println(counters2remove)
+	// fmt.Println(counters2remove)
 	// We remove all the useless counters
 	for _, ctr := range counters2remove {
 		delete(counterID, ctr)
