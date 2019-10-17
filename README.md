@@ -79,9 +79,26 @@ docker run --rm --name=netspot \
 
 ### Starting the server
 
+Basically, you can start the server by executing the binary.
 ```bash
-
+netspot
 ```
+
+Naturally, some options are loaded by default. `netspot` reads first the `/etc/netspot/netspot.toml` config file. 
+So you can have some errors (like the the device to sniff) but this is not problem since it can be changed afterwards.
+
+If you want to change some options while starting, some of them can be overriden by command-line parameters.
+```bash
+netspot --device eth0 --output-dir /tmp
+```
+In this case, `netspot` reads  `/etc/netspot/netspot.toml` and then it changes the sniffed device and the directory where the results will be stored.
+Otherwise these options can be set directly in the config file (you can also use another config file with the `-c` flag).
+
+### Endpoints
+
+By default, `netspot` exposes two endpoints:
+- **HTTP** (`127.0.0.1:11000`)
+- **Go RPC** (`127.0.0.1:11001`)
 
 ### Managing with the built-in client
 
