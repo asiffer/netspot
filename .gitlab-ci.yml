@@ -10,9 +10,8 @@ build:
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common libpcap-dev
-
-docker:
-  script: sudo make docker
+# docker:
+#   script: sudo make docker
 # before_script:
 #   - apt-get update
 #   - apt-get install -y sudo software-properties-common python3-software-properties libpcap-dev
