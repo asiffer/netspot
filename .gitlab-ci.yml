@@ -1,26 +1,27 @@
 image: golang:1.11-stretch
 
 stages:
-  - build-arm
+  - build
 
-# build:
-#   stage: build
-#   image: golang:1.11-stretch
-#   script:
-#     - pwd
-#     - make deps
-#     - make build
-#   before_script:
-#     - apt-get update
-#     - apt-get install -y sudo software-properties-common libpcap-dev
-#     - ln -s /builds/asr/netspot /go/src/netspot
-#   artifacts:
-#     paths:
-#       - bin/netspot
-#       - bin/netspotctl
+build-amd64:
+  stage: build
+  image: golang:1.11-stretch
+  script:
+    - pwd
+    - make deps
+    - make build
+  before_script:
+    - apt-get update
+    - apt-get install -y sudo software-properties-common libpcap-dev
+    - ln -s /builds/asr/netspot /go/src/netspot
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    paths:
+      - bin/netspot
+      - bin/netspotctl
 
-build-arm:
-  stage: build-arm
+build-armhf:
+  stage: build
   image: golang:1.11-stretch
   variables:
     LIBPCAP_VERSION: "1.9.1"
@@ -43,33 +44,7 @@ build-arm:
     - make deps
     - CC=arm-linux-gnueabihf-gcc GOOS=linux GOARCH=arm GOARM=7 make build
   artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
     paths:
       - bin/netspot
       - bin/netspotctl
-# docker:
-#   script: sudo make docker
-# before_script:
-#   - apt-get update
-#   - apt-get install -y sudo software-properties-common python3-software-properties libpcap-dev
-#   - add-apt-repository ppa:asiffer/libspot
-#   - apt-get update
-#   - apt-get install -y libspot make --allow-unauthenticated
-#   - mkdir -p /go/src/gitlab.com
-#   - mkdir -p /go/src/github.com
-#   - go get -u github.com/c-bata/go-prompt
-#   - go get -u github.com/rs/zerolog
-#   - go get -u github.com/spf13/viper
-#   - go get -u github.com/fatih/color
-#   - go get -u github.com/fsnotify/fsnotify
-#   - go get -u github.com/urfave/cli
-#   - go get -u github.com/influxdata/influxdb1-client/v2
-#   - go get -u github.com/asiffer/gospot
-#   - go get -u github.com/google/gopacket
-#   - ln -s /builds/asr/netspot /go/src/netspot
-
-# coverage:
-#   stage: test
-#   script:
-#     - cd /builds/asr/netspot
-#     - id -u
-#     - go test -coverprofile fmt ./...
