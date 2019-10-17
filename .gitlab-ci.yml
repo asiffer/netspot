@@ -1,7 +1,7 @@
 image: golang:1.11-stretch
 
 stages:
-  - build
+  - build-arm
 
 build:
   stage: build
@@ -14,6 +14,32 @@ build:
     - apt-get update
     - apt-get install -y sudo software-properties-common libpcap-dev
     - ln -s /builds/asr/netspot /go/src/netspot
+  artifacts:
+    paths:
+      - bin/netspot
+      - bin/netspotctl
+
+build-arm:
+  stage: build-arm
+  image: golang:1.11-stretch
+  variables:
+    LIBPCAP_VERSION: "1.9.1"
+  before_script:
+    - apt-get update
+    - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabi byacc flex
+    - ln -s /builds/asr/netspot /go/src/netspot
+    - cd /tmp
+    - wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
+    - tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
+    - cd libpcap-$LIBPCAP_VERSION
+    - export CC=arm-linux-gnueabi-gcc
+    - ./configure --host=arm-linux --with-pcap=linux
+    - make
+    - sudo make install
+  script:
+    - pwd
+    - make deps
+    - GOOS=linux GOARCH=arm make build
   artifacts:
     paths:
       - bin/netspot
