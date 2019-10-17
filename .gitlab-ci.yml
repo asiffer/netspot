@@ -35,7 +35,7 @@ build-arm:
     - export CC=arm-linux-gnueabi-gcc
     - export CGO_ENABLED=1
     - export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
-    - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION/"
+    - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
     - ./configure --host=arm-linux --with-pcap=linux
     - make
     - sudo make install
