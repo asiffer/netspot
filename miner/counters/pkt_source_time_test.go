@@ -12,9 +12,9 @@ func TestTimeCounter(t *testing.T) {
 	title("Testing Time counter")
 	ctr := &SOURCE_TIME{PktCtr: NewPktCtr(), Counter: 0}
 	checkTitle("Check counter name...")
-	if ctr.Name() != "TIME" {
+	if ctr.Name() != "SOURCE_TIME" {
 		testERROR()
-		t.Errorf("Bad counter name (expected 'Time', got %s)", ctr.Name())
+		t.Errorf("Bad counter name (expected 'SOURCE_TIME', got %s)", ctr.Name())
 	}
 	testOK()
 
@@ -55,9 +55,10 @@ func TestTimeCounter(t *testing.T) {
 
 	checkTitle("Check counter reset...")
 	ctr.Reset()
-	if ctr.Value() != 0 {
+	// the reset of this counter is special: it does nothing
+	if ctr.Value() != 1445353834525737000 {
 		testERROR()
-		t.Errorf("Bad counter reset (expected 0, got %d)", ctr.Value())
+		t.Errorf("Bad counter reset (expected 1445353834525737000, got %d)", ctr.Value())
 	}
 	testOK()
 }

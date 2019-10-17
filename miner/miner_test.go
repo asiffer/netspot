@@ -8,6 +8,7 @@ import (
 	"net"
 	"netspot/miner/counters"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -76,7 +77,7 @@ func TestSetDevice(t *testing.T) {
 	title("Testing device setting")
 	checkTitle(fmt.Sprintf("Setting device to %s... ", pcapTestFile))
 	r := SetDevice(pcapTestFile)
-	if r != 0 || GetDevice() != pcapTestFile {
+	if r != 0 || path.Base(GetDevice()) != path.Base(pcapTestFile) {
 		testERROR()
 		t.Error("Fail: setting device (file)")
 	}
@@ -166,7 +167,7 @@ func TestInitConfig(t *testing.T) {
 
 func checkTapConfig(t *testing.T) {
 	checkTitle("Checking device...")
-	if GetDevice() != "test/test.pcap" {
+	if path.Base(GetDevice()) != "test.pcap" {
 		testERROR()
 		t.Errorf("Fail: setting device (expected test.pcap, got %s)", GetDevice())
 	} else {
@@ -206,10 +207,9 @@ func TestRawStatus(t *testing.T) {
 	m := RawStatus()
 
 	checkTitle("Checking device...")
-	if m["device"] != "test/test.pcap" {
+	if path.Base(m["device"]) != "test.pcap" {
 		testERROR()
-		fmt.Println(GetDevice())
-		t.Error("Fail: setting device (file)")
+		t.Errorf("Fail: setting device (file) (expected 'test.pcap', got %s)", GetDevice())
 	} else {
 		testOK()
 	}
