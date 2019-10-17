@@ -6,10 +6,14 @@ stages:
 build:
   stage: build
   image: golang:1.11-stretch
-  script: pwd; ls -al; make deps; make build
+  script:
+    - pwd
+    - make deps
+    - make build
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common libpcap-dev
+    - ln -s /builds/asr/netspot /go/src/netspot
 # docker:
 #   script: sudo make docker
 # before_script:
