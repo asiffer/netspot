@@ -102,7 +102,7 @@ build_netspot:
 	@echo "\033[34m[Building netspot]\033[0m"
 	@export GOPATH=$(GOPATH)
 	@echo -n "Building go package...               "
-	@$(GO) build -o $(BIN_DIR)/netspot $(SRC_DIR)/*.go
+	@$(GO) build -o $(BIN_DIR)/netspot $(SRC_DIR)/netspot.go
 	@echo $(OK)
 
 build_netspotctl:
