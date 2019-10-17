@@ -37,6 +37,7 @@ build-arm:
     - make
     - sudo make install
   script:
+    - cd /go/src/netspot
     - pwd
     - make deps
     - GOOS=linux GOARCH=arm make build
