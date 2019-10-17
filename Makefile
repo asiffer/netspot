@@ -29,7 +29,8 @@ $(info ARCH="$(ARCH)")
 $(info OS="$(OS)")
 
 # sources
-SRC_DIR := $(GOPATH)/src/netspot
+# SRC_DIR := $(GOPATH)/src/netspot
+SRC_DIR := $(shell pwd)
 EXTRA_DIR = $(SRC_DIR)/extra
 
 $(info SRC_DIR="$(SRC_DIR)")

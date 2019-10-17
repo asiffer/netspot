@@ -6,7 +6,7 @@ stages:
 build:
   stage: build
   image: golang:1.11-stretch
-  script: ls -al; make deps; make build
+  script: pwd; ls -al; make deps; make build
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common libpcap-dev
