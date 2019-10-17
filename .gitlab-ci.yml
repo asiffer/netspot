@@ -3,21 +3,21 @@ image: golang:1.11-stretch
 stages:
   - build-arm
 
-build:
-  stage: build
-  image: golang:1.11-stretch
-  script:
-    - pwd
-    - make deps
-    - make build
-  before_script:
-    - apt-get update
-    - apt-get install -y sudo software-properties-common libpcap-dev
-    - ln -s /builds/asr/netspot /go/src/netspot
-  artifacts:
-    paths:
-      - bin/netspot
-      - bin/netspotctl
+# build:
+#   stage: build
+#   image: golang:1.11-stretch
+#   script:
+#     - pwd
+#     - make deps
+#     - make build
+#   before_script:
+#     - apt-get update
+#     - apt-get install -y sudo software-properties-common libpcap-dev
+#     - ln -s /builds/asr/netspot /go/src/netspot
+#   artifacts:
+#     paths:
+#       - bin/netspot
+#       - bin/netspotctl
 
 build-arm:
   stage: build-arm
