@@ -3,15 +3,13 @@ image: golang:1.11-stretch
 stages:
   - build
 
-default:
-  image: golang:1.11-stretch
-
 variables:
   LIBPCAP_VERSION: "1.9.1"
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
 
 build-amd64:
   stage: build
+  image: golang:1.11-stretch
   only:
     - web
   script:
@@ -34,6 +32,7 @@ build-amd64:
 
 build-armhf:
   stage: build
+  image: golang:1.11-stretch
   only:
     - web
   before_script:
@@ -61,6 +60,7 @@ build-armhf:
 
 build-aarch64:
   stage: build
+  image: golang:1.11-stretch
   only:
     - web
   before_script:
