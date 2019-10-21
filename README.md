@@ -44,16 +44,12 @@ As *a good sketch is better than a long speech*, we illustrate what the [`SPOT`]
 You naturally have to clone the git repository and build the executables. The building process requires the `Go` compiler (I use the version `1.10.4` on linux/amd64 and `1.12.9` on linux/arm)
 and some dependencies that you can get with `make deps`.
 
-```bash
-# clone
-git clone github.com/asiffer/netspot.git
-cd netspot
-# get dependencies
-make deps
-# build
-make
-# install (it may require root privileges)
-make install
+```console
+$ git clone github.com/asiffer/netspot.git
+$ cd netspot
+$ make deps
+$ make
+$ sudo make install
 ```
 The installation step put the two executables in `$(DESTDIR)/usr/bin`, the configuration file in `$(DESTDIR)/etc/netspot` and the `systemd` service file in `$(DESTDIR)/lib/systemd/system`. By default `$(DESTDIR)` is empty.
 
@@ -65,12 +61,12 @@ A debian package is also available on the release section. Two architectures are
 
 A `docker` image (based on `alpine`) also exists. Some options can naturally be added to start a new container.
 
-```bash
-docker run --rm --name=netspot \
-                --net=host \
-                -p 11000:11000 \
-                -p 11001:11001 \
-                -v netspot.toml:/etc/netspot/netspot.toml \
+```console
+$ docker run --rm --name=netspot \
+             --net=host \
+             -p 11000:11000 \
+             -p 11001:11001 \
+             -v netspot.toml:/etc/netspot/netspot.toml \
                 asiffer/netspot-amd64:1.3
 ```
 
@@ -80,15 +76,15 @@ docker run --rm --name=netspot \
 ### Starting the server
 
 Basically, you can start the server by executing the binary.
-```bash
-netspot
+```console
+$ netspot
 ```
 
 Naturally, some options are loaded by default. `netspot` reads first the `/etc/netspot/netspot.toml` config file. 
 So you can have some errors (like the the device to sniff) but this is not problem since it can be changed afterwards.
 
 If you want to change some options while starting, some of them can be overriden by command-line parameters.
-```bash
+```console
 netspot --device eth0 --output-dir /tmp
 ```
 In this case, `netspot` reads  `/etc/netspot/netspot.toml` and then it changes the sniffed device and the directory where the results will be stored.
@@ -103,20 +99,30 @@ By default, `netspot` exposes two endpoints:
 While the HTTP API is rather general, the RPC endpoint is likely to be useful only for Go clients (like the built-in client: `netspotctl`).
 
 You can modify or desactivate the endpoints through CLI flags.
-```bash
-netspot --no-rpc --http 127.0.0.1:15000
+```console
+$ netspot --no-rpc --http 127.0.0.1:15000
 ```
 
 ### HTTPS
 
 TLS can be set up on the HTTP endpoint. For this purpose, you need to provide a certificate and a key. You can create a RSA key and a self-signed certificate with `openssl` for instance:
 
-```bash
-openssl req -newkey rsa:4096 -nodes -keyout key.pem -x509 -out cert.pem
+```console
+$ openssl req -newkey rsa:4096 -nodes -keyout key.pem -x509 -out cert.pem
+```
+
+Then the HTTPS configuration can be set-up either in the config file or in the cli flags.
+```console
+netspot --tls --cert cert.pem --key key.pem  
 ```
 
 ### Managing with the built-in client
 
+```console
+$ netspotctl
+Connected to netspot server (localhost:11001)
+netspot >
+```
 
 ## REST API
 
