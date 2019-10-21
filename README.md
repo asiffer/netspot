@@ -149,9 +149,9 @@ We can see several things. First the configuration is divided into two categorie
 In the above example, we see that the server is ready to sniff the `lo` device (loopback) in promiscuous mode (the snapshot length if the maximum size to read for each packet and the timeout is roughly the maximum delay between two received packets, see the [libpcap documentation](https://www.tcpdump.org/manpages/pcap.3pcap.html) for more details).
 
 These configurations can be changed with the `set` command
-<pre><code class="language-console"><span class="gp">netspot ></span> set device enp2s0
+<pre><code class="language-console"><span class="nt">netspot ></span> set device enp2s0
 Set device to "enp2s0"
-<span class="gp">netspot ></span> set promisc false
+<span class="nt">netspot ></span> set promisc false
 Set promiscuous to false
 </code></pre>
 
