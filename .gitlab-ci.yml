@@ -5,7 +5,7 @@ stages:
 
 variables:
   LIBPCAP_VERSION: "1.9.1"
-  ARTIFACT_NAME_TEMPLATE: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+  ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
 
 build-amd64:
   stage: build
@@ -22,13 +22,13 @@ build-amd64:
     - ln -s /builds/asr/netspot /go/src/netspot
   after_script:
     - pip3 install pybadges
-    - python3 /go/src/netspot/.badge.gitlab-ci.py -d /go/src/netspot/bin -a $CI_JOB_STAGE -o /tmp/build-$CI_JOB_STAGE.svg
+    - python3 /go/src/netspot/.badge.gitlab-ci.py -d /go/src/netspot/bin -a $CI_JOB_NAME -o /tmp/$CI_JOB_NAME.svg
   artifacts:
     name: $ARTIFACT_NAME_TEMPLATE
     paths:
       - bin/netspot
       - bin/netspotctl
-      - /tmp/build-$CI_JOB_STAGE.svg
+      - /tmp/$CI_JOB_NAME.svg
 
 build-armhf:
   stage: build

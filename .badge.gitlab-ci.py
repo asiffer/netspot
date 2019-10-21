@@ -16,14 +16,16 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output", type=str, default="badge.svg")
     args = parser.parse_args()
 
+    # architecture is the last tag og the job name
+    architecture = args.architecture.split('-')[-1]
     success = path.exists(path.join(args.directory, SERVER)) and path.exists(path.join(args.directory, CLIENT))
 
     if success:
-        badge = pb.badge(left_text=BUILD_TEMPLATE.format(args.architecture),
+        badge = pb.badge(left_text=BUILD_TEMPLATE.format(architecture),
         right_text='passing',
         right_color='green')
     else:
-        badge = pb.badge(left_text=BUILD_TEMPLATE.format(args.architecture),
+        badge = pb.badge(left_text=BUILD_TEMPLATE.format(architecture),
         right_text='failed',
         right_color='red')
     
