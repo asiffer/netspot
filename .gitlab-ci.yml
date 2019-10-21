@@ -10,6 +10,8 @@ variables:
 build-amd64:
   stage: build
   image: golang:1.11-stretch
+  only:
+    - web
   script:
     - pwd
     - make deps
@@ -27,6 +29,8 @@ build-amd64:
 build-armhf:
   stage: build
   image: golang:1.11-stretch
+  only:
+    - web
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabihf byacc flex
@@ -54,6 +58,8 @@ build-armhf:
 build-aarch64:
   stage: build
   image: golang:1.11-stretch
+  only:
+    - web
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common gcc-aarch64-linux-gnu byacc flex
@@ -71,7 +77,7 @@ build-aarch64:
     - export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
     - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
     - make deps
-    - CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm GOARM=8 make build
+    - CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm64 make build
   artifacts:
     name: $ARTIFACT_NAME_TEMPLATE
     paths:
