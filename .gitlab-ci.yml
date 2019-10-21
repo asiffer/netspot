@@ -8,7 +8,7 @@ variables:
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
 
 build-amd64:
-  stage: build
+  # stage: build
   image: golang:1.11-stretch
   only:
     - web
@@ -31,7 +31,7 @@ build-amd64:
       - $CI_JOB_NAME.svg
 
 build-armhf:
-  stage: build
+  # stage: build
   image: golang:1.11-stretch
   only:
     - web
@@ -59,7 +59,7 @@ build-armhf:
       - bin/netspotctl
 
 build-aarch64:
-  stage: build
+  # stage: build
   image: golang:1.11-stretch
   only:
     - web
