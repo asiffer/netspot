@@ -23,6 +23,7 @@ build-amd64:
   after_script:
     - pip3 install pybadges
     - python3 /go/src/netspot/.badge.gitlab-ci.py -d /go/src/netspot/bin -a $CI_JOB_NAME -o /tmp/$CI_JOB_NAME.svg
+    - ls -al /tmp
   artifacts:
     name: $ARTIFACT_NAME_TEMPLATE
     paths:
