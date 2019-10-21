@@ -113,10 +113,12 @@ $ openssl req -newkey rsa:4096 -nodes -keyout key.pem -x509 -out cert.pem
 
 Then the HTTPS configuration can be set-up either in the config file or in the cli flags.
 ```console
-netspot --tls --cert cert.pem --key key.pem  
+$ netspot --tls --cert cert.pem --key key.pem  
 ```
 
 ### Managing with the built-in client
+
+The `netspot` server can be managed by the `Go` built-in client `netspotctl`. When the server is running, you can easily start it.
 
 ```console
 $ netspotctl
