@@ -3,6 +3,10 @@ image: golang:1.11-stretch
 stages:
   - build
 
+variables:
+  LIBPCAP_VERSION: "1.9.1"
+  ARTIFACT_NAME_TEMPLATE: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+
 build-amd64:
   stage: build
   image: golang:1.11-stretch
@@ -15,7 +19,7 @@ build-amd64:
     - apt-get install -y sudo software-properties-common libpcap-dev
     - ln -s /builds/asr/netspot /go/src/netspot
   artifacts:
-    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    name: $ARTIFACT_NAME_TEMPLATE
     paths:
       - bin/netspot
       - bin/netspotctl
@@ -23,8 +27,6 @@ build-amd64:
 build-armhf:
   stage: build
   image: golang:1.11-stretch
-  variables:
-    LIBPCAP_VERSION: "1.9.1"
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabihf byacc flex
@@ -44,7 +46,34 @@ build-armhf:
     - make deps
     - CC=arm-linux-gnueabihf-gcc GOOS=linux GOARCH=arm GOARM=7 make build
   artifacts:
-    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    name: $ARTIFACT_NAME_TEMPLATE
+    paths:
+      - bin/netspot
+      - bin/netspotctl
+
+build-aarch64:
+  stage: build
+  image: golang:1.11-stretch
+  before_script:
+    - apt-get update
+    - apt-get install -y sudo software-properties-common gcc-aarch64-linux-gnu byacc flex
+    - ln -s /builds/asr/netspot /go/src/netspot
+    - cd /tmp
+    - wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
+    - tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
+    - cd libpcap-$LIBPCAP_VERSION
+    - CC=aarch64-linux-gnu-gcc ./configure --host=arm-linux --with-pcap=linux
+    - CC=aarch64-linux-gnu-gcc make
+    - sudo make install
+  script:
+    - cd /go/src/netspot
+    - export CGO_ENABLED=1
+    - export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
+    - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
+    - make deps
+    - CC=aarch64-linux-gnu-gcc GOOS=linux GOARCH=arm GOARM=8 make build
+  artifacts:
+    name: $ARTIFACT_NAME_TEMPLATE
     paths:
       - bin/netspot
       - bin/netspotctl
