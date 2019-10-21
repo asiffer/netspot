@@ -126,6 +126,36 @@ Connected to netspot server (localhost:11001)
 netspot >
 ```
 
+Now you can run some commands. In particular we can access the configuration of the server:
+
+```console
+netspot > config
+Miner
+     snapshot_length   65535
+         promiscuous   true
+             timeout   20s
+              device   lo
+
+Analyzer
+          statistics   [PERF R_SYN R_ACK]
+              period   1s
+            influxdb   false
+                file   true
+              output   /tmp
+```
+
+We can see several things. First the configuration is divided into two categories: `Miner`, which deals with the network capture and `Analyzer` which manages the statistics and the outputs.
+
+In the above example, we see that the server is ready to sniff the `lo` device (loopback) in promiscuous mode (the snapshot length if the maximum size to read for each packet and the timeout is roughly the maximum delay between two received packets, see the [libpcap documentation](https://www.tcpdump.org/manpages/pcap.3pcap.html) for more details).
+
+These configurations can be changed with the `set` command
+<pre><code class="language-console"><span class="gp">netspot ></span> set device enp2s0
+Set device to "enp2s0"
+<span class="gp">netspot ></span> set promisc false
+Set promiscuous to false
+</code></pre>
+
+
 ## REST API
 
 The current implementation of `netspot` embeds a `Go` client. However, `netspot` can be managed by other clients since it exposes a REST API.
