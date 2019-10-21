@@ -3,13 +3,15 @@ image: golang:1.11-stretch
 stages:
   - build
 
+default:
+  image: golang:1.11-stretch
+
 variables:
   LIBPCAP_VERSION: "1.9.1"
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
 
 build-amd64:
   stage: build
-  image: golang:1.11-stretch
   only:
     - web
   script:
@@ -18,17 +20,20 @@ build-amd64:
     - make build
   before_script:
     - apt-get update
-    - apt-get install -y sudo software-properties-common libpcap-dev
+    - apt-get install -y sudo software-properties-common libpcap-dev python3-pip
     - ln -s /builds/asr/netspot /go/src/netspot
+  after_script:
+    - pip3 install pybadges
+    - python3 /go/src/netspot/.badge.gitlab-ci.py -d /go/src/netspot/bin -a $CI_JOB_STAGE -o /tmp/build-$CI_JOB_STAGE.svg
   artifacts:
     name: $ARTIFACT_NAME_TEMPLATE
     paths:
       - bin/netspot
       - bin/netspotctl
+      - /tmp/build-$CI_JOB_STAGE.svg
 
 build-armhf:
   stage: build
-  image: golang:1.11-stretch
   only:
     - web
   before_script:
@@ -41,7 +46,6 @@ build-armhf:
     - cd libpcap-$LIBPCAP_VERSION
     - CC=arm-linux-gnueabihf-gcc ./configure --host=arm-linux --with-pcap=linux
     - CC=arm-linux-gnueabihf-gcc make
-    - sudo make install
   script:
     - cd /go/src/netspot
     - export CGO_ENABLED=1
@@ -57,7 +61,6 @@ build-armhf:
 
 build-aarch64:
   stage: build
-  image: golang:1.11-stretch
   only:
     - web
   before_script:
@@ -70,7 +73,6 @@ build-aarch64:
     - cd libpcap-$LIBPCAP_VERSION
     - CC=aarch64-linux-gnu-gcc ./configure --host=arm-linux --with-pcap=linux
     - CC=aarch64-linux-gnu-gcc make
-    - sudo make install
   script:
     - cd /go/src/netspot
     - export CGO_ENABLED=1
