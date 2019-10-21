@@ -116,9 +116,9 @@ Then the HTTPS configuration can be set-up either in the config file or in the c
 $ netspot --tls --cert cert.pem --key key.pem  
 ```
 
-### Managing with the built-in client
+### Configuring the server with `netspotctl`
 
-The `netspot` server can be managed by the `Go` built-in client `netspotctl`. When the server is running, you can easily start it.
+The `netspot` server can be managed by the `Go` built-in client `netspotctl`. When the server is up, you can easily run the client.
 
 ```console
 $ netspotctl
@@ -146,15 +146,47 @@ Analyzer
 
 We can see several things. First the configuration is divided into two categories: `Miner`, which deals with the network capture and `Analyzer` which manages the statistics and the outputs.
 
+#### Miner
+
 In the above example, we see that the server is ready to sniff the `lo` device (loopback) in promiscuous mode (the snapshot length if the maximum size to read for each packet and the timeout is roughly the maximum delay between two received packets, see the [libpcap documentation](https://www.tcpdump.org/manpages/pcap.3pcap.html) for more details).
 
 These configurations can be changed with the `set` command
-<pre><code class="language-console"><span class="nt">netspot ></span> set device enp2s0
-Set device to "enp2s0"
-<span class="nt">netspot ></span> set promisc false
-Set promiscuous to false
-</code></pre>
+```console
+netspot > set device enp2s0
+```
 
+The device can also be a capture file, thus we can indicate the [absolute path] of the file we want to analyze.
+
+```console
+netspot > set device /data/pcap/capture.pcap
+```
+
+#### Analyzer
+
+The analyzer defines what is monitored. So we can choose the statistics to look at (`load` and `unload` commands) and also at which interval they are computed (`period`). As we have seen above, the `config` command gives the current status of the server (the statistics already loaded and the period).
+
+To load a new statistic
+```console
+netspot > load R_IP
+```
+
+To unload a statistic
+```console
+netspot > unload R_SYN
+```
+
+To change the period
+```console
+netspot > set period 500ms
+```
+
+Moreover we can tune the outputs of the server. Basically, `netspot` creates 3 files:
+- The raw statistics (computed every `period`)
+- The SPOT thresholds which are automatically computed
+- The anomalies (when a stat is higher or lower than the SPOT threshold)
+
+These files are located is a user-defined directory (`/tmp` by default)
+`netspot` embeds a `influxdb` client 
 
 ## REST API
 

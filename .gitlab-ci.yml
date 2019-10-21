@@ -1,7 +1,7 @@
 image: golang:1.11-stretch
 
-stages:
-  - build
+# stages:
+#   - build
 
 variables:
   LIBPCAP_VERSION: "1.9.1"
