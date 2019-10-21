@@ -7,7 +7,7 @@ variables:
   LIBPCAP_VERSION: "1.9.1"
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
 
-build-amd64:
+amd64:
   # stage: build
   image: golang:1.11-stretch
   only:
