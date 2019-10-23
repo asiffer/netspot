@@ -119,7 +119,7 @@ build_debian:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y software-properties-common libpcap-dev dpkg-dev
+    - apt-get install -y software-properties-common libpcap-dev dpkg-dev python3-pip
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - make deps
