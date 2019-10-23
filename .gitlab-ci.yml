@@ -2,7 +2,7 @@ image: golang:1.11-stretch
 
 stages:
   - build
-  - docker
+  # - docker
   - debian
 
 variables:
@@ -102,6 +102,8 @@ build_aarch64:
 build_docker:
   stage: docker
   image: docker:19.03.1
+  only:
+    - web
   before_script:
     - docker info
   script:
@@ -114,6 +116,8 @@ build_docker:
 build_debian:
   stage: debian
   image: debian:buster-slim
+  only:
+    - web
   before_script:
     - apt-get install -y devscripts dpkg-dev
   script:
