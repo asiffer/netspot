@@ -2,8 +2,6 @@ image: golang:1.11-stretch
 
 stages:
   - build
-  # - docker
-  - debian
 
 variables:
   LIBPCAP_VERSION: "1.9.1"
@@ -114,7 +112,7 @@ build_aarch64:
 #       - dist/docker/docker-netspot*
 
 build_debian:
-  stage: debian
+  stage: build
   image: debian:buster-slim
   only:
     - web
