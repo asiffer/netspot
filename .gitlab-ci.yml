@@ -99,19 +99,19 @@ build_aarch64:
       - bin/netspotctl-aarch64
       - $CI_JOB_NAME.svg
 
-build_docker:
-  stage: docker
-  image: docker:19.03.1
-  only:
-    - web
-  before_script:
-    - docker info
-  script:
-    - make docker
-  artifacts:
-    name: $ARTIFACT_NAME_TEMPLATE
-    paths:
-      - dist/docker/docker-netspot*
+# build_docker:
+#   stage: docker
+#   image: docker:19.03.1
+#   only:
+#     - web
+#   before_script:
+#     - docker info
+#   script:
+#     - make docker
+#   artifacts:
+#     name: $ARTIFACT_NAME_TEMPLATE
+#     paths:
+#       - dist/docker/docker-netspot*
 
 build_debian:
   stage: debian
