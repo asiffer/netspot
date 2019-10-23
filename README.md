@@ -2,7 +2,7 @@
 
 <table style="width: 100%; display: block;">
 <tr>
-<img src="assets/netspot.png" alt="drawing" width="300" align="left" style="display: block; margin: 10px;"/>
+<img src="assets/netspot.png" alt="drawing" width="400" align="left" style="display: block; margin: 10px;"/>
 </tr>
 <tr>
 <code>netspot</code> is a simple <it>anomaly-based</it> network IDS written in <code>Go</code> (based on <a href="https://github.com/google/gopacket"><code>GoPacket</code></a>).
@@ -39,9 +39,14 @@ As *a good sketch is better than a long speech*, we illustrate what the [`SPOT`]
 
 ## Installation
 
+### Binaries
+
+The latest compiled binaries can be found on the released tag. 
+Neither  `systemd` service file nor the default configuration is provided.
+
 ### From sources
 
-You naturally have to clone the git repository and build the executables. The building process requires the `Go` compiler (I use the version `1.10.4` on linux/amd64 and `1.12.9` on linux/arm)
+You naturally have to clone the git repository and build the binaries. The building process requires a `Go` compiler
 and some dependencies that you can get with `make deps`.
 
 ```console
@@ -51,7 +56,7 @@ $ make deps
 $ make
 $ sudo make install
 ```
-The installation step put the two executables in `$(DESTDIR)/usr/bin`, the configuration file in `$(DESTDIR)/etc/netspot` and the `systemd` service file in `$(DESTDIR)/lib/systemd/system`. By default `$(DESTDIR)` is empty.
+The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the configuration file in `$(DESTDIR)/etc/netspot` and the `systemd` service file in `$(DESTDIR)/lib/systemd/system`. By default `$(DESTDIR)` is empty.
 
 ### Debian package
 

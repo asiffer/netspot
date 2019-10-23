@@ -2,10 +2,12 @@ image: golang:1.11-stretch
 
 stages:
   - build
+  - docker
+  - debian
 
 variables:
   LIBPCAP_VERSION: "1.9.1"
-  ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+  ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME"
 
 build_amd64:
   stage: build
@@ -37,6 +39,7 @@ build_armhf:
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabihf byacc flex
+    - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
     - wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
@@ -70,6 +73,7 @@ build_aarch64:
   before_script:
     - apt-get update
     - apt-get install -y sudo software-properties-common gcc-aarch64-linux-gnu byacc flex
+    - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
     - wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
@@ -94,3 +98,27 @@ build_aarch64:
       - bin/netspot-aarch64
       - bin/netspotctl-aarch64
       - $CI_JOB_NAME.svg
+
+build_docker:
+  stage: docker
+  image: docker:19.03.1
+  before_script:
+    - docker info
+  script:
+    - make docker
+  artifacts:
+    name: $ARTIFACT_NAME_TEMPLATE
+    paths:
+      - dist/docker/docker-netspot*
+
+build_debian:
+  stage: debian
+  image: debian:buster-slim
+  before_script:
+    - apt-get install -y devscripts dpkg-dev
+  script:
+    - make debian
+  artifacts:
+    name: $ARTIFACT_NAME_TEMPLATE
+    paths:
+      - dist/debian/netspot*
