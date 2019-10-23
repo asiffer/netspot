@@ -42,7 +42,7 @@ As *a good sketch is better than a long speech*, we illustrate what the [`SPOT`]
 ### Binaries
 
 The latest compiled binaries can be found on the released tag. 
-Neither  `systemd` service file nor the default configuration is provided.
+A `systemd` service file and the default configurations (server and client) can be found in the [extra](extra/) folder.
 
 ### From sources
 

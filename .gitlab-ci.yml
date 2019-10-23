@@ -6,15 +6,16 @@ stages:
 variables:
   LIBPCAP_VERSION: "1.9.1"
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME"
+  GO_IMAGE: "golang:1.11-stretch"
 
 build_amd64:
   stage: build
-  image: golang:1.11-stretch
+  image: $GO_IMAGE
   only:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y sudo software-properties-common libpcap-dev python3-pip
+    - apt-get install -y software-properties-common libpcap-dev python3-pip
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - make deps
@@ -31,12 +32,12 @@ build_amd64:
 
 build_armhf:
   stage: build
-  image: golang:1.11-stretch
+  image: $GO_IMAGE
   only:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y sudo software-properties-common gcc-arm-linux-gnueabihf byacc flex
+    - apt-get install -y software-properties-common gcc-arm-linux-gnueabihf byacc flex
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
@@ -65,12 +66,12 @@ build_armhf:
 
 build_aarch64:
   stage: build
-  image: golang:1.11-stretch
+  image: $GO_IMAGE
   only:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y sudo software-properties-common gcc-aarch64-linux-gnu byacc flex
+    - apt-get install -y software-properties-common gcc-aarch64-linux-gnu byacc flex
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
@@ -113,12 +114,12 @@ build_aarch64:
 
 build_debian:
   stage: build
-  image: debian:buster-slim
+  image: $GO_IMAGE
   only:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y sudo software-properties-common libpcap-dev python3-pip dpkg-dev
+    - apt-get install -y software-properties-common libpcap-dev dpkg-dev
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - make deps
