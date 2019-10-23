@@ -118,7 +118,7 @@ $ netspot --tls --cert cert.pem --key key.pem
 
 ### Configuring the server with `netspotctl`
 
-The `netspot` server can be managed by the `Go` built-in client `netspotctl`. When the server is up, you can easily run the client.
+The `netspot` server can be managed by the `Go` built-in client `netspotctl`. When the server is up, you can easily run the client, opening then a new CLI.
 
 ```console
 $ netspotctl
