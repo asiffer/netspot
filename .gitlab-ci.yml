@@ -37,7 +37,7 @@ build_armhf:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y software-properties-common gcc-arm-linux-gnueabihf byacc flex
+    - apt-get install -y software-properties-common linux-libc-dev-armhf-cross byacc flex
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
@@ -51,8 +51,13 @@ build_armhf:
     - export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
     - cd /go/src/netspot
     - make deps
+    - export CC=arm-linux-gnueabihf-gcc
+    - export GOOS=linux
+    - export GOARCH=arm
+    - export GOARM=7
   script:
-    - CC=arm-linux-gnueabihf-gcc GOOS=linux GOARCH=arm GOARM=7 make build
+    - make build
+    - LD_LIBRARY_PATH=/usr/arm-linux-gnueabihf/lib make debian
   after_script:
     - mv bin/netspot bin/netspot-armhf
     - mv bin/netspotctl bin/netspotctl-armhf
@@ -62,6 +67,7 @@ build_armhf:
     paths:
       - bin/netspot-armhf
       - bin/netspotctl-armhf
+      - dist/debian/*.deb
       - $CI_JOB_NAME.svg
 
 build_aarch64:
