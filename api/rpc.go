@@ -33,11 +33,14 @@ func (ns *Netspot) Zero(none *int, i *int) error {
 		*i = 2
 		return err
 	}
-	err = miner.Zero()
-	if err != nil {
-		*i = 1
-		return err
-	}
+	//
+	// The analyzer.Zero resets the Miner
+	//
+	// err = miner.Zero()
+	// if err != nil {
+	// 	*i = 1
+	// 	return err
+	// }
 	*i = 0
 	return nil
 }
