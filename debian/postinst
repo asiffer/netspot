@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# fancyness
+OK="[\033[32mOK\033[0m]"
+
+echo -n "Creating user 'netspot'...                         "
+useradd --no-create-home --no-user-group --system netspot
+usermod -L -s /usr/sbin/nologin netspot
+echo $OK
+echo -n "Setting CAP_NET_RAW, CAP_NET_ADMIN capabilities... "
+setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/netspot
+echo $OK

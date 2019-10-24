@@ -1,0 +1,11 @@
+netspot (1.3) UNSTABLE; urgency=medium
+
+  [ Alban Siffer ]
+  * New counters and statistics
+  * New HTTP API with OpenAPI spec
+  * Go RPC endpoint
+  * Cleaner code
+  * Go console client
+  * New distributions options (Debian package, Docker image, `armhf` binaries)
+
+ -- Alban Siffer <alban.siffer@irisa.fr>  Fri, 17 Oct 2019 09:00:00 +0200
