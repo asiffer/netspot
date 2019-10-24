@@ -7,7 +7,7 @@ variables:
   LIBPCAP_VERSION: "1.9.1"
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME"
   GO_IMAGE: "golang:1.11-stretch"
-  PACKAGES: "software-properties-common byacc flex dpkg-dev python3-pip"
+  PACKAGES: "software-properties-common byacc flex dpkg-dev python3-pip debhelper"
 
 build_amd64:
   stage: build
