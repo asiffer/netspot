@@ -38,7 +38,7 @@ build_armhf:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y $PACKAGES linux-libc-dev-armhf-cross
+    - apt-get install -y $PACKAGES linux-libc-dev-armhf-cross gcc-arm-linux-gnueabihf
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
@@ -78,7 +78,7 @@ build_aarch64:
     - web
   before_script:
     - apt-get update
-    - apt-get install -y $PACKAGES linux-libc-dev-arm64-cross
+    - apt-get install -y $PACKAGES linux-libc-dev-arm64-cross gcc-aarch64-linux-gnu
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - cd /tmp
