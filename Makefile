@@ -148,7 +148,7 @@ install_service:
 	@install $(EXTRA_DIR)/netspot.service $(INSTALL_SERVICE_DIR)/
 	@echo $(OK)
 
-debian: build
+debian:
 	mkdir -p $(DEBIAN_DIR)
 	dpkg-buildpackage -us -uc -b
 	cp -u ../*.deb $(DEBIAN_DIR)
