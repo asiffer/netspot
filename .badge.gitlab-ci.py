@@ -18,7 +18,9 @@ if __name__ == '__main__':
 
     # architecture is the last tag og the job name
     architecture = args.architecture.split('_')[-1]
-    success = path.exists(path.join(args.directory, SERVER)) and path.exists(path.join(args.directory, CLIENT))
+    server = "{}-{}".format(SERVER, architecture)
+    client = "{}-{}".format(CLIENT, architecture)
+    success = path.exists(path.join(args.directory, server)) and path.exists(path.join(args.directory, client))
 
     if success:
         badge = pb.badge(left_text=BUILD_TEMPLATE.format(architecture),
