@@ -1,13 +1,8 @@
 # netspot
 
-
-
-<!-- [![build_amd64](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/download?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6) -->
-
-<img src="https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6"/>
-
-[![build_armhf](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_armhf.svg?job=build_armhf#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/download?job=build_armhf#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
-[![build_armhf](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_aarch64.svg?job=build_aarch64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/download?job=build_aarch64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+![build_amd64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+![build_armhf](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_armhf.svg?job=build_armhf#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+![build_aarch64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_aarch64.svg?job=build_aarch64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
 
 ---
 
