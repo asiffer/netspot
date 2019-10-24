@@ -150,7 +150,7 @@ install_service:
 
 debian: build
 	mkdir -p $(DEBIAN_DIR)
-	dpkg-buildpackage -us -uc
+	dpkg-buildpackage -us -uc -b
 	cp -u ../*.deb $(DEBIAN_DIR)
 
 
