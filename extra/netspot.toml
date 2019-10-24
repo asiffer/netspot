@@ -32,7 +32,7 @@ rpc_addr = "127.0.0.1:11001"
 
 [miner]
 # name of the interface to listen or dump/pcap file path
-device = "eno1"
+# device = "eno1"
 # device = "/path/to/pcap/file"
 # interface only
 promiscuous = true
@@ -44,7 +44,7 @@ timeout = "20s"
 period = "1s"
 # stats to load at startup
 #stats = ["AVG_PKT_SIZE"]
-stats = ["PERF", "R_SYN", "R_ACK"]
+# stats = ["PERF", "R_SYN", "R_ACK"]
 #stats = []
 
 [data]

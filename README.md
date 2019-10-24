@@ -1,5 +1,13 @@
 # netspot
 
+
+
+[![build_amd64](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/download?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+[![build_armhf](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_armhf.svg?job=build_armhf#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/download?job=build_armhf#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+[![build_armhf](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/raw/build_aarch64.svg?job=build_aarch64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)](https://gitlab.amossys.fr/asr/netspot/-/jobs/artifacts/master/download?job=build_aarch64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+
+---
+
 <table style="width: 100%; display: block;">
 <tr>
 <img src="assets/netspot.png" alt="drawing" width="400" align="left" style="display: block; margin: 10px;"/>
@@ -60,7 +68,18 @@ The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the conf
 
 ### Debian package
 
-A debian package is also available on the release section. Two architectures are available `amd64` and `armhf` (for a Raspberry Pi for instance).
+<table style="width: 100%; display: block;">
+<tr>
+<img src="https://pc-freak.net/images/how-to-fix-unfixable-broken-package-dependency-on-debian-ubuntu-linux-icon.png" alt="drawing" align="left" style="display: block; margin: 10px;" width="100"/>
+</tr>
+<tr>
+<code>netspot</code> (and its built-in client) can be installed through <code>debian</code> packages. Three architectures are available: <code>amd64</code>, <code>armhf</code> and <code>aarch64</code> (for a Raspberry Pi for instance).
+</tr>
+</table>
+
+
+
+
 
 ### Docker container
 
@@ -85,8 +104,8 @@ Basically, you can start the server by executing the binary.
 $ netspot
 ```
 
-Naturally, some options are loaded by default. `netspot` reads first the `/etc/netspot/netspot.toml` config file. 
-So you can have some errors (like the the device to sniff) but this is not problem since it can be changed afterwards.
+Some options are loaded by default. First `netspot` reads the `/etc/netspot/netspot.toml` config file. 
+So you can have some errors (missing file, unknown device etc.) but this is not problem since it can be changed afterwards.
 
 If you want to change some options while starting, some of them can be overriden by command-line parameters.
 ```console
@@ -190,8 +209,51 @@ Moreover we can tune the outputs of the server. Basically, `netspot` creates 3 f
 - The SPOT thresholds which are automatically computed
 - The anomalies (when a stat is higher or lower than the SPOT threshold)
 
-These files are located is a user-defined directory (`/tmp` by default)
-`netspot` embeds a `influxdb` client 
+These files are located is a user-defined directory (`/tmp` by default) but you can change it.
+```console
+netspot > set directory ./
+```
+
+
+`netspot` also embeds an `influxdb` client but it can only be set up through a configuration file.
+
+### Running `netspot`
+
+Once the server is well configured (device, monitored statistics, computation period, output directory...), you can start the analysis. From `netspotctl`:
+```console
+netspot > start
+```
+
+If you want to perform a simple analysis of a capture file, the server can be started offline. You can either give the path to a configuration file,
+
+```console
+$ netspot -c /path/to/a/config/file --run
+```
+
+or provide command-line arguments (don't forget that `netspot` will still look at `/etc/netspot/netspot.toml` first)
+```console
+$ netspot --device /path/to/pcap \
+          --period 1s \
+          --load-stat R_SYN --load-stat R_ACK \
+          --output-dir ./ \
+          --run
+```
+
+### Stop/Reset
+
+You can easily stop `netspot` with `netspotctl`.
+```console
+netspot > stop
+```
+
+When the analysis is stopped, the internal state is not reset. It means that the behaviours learnt by `netspot` remain. So, you can start again the analysis (on another device for instance) without information loss.
+If you want to reset the server, you have to precisely invoke the `reset ` command
+```console
+netspot > reset
+```
+
+This command unloads all statistics, so the possibly learnt behaviours are lost.
+
 
 ## REST API
 

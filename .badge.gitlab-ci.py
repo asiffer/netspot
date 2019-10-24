@@ -17,7 +17,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # architecture is the last tag og the job name
-    architecture = args.architecture.split('-')[-1]
+    architecture = args.architecture.split('_')[-1]
     success = path.exists(path.join(args.directory, SERVER)) and path.exists(path.join(args.directory, CLIENT))
 
     if success:
