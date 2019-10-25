@@ -20,28 +20,33 @@ The current package embeds a client: <code>netspotctl</code> but the latter coul
 </tr>
 </table>
 
+
+
+
 <!-- <div style="width: 100%; display: block">-</div> -->
 
 ## Table of contents
-- [The SPOT algorithm through a single picture](#the-spot-algorithm-through-a-single-picture)
-- [Installation](#installation)
+
+  - [Table of contents](#table-of-contents)
+  - [The SPOT algorithm through a single picture](#the-spot-algorithm-through-a-single-picture)
+  - [Installation](#installation)
     - [Binaries](#binaries)
     - [From sources](#from-sources)
     - [Debian package](#debian-package)
     - [Docker container](#docker-container)
-- [Get started](#get-started)
+  - [Get started](#get-started)
     - [Starting the server](#starting-the-server)
     - [Endpoints](#endpoints)
     - [HTTPS](#https)
-    - [Configuring the server with `netspotctl`](#configuring-the-server-with-`netspotctl`)
-    - [Running `netspot`](#running-`netspot`)
-    - [Stop/Reset](#stop/reset)
-- [REST API](#rest-api)
-- [Architecture overview](#architecture-overview)
+    - [Configuring the server with](#configuring-the-server-with)
+    - [Running](#running)
+    - [Stop/Reset](#stopreset)
+  - [REST API](#rest-api)
+  - [Architecture overview](#architecture-overview)
     - [Miner](#miner)
     - [Analyzer](#analyzer)
     - [Alarms](#alarms)
-- [Notes](#notes)
+  - [Notes](#notes)
 
 
 
@@ -71,22 +76,30 @@ $ make deps
 $ make
 $ sudo make install
 ```
+
 The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the configuration file in `$(DESTDIR)/etc/netspot` and the `systemd` service file in `$(DESTDIR)/lib/systemd/system`. By default `$(DESTDIR)` is empty.
 
 ### Debian package
 
-<table style="width: 100%; display: block;">
+<!-- <table style="width: 100%; display: block;">
 <tr>
 <img src="https://pc-freak.net/images/how-to-fix-unfixable-broken-package-dependency-on-debian-ubuntu-linux-icon.png" alt="drawing" align="left" style="display: block; margin: 10px;" width="100"/>
 </tr>
 <tr>
 <code>netspot</code> (and its built-in client) can be installed through <code>debian</code> packages. Three architectures are available: <code>amd64</code>, <code>armhf</code> and <code>aarch64</code> (for a Raspberry Pi for instance).
 </tr>
-</table>
+</table> -->
 
+`netspot` (and its built-in client) can be installed through `debian` packages. Three architectures are available: `amd64`, `armhf` and `aarch64` (for a Raspberry Pi for instance).
 
+<center>
+<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_amd64.deb?job=build_amd64"><img src="assets/amd64.png" width="20%" float="left"></a>
+<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_armhf.deb?job=build_armhf"><img src="assets/armhf.png" width="20%" float="left"></a>
+<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_arm64.deb?job=build_aarch64"><img src="assets/aarch64.png" width="20%" float="left"></a>
+</center>
 
-
+<br>
+<br>
 
 ### Docker container
 
