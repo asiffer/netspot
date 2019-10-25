@@ -19,7 +19,8 @@ The <code>netspot</code> core uses <a href="https://asiffer.github.io/libspot/">
 The current package embeds a client: <code>netspotctl</code> but the latter could be in a different package in the future.
 </tr>
 </table>
-
+<br>
+<br>
 
 
 
@@ -95,10 +96,10 @@ The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the conf
 <center>
 <a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_amd64.deb?job=build_amd64"><img src="assets/amd64.png" width="20%" float="left"></a>
 <a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_armhf.deb?job=build_armhf"><img src="assets/armhf.png" width="20%" float="left"></a>
-<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_arm64.deb?job=build_aarch64"><img src="assets/aarch64.png" width="20%" float="left"></a>
+<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_arm64.deb?job=build_aarch64"><img src="assets/aarch64.png" width="20%" float="left" padding="0 5%"></a>
 </center>
 
-<br>
+
 <br>
 
 ### Docker container
