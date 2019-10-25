@@ -1,8 +1,8 @@
 # netspot
 
-![build_amd64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
-![build_armhf](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_armhf.svg?job=build_armhf#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
-![build_aarch64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_aarch64.svg?job=build_aarch64#PRIVATE-TOKEN=5XGx6T7ZqsjE2qBy8AY6)
+![build_amd64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64)
+![build_armhf](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_armhf.svg?job=build_armhf)
+![build_aarch64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_aarch64.svg?job=build_aarch64)
 
 ---
 
@@ -25,16 +25,25 @@ The current package embeds a client: <code>netspotctl</code> but the latter coul
 ## Table of contents
 - [The SPOT algorithm through a single picture](#the-spot-algorithm-through-a-single-picture)
 - [Installation](#installation)
-	- [From sources](#from-sources)
+    - [Binaries](#binaries)
+    - [From sources](#from-sources)
     - [Debian package](#debian-package)
     - [Docker container](#docker-container)
 - [Get started](#get-started)
+    - [Starting the server](#starting-the-server)
+    - [Endpoints](#endpoints)
+    - [HTTPS](#https)
+    - [Configuring the server with `netspotctl`](#configuring-the-server-with-`netspotctl`)
+    - [Running `netspot`](#running-`netspot`)
+    - [Stop/Reset](#stop/reset)
 - [REST API](#rest-api)
 - [Architecture overview](#architecture-overview)
     - [Miner](#miner)
     - [Analyzer](#analyzer)
     - [Alarms](#alarms)
 - [Notes](#notes)
+
+
 
 
 ## The SPOT algorithm through a single picture
