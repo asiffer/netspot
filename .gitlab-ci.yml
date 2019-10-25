@@ -113,3 +113,18 @@ build_aarch64:
       - bin/netspotctl-aarch64
       - dist/debian/*.deb
       - $CI_JOB_NAME.svg
+
+docker:
+  image: docker:stable
+  stage: build
+  only:
+    - web
+  services:
+    - docker:dind
+  before_script:
+    - docker info
+  script: make docker
+  artifacts:
+    name: $ARTIFACT_NAME_TEMPLATE
+    paths:
+      - dist/docker/*
