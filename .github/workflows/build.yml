@@ -2,7 +2,7 @@ name: Go
 on: [push]
 jobs:
   build:
-    name: Build
+    name: Build (amd64)
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
@@ -26,4 +26,43 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: netspot
+          path: bin/
+
+  build-armhf:
+    name: Build (armhf)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Compilation of libpcap
+        env:
+          LIBPCAP_VERSION: 1.9.1
+          PACKAGES: software-properties-common byacc flex dpkg-dev python3 python3-pip debhelper
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $PACKAGES linux-libc-dev-armhf-cross gcc-arm-linux-gnueabihf
+          export CC=aarch64-linux-gnu-gcc
+          cd /tmp
+          wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
+          tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
+          cd libpcap-$LIBPCAP_VERSION
+          ./configure --host=arm-linux --with-pcap=linux
+          make
+          cd /home/runner/work/netspot/netspot
+          export CC=arm-linux-gnueabihf-gcc
+          export GOOS=linux
+          export GOARCH=arm
+          export GOARM=7
+
+      - name: Compilation of netspot for armhf
+        run: make
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v1
+        with:
+          name: netspot-armhf
           path: bin/
