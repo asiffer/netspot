@@ -1,11 +1,11 @@
-netspot (1.3.1) UNRELEASED; urgency=medium
+netspot (1.3.1) disco; urgency=medium
 
   [ Alban Siffer ]
   * minor fixes
   * add debhelper dependency
   * integrate new urfave/cli api (v2)
 
- -- asr <asr@irisa.fr>  Tue, 07 Jan 2020 10:21:10 +0100
+ -- Alban Siffer <alban.siffer@irisa.fr>  Tue, 07 Jan 2020 11:17:00 +0100
 
 netspot (1.3) UNSTABLE; urgency=medium
 

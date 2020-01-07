@@ -14,15 +14,16 @@ $(info GO="$(GOEXEC)")
 $(info GOPATH="$(GOPATH)")
 
 # environment
-ARCH =
-OS =
-ifndef ARCH
-  ARCH := $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
-endif
-
-ifndef OS
-  OS := $(shell $(GOEXEC) env | grep GOOS= | sed -e 's/GOOS=//' -e 's/"//g' )
-endif
+# ARCH =
+# OS =
+# ifndef ARCH
+#   ARCH := $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
+# endif
+ARCH ?= $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
+OS ?= $(shell $(GOEXEC) env | grep GOOS= | sed -e 's/GOOS=//' -e 's/"//g' )
+# ifndef OS
+#   OS := $(shell $(GOEXEC) env | grep GOOS= | sed -e 's/GOOS=//' -e 's/"//g' )
+# endif
 
 # Print environment variable
 $(info ARCH="$(ARCH)")

@@ -39,7 +39,7 @@ The current package embeds a client: <code>netspotctl</code> but the latter coul
     - [Starting the server](#starting-the-server)
     - [Endpoints](#endpoints)
     - [HTTPS](#https)
-    - [Configuring the server with](#configuring-the-server-with-netspotctl)
+    - [Configuring the server with netspotctl](#configuring-the-server-with-netspotctl)
     - [Running](#running)
     - [Stop/Reset](#stopreset)
   - [REST API](#rest-api)
