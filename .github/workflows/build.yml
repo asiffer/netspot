@@ -50,8 +50,11 @@ jobs:
           wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
           tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
           cd libpcap-$LIBPCAP_VERSION
-          ./configure --host=arm-linux --with-pcap=linux
-          make
+          CC=arm-linux-gnueabihf-gcc ./configure --host=arm-linux --with-pcap=linux
+          CC=arm-linux-gnueabihf-gcc make
+          export CGO_ENABLED=1
+          export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
+          export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
           cd /home/runner/work/netspot/netspot
           export CC=arm-linux-gnueabihf-gcc
           export GOOS=linux
