@@ -21,5 +21,5 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libpcap0.8 libpcap-dev
-          ln -s home/runner/work/netspot/netspot /home/runner/go/src/netspot
+          ln -s /home/runner/work/netspot/netspot /home/runner/go/src/netspot
           make
