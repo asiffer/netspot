@@ -61,12 +61,15 @@ jobs:
           export GOARCH=arm
           export GOARM=7
 
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
       - name: Compilation of netspot for armhf
         run: |
           pwd
           ls -al
           cd /home/runner/work/netspot/netspot
-          echo "CC="$CC
+          echo "CC=${CC}"
           echo "GOOS="$GOOS
           echo "GOARCH="$GOARCH
           echo "GOARM="$GOARM
