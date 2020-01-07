@@ -3,6 +3,9 @@ on: [push]
 jobs:
   build:
     name: Build (amd64)
+    env:
+      LIBPCAP_VERSION: 1.9.1
+      PACKAGES: software-properties-common byacc flex dpkg-dev python3 python3-pip debhelper
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
@@ -17,7 +20,7 @@ jobs:
       - name: Build
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpcap0.8 libpcap-dev
+          sudo apt-get install -y $PACKAGES libpcap0.8 libpcap-dev
           pwd
           ls -al
           make
