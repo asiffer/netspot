@@ -25,14 +25,14 @@ jobs:
           ls -al
           make
 
-      - name: Download netspot
-        uses: actions/download-artifact@v1
+      - name: Upload netspot
+        uses: actions/upload-artifact@v1
         with:
           name: netspot
           path: bin/netspot
 
-      - name: Download netspotctl
-        uses: actions/download-artifact@v1
+      - name: Upload netspotctl
+        uses: actions/upload-artifact@v1
         with:
           name: netspotctl
           path: bin/netspotctl
