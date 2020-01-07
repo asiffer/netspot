@@ -292,7 +292,7 @@ func InitSubpackages() {
 }
 
 // StartServer (it receives the cli arguments)
-func StartServer(c *cli.Context) {
+func StartServer(c *cli.Context) error {
 	// load config
 	if c.IsSet("config") || c.IsSet("c") {
 		LoadConfig(c.String("config"))
@@ -318,7 +318,7 @@ func StartServer(c *cli.Context) {
 	// NEW: Direct run (Offline mode, no server)
 	if c.IsSet("run") {
 		analyzer.StartStatsAndWait()
-		return
+		return nil
 	}
 
 	// SERVER CASE
@@ -348,8 +348,9 @@ func StartServer(c *cli.Context) {
 	// wait
 	if err := <-com; err != nil {
 		log.Fatal().Msgf("server error: %v", err)
+		return err
 	}
-
+	return nil
 }
 
 // InitApp starts netspot
@@ -368,66 +369,66 @@ func InitApp() {
 
 	// CLI arguments
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "config, c",
 			Value: "/etc/netspot/netspot.toml",
 			Usage: "Load configuration from `FILE`",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "http",
 			Value: "localhost:11000",
 			Usage: "netspot server HTTP endpoint",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "rpc",
 			Value: "localhost:11001",
 			Usage: "netspot server RPC endpoint",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "no-rpc",
 			Usage: "Disable the golang RPC endpoint",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "no-http",
 			Usage: "Disable the HTTP endpoint",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "tls",
 			Usage: "Activate TLS on HTTP endpoint (HTTPS)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "cert",
 			Usage: "Path to the public certificate",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "key",
 			Usage: "Path to the private key",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  "log-level, l",
 			Value: 1,
 			Usage: "Minimum logging level (0: Debug, 1: Info, 2: Warn, 3: Error)",
 		},
 		// NEW
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "run",
 			Usage: "Directly starts netspot once config is loaded (offline mode, no server)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "device, d",
 			Usage: "Interface or .pcap file to analyze",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "output-dir, o",
 			Usage: "Output directory where records will be saved",
 		},
-		cli.DurationFlag{
+		&cli.DurationFlag{
 			Name:     "period, p",
 			Usage:    "Time between two stats computations",
 			Value:    2 * time.Second,
 			Required: false,
 		},
-		cli.StringSliceFlag{
+		&cli.StringSliceFlag{
 			Name:  "load-stat, s",
 			Usage: "Statistic to load",
 		},
