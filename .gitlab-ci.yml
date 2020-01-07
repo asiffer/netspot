@@ -15,8 +15,8 @@ build_amd64:
   only:
     - web
   before_script:
-    - sudo apt-get update
-    - sudo apt-get install -y $PACKAGES libpcap0.8 libpcap-dev
+    - apt-get update
+    - apt-get install -y $PACKAGES libpcap0.8 libpcap-dev
     - pip3 install pybadges
     - ln -s /builds/asr/netspot /go/src/netspot
     - make deps
