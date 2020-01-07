@@ -19,6 +19,8 @@ jobs:
 
       - name: Build
         run: |
-          cd /home/runner/work/netspot/netspot
+          mkdir -p /home/runner/go/src/netspot
+          cp /home/runner/work/netspot/netspot/* /home/runner/go/src/netspot/
+          cd /home/runner/go/src/netspot
           ls -al
           make
