@@ -1,5 +1,4 @@
 <style>
-
 .get {
     display: block;
     width: 100%;
@@ -25,9 +24,9 @@
     margin-bottom: 0.5em;
     border-radius: 8px;
 }
+</style>
 
-</style>## Routes
-
+## Routes
 
 <div class="get">GET /api/config</div>
 
