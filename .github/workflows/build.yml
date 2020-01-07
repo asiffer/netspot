@@ -30,6 +30,9 @@ jobs:
 
   build-armhf:
     name: Build (armhf)
+    env:
+      LIBPCAP_VERSION: 1.9.1
+      PACKAGES: software-properties-common byacc flex dpkg-dev python3 python3-pip debhelper
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
@@ -39,9 +42,6 @@ jobs:
         id: go
 
       - name: Compilation of libpcap
-        env:
-          LIBPCAP_VERSION: 1.9.1
-          PACKAGES: software-properties-common byacc flex dpkg-dev python3 python3-pip debhelper
         run: |
           sudo apt-get update
           sudo apt-get install -y $PACKAGES linux-libc-dev-armhf-cross gcc-arm-linux-gnueabihf
@@ -52,14 +52,6 @@ jobs:
           cd libpcap-$LIBPCAP_VERSION
           CC=arm-linux-gnueabihf-gcc ./configure --host=arm-linux --with-pcap=linux
           CC=arm-linux-gnueabihf-gcc make
-          export CGO_ENABLED=1
-          export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
-          export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
-          cd /home/runner/work/netspot/netspot
-          export CC=arm-linux-gnueabihf-gcc
-          export GOOS=linux
-          export GOARCH=arm
-          export GOARM=7
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
@@ -68,11 +60,13 @@ jobs:
         run: |
           pwd
           ls -al
-          cd /home/runner/work/netspot/netspot
-          echo "CC=${CC}"
-          echo "GOOS="$GOOS
-          echo "GOARCH="$GOARCH
-          echo "GOARM="$GOARM
+          export CGO_ENABLED=1
+          export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
+          export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
+          export CC=arm-linux-gnueabihf-gcc
+          export GOOS=linux
+          export GOARCH=arm
+          export GOARM=7
           make
 
       - name: Upload binaries
