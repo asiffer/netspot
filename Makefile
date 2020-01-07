@@ -30,14 +30,12 @@ $(info ARCH="$(ARCH)")
 $(info OS="$(OS)")
 
 # sources
-# SRC_DIR := $(GOPATH)/src/netspot
 SRC_DIR := $(shell pwd)
 EXTRA_DIR = $(SRC_DIR)/extra
 
 $(info SRC_DIR="$(SRC_DIR)")
 
 # golang compiler
-#GO := /usr/local/go/bin/go
 GO := GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
 GO_BUILD_EXTRA_FLAGS := 
 
@@ -47,7 +45,6 @@ DIST_DIR := $(SRC_DIR)/dist
 DOCKER_DIR := $(DIST_DIR)/docker
 DEBIAN_DIR := $(DIST_DIR)/debian
 SNAP_DIR := $(DIST_DIR)/snap
-# PKG_BUILD_DIR = $(PKG_DIR)/$(OS)/$(ARCH)
 
 # installation
 DESTDIR :=

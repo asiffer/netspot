@@ -21,8 +21,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y $PACKAGES libpcap0.8 libpcap-dev
-          pwd
-          ls -al
           make
 
       - name: Upload binaries
@@ -37,7 +35,7 @@ jobs:
       - name: Upload debian package
         uses: actions/upload-artifact@v1
         with:
-          name: netspot-debian-package
+          name: netspot-debian-amd64
           path: dist/debian/
 
   build-armhf:
@@ -84,6 +82,15 @@ jobs:
           name: netspot-armhf
           path: bin/
 
+      - name: Debian packaging
+        run: LD_LIBRARY_PATH=/usr/arm-linux-gnueabihf/lib make debian
+
+      - name: Upload debian package
+        uses: actions/upload-artifact@v1
+        with:
+          name: netspot-debian-armhf
+          path: dist/debian/
+
   build-aarch64:
     name: Build (aarch64)
     env:
@@ -126,3 +133,12 @@ jobs:
         with:
           name: netspot-aarch64
           path: bin/
+
+      - name: Debian packaging
+        run: LD_LIBRARY_PATH=/usr/aarch64-linux-gnu/lib make debian
+
+      - name: Upload debian package
+        uses: actions/upload-artifact@v1
+        with:
+          name: netspot-debian-armhf
+          path: dist/debian/
