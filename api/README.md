@@ -29,9 +29,7 @@
 ## Routes
 
 <!-- <div class="get">GET /api/config</div> -->
-<div style="display: block; width: 100%; color: white; font-size: 1.25em;
-    padding: 0.25em 1em; font-weight: bold; font-family: 'Liberation Mono';
-    background-color: #29BEB0; margin-bottom: 0.5em; border-radius: 8px;">GET /api/config</div>
+<div>GET /api/config</div>
 
 *Return the current configuration*
 
