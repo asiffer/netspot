@@ -28,6 +28,15 @@ jobs:
           name: netspot
           path: bin/
 
+      - name: Debian packaging
+        run: make debian
+
+      - name: Upload debian package
+        uses: actions/upload-artifact@v1
+        with:
+          name: netspot-debian-package
+          path: dist/debian/
+
   build-armhf:
     name: Build (armhf)
     env:
@@ -45,7 +54,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y $PACKAGES linux-libc-dev-armhf-cross gcc-arm-linux-gnueabihf
-          export CC=aarch64-linux-gnu-gcc
           cd /tmp
           wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
           tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
@@ -58,8 +66,6 @@ jobs:
 
       - name: Compilation of netspot for armhf
         run: |
-          pwd
-          ls -al
           export CGO_ENABLED=1
           export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
           export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
@@ -73,4 +79,47 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: netspot-armhf
+          path: bin/
+
+  build-aarch64:
+    name: Build (aarch64)
+    env:
+      LIBPCAP_VERSION: 1.9.1
+      PACKAGES: software-properties-common byacc flex dpkg-dev python3 python3-pip debhelper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Compilation of libpcap
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $PACKAGES linux-libc-dev-arm64-cross gcc-aarch64-linux-gnu
+          cd /tmp
+          wget http://www.tcpdump.org/release/libpcap-$LIBPCAP_VERSION.tar.gz
+          tar xvf libpcap-$LIBPCAP_VERSION.tar.gz
+          cd libpcap-$LIBPCAP_VERSION
+          CC=aarch64-linux-gnu-gcc ./configure --host=arm-linux --with-pcap=linux
+          CC=aarch64-linux-gnu-gcc make
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Compilation of netspot for aarch64
+        run: |
+          export CGO_ENABLED=1
+          export CGO_LDFLAGS=-L/tmp/libpcap-$LIBPCAP_VERSION
+          export CGO_CFLAGS="-g -O2 -I/tmp/libpcap-$LIBPCAP_VERSION"
+          export CC=aarch64-linux-gnu-gcc
+          export GOOS=linux
+          export GOARCH=arm64
+          make
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v1
+        with:
+          name: netspot-aarch64
           path: bin/
