@@ -14,9 +14,6 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
-      # - name: Get dependencies
-      #   run: make deps
-
       - name: Build
         run: |
           sudo apt-get update
@@ -25,14 +22,8 @@ jobs:
           ls -al
           make
 
-      - name: Upload netspot
+      - name: Upload binaries
         uses: actions/upload-artifact@v1
         with:
           name: netspot
-          path: bin/netspot
-
-      - name: Upload netspotctl
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspotctl
-          path: bin/netspotctl
+          path: bin/
