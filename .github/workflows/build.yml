@@ -81,6 +81,7 @@ jobs:
           cd libpcap-$LIBPCAP_VERSION
           ./configure --host=arm-linux --with-pcap=linux
           make
+          echo ::set-env name=LD_LIBRARY_PATH::$LD_LIBRARY_PATH
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
@@ -88,7 +89,6 @@ jobs:
       - name: Compilation of netspot for armhf
         run: |
           make
-          echo ::set-env name=LD_LIBRARY_PATH::$LD_LIBRARY_PATH
 
       - name: Upload binaries
         uses: actions/upload-artifact@v1
