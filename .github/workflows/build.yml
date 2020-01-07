@@ -62,7 +62,15 @@ jobs:
           export GOARM=7
 
       - name: Compilation of netspot for armhf
-        run: make
+        run: |
+          pwd
+          ls -al
+          cd /home/runner/work/netspot/netspot
+          echo "CC="$CC
+          echo "GOOS="$GOOS
+          echo "GOARCH="$GOARCH
+          echo "GOARM="$GOARM
+          make
 
       - name: Upload binaries
         uses: actions/upload-artifact@v1
