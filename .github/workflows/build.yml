@@ -88,6 +88,7 @@ jobs:
 
       - name: Compilation of netspot for armhf
         run: |
+          find / -name pcap.h
           make
 
       - name: Upload binaries
