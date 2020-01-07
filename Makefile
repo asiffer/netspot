@@ -57,19 +57,19 @@ INSTALL_SERVICE_DIR := $(DESTDIR)/lib/systemd/system
 CTL_INSTALL_CONF_DIR := $(DESTDIR)/etc/netspotctl
 
 # go dependencies
-GO_DEP_NETSPOT := 	"fatih/color" \
-					"fsnotify/fsnotify" \
-					"rs/zerolog" \
-					"spf13/viper" \
-					"urfave/cli" \
-					"google/gopacket" \
-					"asiffer/gospot" \
-					"influxdata/influxdb1-client/v2" \
-					"gorilla/mux" \
+# GO_DEP_NETSPOT := 	"fatih/color" \
+# 					"fsnotify/fsnotify" \
+# 					"rs/zerolog" \
+# 					"spf13/viper" \
+# 					"urfave/cli" \
+# 					"google/gopacket" \
+# 					"asiffer/gospot" \
+# 					"influxdata/influxdb1-client/v2" \
+# 					"gorilla/mux" \
 
-GO_DEP_NETSPOTCTL := 	"rs/zerolog" \
-						"spf13/viper" \
-						"c-bata/go-prompt" \
+# GO_DEP_NETSPOTCTL := 	"rs/zerolog" \
+# 						"spf13/viper" \
+# 						"c-bata/go-prompt" \
 
 
 
@@ -83,7 +83,7 @@ OK := "[\033[32mOK\033[0m]"
 # main actions
 default: build
 
-deps: netspot_deps netspotctl_deps
+# deps: netspot_deps netspotctl_deps
 
 build: build_netspot build_netspotctl
 
@@ -93,13 +93,13 @@ install: install_bin install_config install_service # post_install
 
 # atomic actions
 
-netspot_deps:
-	@echo "\033[34m[Retrieving netspot build dependencies]\033[0m"
-	@for dep in $(GO_DEP_NETSPOT) ; do echo "Getting "$$dep"... "; go get -u github.com/$$dep; done
+# netspot_deps:
+# 	@echo "\033[34m[Retrieving netspot build dependencies]\033[0m"
+# 	@for dep in $(GO_DEP_NETSPOT) ; do echo "Getting "$$dep"... "; go get -u github.com/$$dep; done
 
-netspotctl_deps:
-	@echo "\033[34m[Retrieving netspotctl build dependencies]\033[0m"
-	@for dep in $(GO_DEP_NETSPOTCTL) ; do echo "Getting "$$dep"... "; go get -u github.com/$$dep; done
+# netspotctl_deps:
+# 	@echo "\033[34m[Retrieving netspotctl build dependencies]\033[0m"
+# 	@for dep in $(GO_DEP_NETSPOTCTL) ; do echo "Getting "$$dep"... "; go get -u github.com/$$dep; done
 
 build_netspot:
 	@echo "\033[34m[Building netspot]\033[0m"
