@@ -52,7 +52,7 @@ jobs:
       GOARCH: arm
       GOARM: 7
       LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib
-      PACKAGES: software-properties-common byacc flex dpkg-dev debhelper
+      PACKAGES: software-properties-common byacc flex dpkg-dev debhelper libpcap-dev
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
@@ -81,6 +81,9 @@ jobs:
           cd libpcap-$LIBPCAP_VERSION
           ./configure --host=arm-linux --with-pcap=linux
           make
+          sudo make install
+          ls -al $LIBPCAP_BUILD_DIR
+          ls -al $LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
           echo ::set-env name=LD_LIBRARY_PATH::$LD_LIBRARY_PATH
 
       - name: Check out code into the Go module directory
@@ -88,7 +91,6 @@ jobs:
 
       - name: Compilation of netspot for armhf
         run: |
-          find / -name pcap.h
           make
 
       - name: Upload binaries
