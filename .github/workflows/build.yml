@@ -47,8 +47,8 @@ jobs:
       LIBC_DIR: /usr/arm-linux-gnueabihf/lib
       CC: arm-linux-gnueabihf-gcc
       CGO_ENABLED: 1
-      CGO_LDFLAGS: -L$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION -L$LIBC_DIR
-      CGO_CFLAGS: -g -O2 -I$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
+      CGO_LDFLAGS: -L/tmp/libpcap-1.9.1 -L/usr/arm-linux-gnueabihf/lib
+      CGO_CFLAGS: -g -O2 -I/tmp/libpcap-1.9.1
       GOOS: linux
       GOARCH: arm
       GOARM: 7
@@ -92,6 +92,8 @@ jobs:
 
       - name: Compilation of netspot for armhf
         run: |
+          env | grep GO
+          env | grep LD
           make
 
       # - name: Upload binaries
@@ -118,8 +120,8 @@ jobs:
       LIBC_DIR: /usr/aarch64-linux-gnu/lib
       CC: aarch64-linux-gnu-gcc
       CGO_ENABLED: 1
-      CGO_LDFLAGS: -L$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION -L$LIBC_DIR
-      CGO_CFLAGS: -g -O2 -I$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
+      CGO_LDFLAGS: -L/tmp/libpcap-1.9.1 -L/usr/aarch64-linux-gnu/lib
+      CGO_CFLAGS: -g -O2 -I/tmp/libpcap-1.9.1
       GOOS: linux
       GOARCH: arm64
       LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib
@@ -159,7 +161,8 @@ jobs:
 
       - name: Compile netspot for aarch64
         run: |
-          env | grep CGO
+          env | grep GO
+          env | grep LD
           make build
 
       # - name: Upload binaries
