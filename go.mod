@@ -16,5 +16,8 @@ require (
 	github.com/rs/zerolog v1.17.2
 	github.com/spf13/viper v1.6.1
 	github.com/urfave/cli v1.22.2
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	golang.org/x/tools v0.0.0-20200108203644-89082a384178 // indirect
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	gonum.org/v1/gonum v0.6.2 // indirect
 )
