@@ -53,7 +53,7 @@ jobs:
       GOARCH: arm
       GOARM: 7
       LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib
-      PACKAGES: software-properties-common byacc flex dpkg-dev debhelper libpcap-dev
+      PACKAGES: software-properties-common byacc flex dpkg-dev debhelper
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.13
@@ -123,7 +123,7 @@ jobs:
       GOOS: linux
       GOARCH: arm64
       LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib
-      PACKAGES: software-properties-common byacc flex dpkg-dev debhelper libpcap-dev
+      PACKAGES: software-properties-common byacc flex dpkg-dev debhelper
 
     runs-on: ubuntu-latest
 
