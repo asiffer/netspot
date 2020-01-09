@@ -44,9 +44,10 @@ jobs:
     env:
       LIBPCAP_VERSION: 1.9.1
       LIBPCAP_BUILD_DIR: /tmp
+      LIBC_DIR: /usr/arm-linux-gnueabihf/lib
       CC: arm-linux-gnueabihf-gcc
       CGO_ENABLED: 1
-      CGO_LDFLAGS: -L$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
+      CGO_LDFLAGS: -L$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION -L$LIBC_DIR
       CGO_CFLAGS: -g -O2 -I$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
       GOOS: linux
       GOARCH: arm
@@ -114,9 +115,10 @@ jobs:
     env:
       LIBPCAP_VERSION: 1.9.1
       LIBPCAP_BUILD_DIR: /tmp
+      LIBC_DIR: /usr/aarch64-linux-gnu/lib
       CC: aarch64-linux-gnu-gcc
       CGO_ENABLED: 1
-      CGO_LDFLAGS: -L$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
+      CGO_LDFLAGS: -L$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION -L$LIBC_DIR
       CGO_CFLAGS: -g -O2 -I$LIBPCAP_BUILD_DIR/libpcap-$LIBPCAP_VERSION
       GOOS: linux
       GOARCH: arm64
@@ -151,14 +153,13 @@ jobs:
           cd libpcap-$LIBPCAP_VERSION
           ./configure --host=arm-linux --with-pcap=linux
           make
-          sudo make install
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
       - name: Compile netspot for aarch64
         run: |
-          make
+          make build
 
       - name: Upload binaries
         uses: actions/upload-artifact@v1
