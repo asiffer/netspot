@@ -24,20 +24,20 @@ jobs:
           sudo apt-get install -y $PACKAGES libpcap0.8 libpcap-dev
           make
 
-      - name: Upload binaries
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspot
-          path: bin/
+      # - name: Upload binaries
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: netspot
+      #     path: bin/
 
       - name: Debian packaging
         run: make debian
 
-      - name: Upload debian package
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspot-debian-amd64
-          path: dist/debian/
+      # - name: Upload debian package
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: netspot-debian-amd64
+      #     path: dist/debian/
 
   build-armhf:
     name: Build (armhf)
@@ -94,21 +94,21 @@ jobs:
         run: |
           make
 
-      - name: Upload binaries
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspot-armhf
-          path: bin/
+      # - name: Upload binaries
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: netspot-armhf
+      #     path: bin/
 
       - name: Debian packaging
         run: |
           make debian
 
-      - name: Upload debian package
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspot-debian-armhf
-          path: dist/debian/
+      # - name: Upload debian package
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: netspot-debian-armhf
+      #     path: dist/debian/
 
   build-aarch64:
     name: Build (aarch64)
@@ -159,23 +159,23 @@ jobs:
 
       - name: Compile netspot for aarch64
         run: |
+          env | grep CGO
           make build
 
-      - name: Upload binaries
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspot-aarch64
-          path: bin/
+      # - name: Upload binaries
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: netspot-aarch64
+      #     path: bin/
 
       - name: Debian packaging
         run: |
           make debian
-
-      - name: Upload debian package
-        uses: actions/upload-artifact@v1
-        with:
-          name: netspot-debian-aarch64
-          path: dist/debian/
+      # - name: Upload debian package
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: netspot-debian-aarch64
+      #     path: dist/debian/
       # - name: Debian packaging
       #   run: |
       #     export CGO_ENABLED=1
