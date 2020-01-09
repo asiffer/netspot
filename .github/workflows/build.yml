@@ -1,5 +1,5 @@
 name: Go
-on: [push]
+on: [repository_dispatch]
 jobs:
   build:
     name: Build (amd64)
