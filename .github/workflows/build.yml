@@ -124,7 +124,7 @@ jobs:
       CGO_CFLAGS: -g -O2 -I/tmp/libpcap-1.9.1
       GOOS: linux
       GOARCH: arm64
-      LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib
+      LD_LIBRARY_PATH: /usr/aarch64-linux-gnu/lib
       PACKAGES: software-properties-common byacc flex dpkg-dev debhelper
 
     runs-on: ubuntu-latest
