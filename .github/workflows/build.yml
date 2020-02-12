@@ -1,5 +1,7 @@
 name: Build
-on: [repository_dispatch]
+on:
+  repository_dispatch:
+    types: update
 jobs:
   build:
     name: Build (amd64)
