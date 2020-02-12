@@ -1,10 +1,5 @@
 # netspot
 
-![build_amd64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_amd64.svg?job=build_amd64)
-![build_armhf](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_armhf.svg?job=build_armhf)
-![build_aarch64](https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/build_aarch64.svg?job=build_aarch64)
-
----
 
 <table style="width: 100%; display: block;">
 <tr>
@@ -93,14 +88,6 @@ The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the conf
 
 `netspot` (and its built-in client) can be installed through `debian` packages. Three architectures are available: `amd64`, `armhf` and `aarch64` (for a Raspberry Pi for instance).
 
-<center>
-<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_amd64.deb?job=build_amd64"><img src="assets/amd64.png" width="20%" float="left"></a>
-<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_armhf.deb?job=build_armhf"><img src="assets/armhf.png" width="20%" float="left"></a>
-<a href="https://gitlab.amossys.fr/api/v4/projects/155/jobs/artifacts/master/raw/dist/debian/netspot_1.3_arm64.deb?job=build_aarch64"><img src="assets/aarch64.png" width="20%" float="left" padding="0 5%"></a>
-</center>
-
-
-<br>
 
 ### Docker container
 
@@ -112,7 +99,7 @@ $ docker run --rm --name=netspot \
              -p 11000:11000 \
              -p 11001:11001 \
              -v netspot.toml:/etc/netspot/netspot.toml \
-                asiffer/netspot-amd64:1.3
+                asiffer/netspot-amd64:1.3.1
 ```
 
 
