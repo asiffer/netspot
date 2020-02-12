@@ -1,4 +1,9 @@
+![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg?branch=master)
+
+---
+
 # netspot
+
 
 
 <table style="width: 100%; display: block;">
@@ -77,21 +82,14 @@ The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the conf
 
 ### Debian package
 
-<!-- <table style="width: 100%; display: block;">
-<tr>
-<img src="https://pc-freak.net/images/how-to-fix-unfixable-broken-package-dependency-on-debian-ubuntu-linux-icon.png" alt="drawing" align="left" style="display: block; margin: 10px;" width="100"/>
-</tr>
-<tr>
-<code>netspot</code> (and its built-in client) can be installed through <code>debian</code> packages. Three architectures are available: <code>amd64</code>, <code>armhf</code> and <code>aarch64</code> (for a Raspberry Pi for instance).
-</tr>
-</table> -->
 
-`netspot` (and its built-in client) can be installed through `debian` packages. Three architectures are available: `amd64`, `armhf` and `aarch64` (for a Raspberry Pi for instance).
+`netspot` (and its built-in client) can be installed through `debian` packages. Three architectures are available: [`amd64`](https://github.com/asiffer/netspot/releases/download/v1.3.1/netspot_1.3.1_amd64.deb), [`armhf`](https://github.com/asiffer/netspot/releases/download/v1.3.1/netspot_1.3.1_armhf.deb) and [`aarch64`](https://github.com/asiffer/netspot/releases/download/v1.3.1/netspot_1.3.1_arm64.deb) (for a Raspberry Pi for instance).
+
 
 
 ### Docker container
 
-A `docker` image (based on `alpine`) also exists. Some options can naturally be added to start a new container.
+A [`docker`](https://github.com/asiffer/netspot/releases/download/v1.3.1/docker-netspot-amd64_1.3.1.tar.gz) image (based on `alpine`) also exists. Some options can naturally be added to start a new container.
 
 ```console
 $ docker run --rm --name=netspot \
