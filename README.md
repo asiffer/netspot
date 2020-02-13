@@ -39,7 +39,7 @@ The current package embeds a client: <code>netspotctl</code> but the latter coul
     - [Starting the server](#starting-the-server)
     - [Endpoints](#endpoints)
     - [HTTPS](#https)
-    - [Configuring the server with netspotctl](#configuring-the-server-with-netspotctl)
+    - [Configuring the server with](#configuring-the-server-with)
     - [Running](#running)
     - [Stop/Reset](#stopreset)
   - [REST API](#rest-api)
@@ -47,7 +47,9 @@ The current package embeds a client: <code>netspotctl</code> but the latter coul
     - [Miner](#miner)
     - [Analyzer](#analyzer)
     - [Alarms](#alarms)
+  - [What's next?](#whats-next)
   - [Notes](#notes)
+
 
 
 
@@ -314,6 +316,13 @@ Every statistic embeds a `SPOT` instance to monitor itself. Like the counters, y
 
 When a `SPOT` instance finds an abnormal value, it merely logs it (currently to a file or to InfluxDB).
 
+## What's next?
+
+I am currently splitting the analyzer, extracting a kind of "exporter" module to manage i/o (data, thresholds and alarms)
+
+Moreover, I think that I will also separate the client. 
+About the API, I am definitely looking at `gRPC` to both
+control the server and also receive data.
 
 ## Notes
 
@@ -323,7 +332,7 @@ The IDS is quite ready for a release!
 * New counters and new stats
 * New HTTP API with OpenAPI spec
 * Cleaner code
-* New distributions options (Debian package, Docker image, `armhf` binaries)
+* New distributions options (Debian package, Docker image, `armhf` and `aarch64` binaries)
 
 
 ### Version 1.2
