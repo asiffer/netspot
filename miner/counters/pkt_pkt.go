@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("PKTS", func() BaseCtrInterface {
-		return &PKTS{
-			PktCtr:  NewPktCtr(),
-			Counter: 0}
-	})
+	Register(&PKTS{Counter: 0})
 }
 
 // PKTS stores the pestamp of the packets
 type PKTS struct {
-	PktCtr
+	BaseCtr
 	Counter uint64
 }
 

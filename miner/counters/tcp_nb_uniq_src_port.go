@@ -3,24 +3,17 @@
 package counters
 
 import (
-	"sync"
-
 	"github.com/google/gopacket/layers"
 )
 
 func init() {
-	Register("NB_UNIQ_SRC_PORT", func() BaseCtrInterface {
-		return &NbUniqSrcPort{
-			TCPCtr: NewTCPCtr(),
-			Port:   make(map[uint16]bool)}
-	})
+	Register(&NbUniqSrcPort{port: make(map[uint16]bool)})
 }
 
 // NbUniqSrcPort gives the number of unique source addresses
 type NbUniqSrcPort struct {
-	TCPCtr
-	Port map[uint16]bool
-	mux  sync.RWMutex
+	BaseCtr
+	port map[uint16]bool
 }
 
 // Name returns the name of the counter (method of BaseCtrInterface)
@@ -29,24 +22,18 @@ func (*NbUniqSrcPort) Name() string {
 }
 
 // Value returns the current value of the counter (method of BaseCtrInterface)
-func (nudp *NbUniqSrcPort) Value() uint64 {
-	return uint64(len(nudp.Port))
+func (nusp *NbUniqSrcPort) Value() uint64 {
+	return uint64(len(nusp.port))
 }
 
 // Reset resets the counter
-func (nudp *NbUniqSrcPort) Reset() {
-	nudp.mux.Lock()
-	for k := range nudp.Port {
-		delete(nudp.Port, k)
-	}
-	nudp.mux.Unlock()
+func (nusp *NbUniqSrcPort) Reset() {
+	nusp.port = make(map[uint16]bool)
 }
 
 // Process update the counter according to data it receives
-func (nudp *NbUniqSrcPort) Process(tcp *layers.TCP) {
-	nudp.mux.Lock()
-	nudp.Port[uint16(tcp.SrcPort)] = true
-	nudp.mux.Unlock()
+func (nusp *NbUniqSrcPort) Process(tcp *layers.TCP) {
+	nusp.port[uint16(tcp.SrcPort)] = true
 }
 
 // END OF NbUniqSrcPort

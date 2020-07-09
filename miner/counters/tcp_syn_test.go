@@ -8,7 +8,7 @@ import (
 
 func TestSYNCounter(t *testing.T) {
 	title("Testing SYN counter")
-	ctr := &SYN{TCPCtr: NewTCPCtr(), Counter: 0}
+	ctr := &SYN{counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "SYN" {
 		testERROR()

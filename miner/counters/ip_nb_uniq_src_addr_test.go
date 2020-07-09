@@ -9,7 +9,7 @@ import (
 
 func TestNbUniqSrcAddrCounter(t *testing.T) {
 	title("Testing NB_UNIQ_SRC_ADDR counter")
-	ctr := &NbUniqSrcAddr{IPCtr: NewIPCtr(), Addr: make(map[string]bool)}
+	ctr := &NbUniqSrcAddr{Addr: make(map[string]bool)}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "NB_UNIQ_SRC_ADDR" {
 		testERROR()

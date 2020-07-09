@@ -8,7 +8,7 @@ import (
 
 func TestNbUniqDstPortCounter(t *testing.T) {
 	title("Testing NB_UNIQ_DST_PORT counter")
-	ctr := &NbUniqDstPort{TCPCtr: NewTCPCtr(), Port: make(map[uint16]bool)}
+	ctr := &NbUniqDstPort{port: make(map[uint16]bool)}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "NB_UNIQ_DST_PORT" {
 		testERROR()

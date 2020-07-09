@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("FIN", func() BaseCtrInterface {
-		return &FIN{
-			TCPCtr:  NewTCPCtr(),
-			Counter: 0}
-	})
+	Register(&FIN{Counter: 0})
 }
 
 // FIN stores the number of FIN packets (TCP)
 type FIN struct {
-	TCPCtr
+	BaseCtr
 	Counter uint64
 }
 

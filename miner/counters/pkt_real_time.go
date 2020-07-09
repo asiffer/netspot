@@ -10,16 +10,12 @@ import (
 )
 
 func init() {
-	Register("REAL_TIME", func() BaseCtrInterface {
-		return &REAL_TIME{
-			PktCtr:  NewPktCtr(),
-			Counter: 0}
-	})
+	Register(&REAL_TIME{Counter: 0})
 }
 
 // REAL_TIME stores the timestamp of the packets
 type REAL_TIME struct {
-	PktCtr
+	BaseCtr
 	Counter uint64
 }
 
@@ -36,7 +32,6 @@ func (tim *REAL_TIME) Value() uint64 {
 // Reset resets the counter
 func (tim *REAL_TIME) Reset() {
 	// do nothing
-	// atomic.StoreUint64(&tim.Counter, 0)
 }
 
 // Process update the counter according to data it receives

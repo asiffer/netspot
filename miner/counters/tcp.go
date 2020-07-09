@@ -3,6 +3,8 @@
 package counters
 
 import (
+	"sync"
+
 	"github.com/google/gopacket/layers"
 )
 
@@ -10,47 +12,37 @@ import (
 // The paramount method is obviously 'process'
 type TCPCtrInterface interface {
 	BaseCtrInterface
-	Process(*layers.TCP)       // method to process a packet
-	LayPipe() chan *layers.TCP // receive packets
-}
-
-// TCPCtr is the generic TCP counter (inherits from BaseCtr)
-type TCPCtr struct {
-	BaseCtr
-	Lay chan *layers.TCP
-}
-
-// NewTCPCtr is the generic constructor of an TCP counter
-func NewTCPCtr() TCPCtr {
-	return TCPCtr{
-		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan *layers.TCP)}
-}
-
-// LayPipe returns the TCP layer channel of the TCP counter
-func (ctr *TCPCtr) LayPipe() chan *layers.TCP {
-	return ctr.Lay
+	Process(*layers.TCP) // method to process a packet
 }
 
 // RunTCPCtr starts an TCP counter
-func RunTCPCtr(ctr TCPCtrInterface) {
-	ctr.SwitchRunningOn()
+func RunTCPCtr(ctr TCPCtrInterface, com chan uint64, input <-chan *layers.TCP, wg *sync.WaitGroup) {
+	// reset
+	ctr.Reset()
+	// loop
 	for {
 		select {
-		case sig := <-ctr.SigPipe():
+		case sig := <-com:
 			switch sig {
 			case STOP: // stop the counter
-				ctr.SwitchRunningOff()
+				defer wg.Done()
 				return
 			case GET: // return the value
-				ctr.ValPipe() <- ctr.Value()
+				com <- ctr.Value()
 			case RESET: // reset
 				ctr.Reset()
 			case FLUSH: // return the value and reset
-				ctr.ValPipe() <- ctr.Value()
+				com <- ctr.Value()
 				ctr.Reset()
+			case TERMINATE:
+				// process the remaining packet
+				for tcp := range input {
+					ctr.Process(tcp)
+				}
+				defer wg.Done()
+				return
 			}
-		case tcp := <-ctr.LayPipe(): // process the packet
+		case tcp := <-input: // process the packet
 			ctr.Process(tcp)
 		}
 	}

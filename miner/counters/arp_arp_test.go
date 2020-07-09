@@ -10,7 +10,7 @@ import (
 
 func TestARPCounter(t *testing.T) {
 	title("Testing ARP counter")
-	ctr := &ARP{ARPCtr: NewARPCtr(), Counter: 0}
+	ctr := &ARP{Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "ARP" {
 		testERROR()

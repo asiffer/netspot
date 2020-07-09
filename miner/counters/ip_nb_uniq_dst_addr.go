@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("NB_UNIQ_DST_ADDR", func() BaseCtrInterface {
-		return &NbUniqDstAddr{
-			IPCtr: NewIPCtr(),
-			Addr:  make(map[string]bool)}
-	})
+	Register(&NbUniqDstAddr{Addr: make(map[string]bool)})
 }
 
 // NbUniqDstAddr gives the number of unique source addresses
 type NbUniqDstAddr struct {
-	IPCtr
+	BaseCtr
 	Addr map[string]bool
 	mux  sync.RWMutex
 }

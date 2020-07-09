@@ -3,6 +3,8 @@
 package counters
 
 import (
+	"sync"
+
 	"github.com/google/gopacket/layers"
 )
 
@@ -10,47 +12,37 @@ import (
 // The paramount method is obviously 'process'
 type UDPCtrInterface interface {
 	BaseCtrInterface
-	Process(*layers.UDP)       // method to process a packet
-	LayPipe() chan *layers.UDP // receive packets
-}
-
-// UDPCtr is the generic UDP counter (inherits from BaseCtr)
-type UDPCtr struct {
-	BaseCtr
-	Lay chan *layers.UDP
-}
-
-// NewUDPCtr is the generic constructor of an UDP counter
-func NewUDPCtr() UDPCtr {
-	return UDPCtr{
-		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan *layers.UDP)}
-}
-
-// LayPipe returns the UDP layer channel of the UDP counter
-func (ctr *UDPCtr) LayPipe() chan *layers.UDP {
-	return ctr.Lay
+	Process(*layers.UDP) // method to process a packet
 }
 
 // RunUDPCtr starts an UDP counter
-func RunUDPCtr(ctr UDPCtrInterface) {
-	ctr.SwitchRunningOn()
+func RunUDPCtr(ctr UDPCtrInterface, com chan uint64, input <-chan *layers.UDP, wg *sync.WaitGroup) {
+	// reset
+	ctr.Reset()
+	// loop
 	for {
 		select {
-		case sig := <-ctr.SigPipe():
-			switch sig {
+		case signal := <-com:
+			switch signal {
 			case STOP: // stop the counter
-				ctr.SwitchRunningOff()
+				defer wg.Done()
 				return
 			case GET: // return the value
-				ctr.ValPipe() <- ctr.Value()
+				com <- ctr.Value()
 			case RESET: // reset
 				ctr.Reset()
 			case FLUSH: // return the value and reset
-				ctr.ValPipe() <- ctr.Value()
+				com <- ctr.Value()
 				ctr.Reset()
+			case TERMINATE:
+				// process the remaining packet
+				for udp := range input {
+					ctr.Process(udp)
+				}
+				defer wg.Done()
+				return
 			}
-		case udp := <-ctr.LayPipe(): // process the packet
+		case udp := <-input: // process the packet
 			ctr.Process(udp)
 		}
 	}

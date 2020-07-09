@@ -9,17 +9,13 @@ import (
 )
 
 func init() {
-	Register("URG", func() BaseCtrInterface {
-		return &URG{
-			TCPCtr:  NewTCPCtr(),
-			Counter: 0}
-	})
+	Register(&URG{counter: 0})
 }
 
 // URG stores the number of URG packets (TCP)
 type URG struct {
-	TCPCtr
-	Counter uint64
+	BaseCtr
+	counter uint64
 }
 
 // Name returns the name of the counter (method of BaseCtrInterface)
@@ -29,17 +25,17 @@ func (*URG) Name() string {
 
 // Value returns the current value of the counter (method of BaseCtrInterface)
 func (urg *URG) Value() uint64 {
-	return atomic.LoadUint64(&urg.Counter)
+	return atomic.LoadUint64(&urg.counter)
 }
 
 // Reset resets the counter
 func (urg *URG) Reset() {
-	atomic.StoreUint64(&urg.Counter, 0)
+	atomic.StoreUint64(&urg.counter, 0)
 }
 
 // Process update the counter according to data it receives
 func (urg *URG) Process(tcp *layers.TCP) {
 	if tcp.URG {
-		atomic.AddUint64(&urg.Counter, 1)
+		atomic.AddUint64(&urg.counter, 1)
 	}
 }

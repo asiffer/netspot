@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("IP_BYTES", func() BaseCtrInterface {
-		return &IPBytes{
-			IPCtr:   NewIPCtr(),
-			Counter: 0}
-	})
+	Register(&IPBytes{Counter: 0})
 }
 
 // IPBytes stores the size of IP payloads (in bytes)
 type IPBytes struct {
-	IPCtr
+	BaseCtr
 	Counter uint64
 }
 

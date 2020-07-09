@@ -8,7 +8,7 @@ import (
 
 func TestIPBYTESCounter(t *testing.T) {
 	title("Testing IP_BYTES counter")
-	ctr := &IPBytes{IPCtr: NewIPCtr(), Counter: 0}
+	ctr := &IPBytes{Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "IP_BYTES" {
 		testERROR()

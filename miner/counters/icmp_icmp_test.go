@@ -8,7 +8,7 @@ import (
 
 func TestICMPCounter(t *testing.T) {
 	title("Testing ICMP counter")
-	ctr := &ICMP{ICMPCtr: NewICMPCtr(), Counter: 0}
+	ctr := &ICMP{Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "ICMP" {
 		testERROR()

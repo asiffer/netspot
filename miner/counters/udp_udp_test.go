@@ -8,7 +8,7 @@ import (
 
 func TestUDPCounter(t *testing.T) {
 	title("Testing UDP counter")
-	ctr := &UDP{UDPCtr: NewUDPCtr(), Counter: 0}
+	ctr := &UDP{counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "UDP" {
 		testERROR()

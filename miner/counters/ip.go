@@ -3,56 +3,47 @@
 package counters
 
 import (
+	"sync"
+
 	"github.com/google/gopacket/layers"
 )
 
-// IPCtrInterface is the interface defining an IP counter
+// IPv4CtrInterface is the interface defining an IP counter
 // The paramount method is obviously 'process'
-type IPCtrInterface interface {
+type IPv4CtrInterface interface {
 	BaseCtrInterface
 	Process(*layers.IPv4) // method to process a packet
-	LayPipe() chan *layers.IPv4
 }
 
-// IPCtr is the generic IP counter (inherits from BaseCtr)
-type IPCtr struct {
-	BaseCtr
-	Lay chan *layers.IPv4
-}
-
-// NewIPCtr is the generic constructor of an IP counter
-func NewIPCtr() IPCtr {
-	return IPCtr{
-		BaseCtr: NewBaseCtr(),
-		Lay:     make(chan *layers.IPv4)}
-}
-
-// LayPipe returns the IPv4 layer channel of the IP counter
-func (ctr *IPCtr) LayPipe() chan *layers.IPv4 {
-	return ctr.Lay
-}
-
-// RunIPCtr starts an IP counter
-func RunIPCtr(ctr IPCtrInterface) {
-	ctr.SwitchRunningOn()
+// RunIPv4Ctr starts an IP counter
+func RunIPv4Ctr(ctr IPv4CtrInterface, com chan uint64, input <-chan *layers.IPv4, wg *sync.WaitGroup) {
+	// reset
+	ctr.Reset()
+	// loop
 	for {
 		select {
-		case sig := <-ctr.SigPipe():
-			switch sig {
+		case signal := <-com:
+			switch signal {
 			case STOP: // stop the counter
-				ctr.SwitchRunningOff()
+				defer wg.Done()
 				return
 			case GET: // return the value
-				ctr.ValPipe() <- ctr.Value()
+				com <- ctr.Value()
 			case RESET: // reset
 				ctr.Reset()
 			case FLUSH: // return the value and reset
-				ctr.ValPipe() <- ctr.Value()
+				com <- ctr.Value()
 				ctr.Reset()
+			case TERMINATE:
+				// process the remaining packet
+				for ip := range input {
+					ctr.Process(ip)
+				}
+				defer wg.Done()
+				return
 			}
-		case ip := <-ctr.LayPipe(): // process the packet
+		case ip := <-input: // process the packet
 			ctr.Process(ip)
-
 		}
 	}
 }

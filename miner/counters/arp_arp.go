@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("ARP", func() BaseCtrInterface {
-		return &ARP{
-			ARPCtr:  NewARPCtr(),
-			Counter: 0}
-	})
+	Register(&ARP{Counter: 0})
 }
 
 // ARP is an ARP counter counting the number of ARP packets
 type ARP struct {
-	ARPCtr
+	BaseCtr
 	Counter uint64
 }
 

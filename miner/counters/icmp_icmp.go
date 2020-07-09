@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("ICMP", func() BaseCtrInterface {
-		return &ICMP{
-			ICMPCtr: NewICMPCtr(),
-			Counter: 0}
-	})
+	Register(&ICMP{Counter: 0})
 }
 
 // ICMP stores the number of ICMP packets
 type ICMP struct {
-	ICMPCtr
+	BaseCtr
 	Counter uint64
 }
 

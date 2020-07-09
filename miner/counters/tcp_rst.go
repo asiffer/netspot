@@ -9,17 +9,13 @@ import (
 )
 
 func init() {
-	Register("RST", func() BaseCtrInterface {
-		return &RST{
-			TCPCtr:  NewTCPCtr(),
-			Counter: 0}
-	})
+	Register(&RST{counter: 0})
 }
 
 // RST stores the number of RST packets (TCP)
 type RST struct {
-	TCPCtr
-	Counter uint64
+	BaseCtr
+	counter uint64
 }
 
 // Name returns the name of the counter (method of BaseCtrInterface)
@@ -29,17 +25,17 @@ func (*RST) Name() string {
 
 // Value returns the current value of the counter (method of BaseCtrInterface)
 func (rst *RST) Value() uint64 {
-	return atomic.LoadUint64(&rst.Counter)
+	return atomic.LoadUint64(&rst.counter)
 }
 
 // Reset resets the counter
 func (rst *RST) Reset() {
-	atomic.StoreUint64(&rst.Counter, 0)
+	atomic.StoreUint64(&rst.counter, 0)
 }
 
 // Process update the counter according to data it receives
 func (rst *RST) Process(tcp *layers.TCP) {
 	if tcp.RST {
-		atomic.AddUint64(&rst.Counter, 1)
+		atomic.AddUint64(&rst.counter, 1)
 	}
 }
