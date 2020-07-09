@@ -53,37 +53,3 @@ func Register(ctr BaseCtrInterface) error {
 
 // BaseCtr is the basic counter object
 type BaseCtr int
-
-// Run starts a counter, making it waiting for new incoming layers
-func Run(ctr BaseCtrInterface) {
-	switch ctr.(type) {
-	case ARPCtrInterface:
-		if arpctr, ok := ctr.(ARPCtrInterface); ok {
-			RunARPCtr(arpctr)
-		}
-	case IPCtrInterface:
-		if ipctr, ok := ctr.(IPCtrInterface); ok {
-			RunIPv4Ctr(ipctr)
-		}
-	case TCPCtrInterface:
-		if tcpctr, ok := ctr.(TCPCtrInterface); ok {
-			RunTCPCtr(tcpctr)
-		}
-	case UDPCtrInterface:
-		if udpctr, ok := ctr.(UDPCtrInterface); ok {
-			RunUDPCtr(udpctr)
-		}
-	case ICMPCtrInterface:
-		if icmpctr, ok := ctr.(ICMPCtrInterface); ok {
-			RunICMPCtr(icmpctr)
-		}
-	case PktCtrInterface:
-		if pktctr, ok := ctr.(PktCtrInterface); ok {
-			RunPktCtr(pktctr)
-		}
-	case PatternCtrInterface:
-		if patternctr, ok := ctr.(PatternCtrInterface); ok {
-			RunPatternCtr(patternctr)
-		}
-	}
-}

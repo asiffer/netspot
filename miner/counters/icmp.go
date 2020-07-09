@@ -16,7 +16,7 @@ type ICMPv4CtrInterface interface {
 }
 
 // RunICMPv4Ctr starts the ICMP counter
-func RunICMPv4Ctr(ctr ICMPCtrInterface, com chan uint64, input <-chan *layers.ICMPv4, wg *sync.WaitGroup) {
+func RunICMPv4Ctr(ctr ICMPv4CtrInterface, com chan uint64, input <-chan *layers.ICMPv4, wg *sync.WaitGroup) {
 	// reset
 	ctr.Reset()
 	// loop
