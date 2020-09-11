@@ -60,11 +60,9 @@ func (c *Console) Start(string) error {
 
 // Write logs data
 func (c *Console) Write(t time.Time, data map[string]float64) error {
+	// fmt.Println(data)
 	if c.data {
-		data["time"] = float64(t.UnixNano())
-		if b, err := json.Marshal(data); err == nil {
-			fmt.Println(string(b))
-		}
+		fmt.Println(jsonifyWithTime(t, data))
 	}
 	return nil
 }
@@ -82,12 +80,6 @@ func (c *Console) Warn(t time.Time, s *SpotAlert) error {
 		if b, err := json.Marshal(alarm); err == nil {
 			fmt.Println(string(b))
 		}
-		// c.alarmLogger.Log().Time("time", t).
-		// 	Str("Status", s.Status).
-		// 	Str("Stat", s.Stat).
-		// 	Float64("Value", s.Value).
-		// 	Int("Code", s.Code).
-		// 	Float64("Probability", s.Probability).Send()
 	}
 	return nil
 }
