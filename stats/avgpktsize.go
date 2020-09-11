@@ -6,8 +6,7 @@ package stats
 import "math"
 
 func init() {
-	Register("AVG_PKT_SIZE",
-		func(bs BaseStat) StatInterface { return &AvgPktSize{bs} })
+	Register(&AvgPktSize{BaseStat{name: "AVG_PKT_SIZE"}})
 }
 
 // AvgPktSize computes the average size of an IP packet

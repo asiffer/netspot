@@ -4,27 +4,26 @@
 package stats
 
 func init() {
-	Register("R_SYN",
-		func(bs BaseStat) StatInterface { return &RSyn{bs} })
+	Register(&RSYN{BaseStat{name: "R_SYN"}})
 }
 
-// RSyn computes the ratio of packets with TCP + SYN flag
-type RSyn struct {
+// RSYN computes the ratio of packets with TCP + SYN flag
+type RSYN struct {
 	BaseStat
 }
 
 // Name returns the unique name of the stat
-func (stat *RSyn) Name() string {
+func (stat *RSYN) Name() string {
 	return "R_SYN"
 }
 
 // Requirement returns teh requested counters to compute the stat
-func (stat *RSyn) Requirement() []string {
+func (stat *RSYN) Requirement() []string {
 	return []string{"SYN", "IP"}
 }
 
 // Compute implements the way to compute the stat from the counters
-func (stat *RSyn) Compute(ctrvalues []uint64) float64 {
+func (stat *RSYN) Compute(ctrvalues []uint64) float64 {
 	//ctrvalues[0] -> syn
 	//ctrvalues[1] -> ip
 	// if ctrvalues[0] == 0 {

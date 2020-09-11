@@ -312,9 +312,7 @@ func TestGetStat(t *testing.T) {
 	}
 
 	checkTitle("Double registering...")
-	err = Register(
-		"R_ACK",
-		func(bs BaseStat) StatInterface { return nil })
+	err = Register(&RACK{BaseStat: BaseStat{name: "R_ACK"}})
 	if err == nil {
 		testERROR()
 		t.Errorf("R_ACK must be already registered")

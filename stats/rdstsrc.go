@@ -6,8 +6,7 @@ package stats
 import "math"
 
 func init() {
-	Register("R_DST_SRC",
-		func(bs BaseStat) StatInterface { return &RDstSrc{bs} })
+	Register(&RDstSrc{BaseStat{name: "R_DST_SRC"}})
 }
 
 // RDstSrc computes the ratio 'number of unique destination addresses' / 'number of unique source addresses'
@@ -20,7 +19,7 @@ func (stat *RDstSrc) Name() string {
 	return "R_DST_SRC"
 }
 
-// Requirement returns teh requested counters to compute the stat
+// Requirement returns the requested counters to compute the stat
 func (stat *RDstSrc) Requirement() []string {
 	return []string{"NB_UNIQ_DST_ADDR", "NB_UNIQ_SRC_ADDR"}
 }

@@ -4,13 +4,11 @@
 package stats
 
 import (
-	"errors"
 	"fmt"
 	"netspot/config"
 
 	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 // StatConstructor is the generic template for a stat constructor
@@ -19,7 +17,7 @@ type StatConstructor func(bs BaseStat) StatInterface
 var (
 	logger zerolog.Logger // package logger
 	// AvailableStats is the map linking a stat name to its constructor
-	AvailableStats = make(map[string]StatConstructor)
+	AvailableStats = make(map[string]StatInterface)
 )
 
 func init() {
@@ -27,14 +25,11 @@ func init() {
 }
 
 // Register aims to add implemented stats to the slice AvailableStats
-func Register(name string, sc StatConstructor) error {
-	_, exists := AvailableStats[name]
-	if exists {
-		msg := fmt.Sprintf("The statistics %s is already available", name)
-		log.Error().Msg(msg)
-		return errors.New(msg)
+func Register(s StatInterface) error {
+	if _, exists := AvailableStats[s.Name()]; exists {
+		return fmt.Errorf("The statistics %s is already available", s.Name())
 	}
-	AvailableStats[name] = sc
+	AvailableStats[s.Name()] = s
 	return nil
 }
 
@@ -48,18 +43,15 @@ type BaseStat struct {
 
 // StatInterface gathers the common behavior of the statistics
 type StatInterface interface {
-	Name() string                       // the name of the statistics
+	Name() string // the name of the statistics
+	Configure() error
 	Requirement() []string              // the names of the requested counters
 	Compute(ctrvalues []uint64) float64 // only compute the statistics
-	Update(val float64) int             // feed dspot
-	DSpot() *gospot.DSpot               // return the DSpot instance
-	Configure() error                   // load the spot parameters
-}
-
-// DSpot returns the pointer to the DSpot instance embedded
-// in the BaseStat
-func (m *BaseStat) DSpot() *gospot.DSpot {
-	return m.dspot
+	Update(val float64) int             // feed DSpot
+	UpProbability(quantile float64) float64
+	DownProbability(quantile float64) float64
+	GetThresholds() (float64, float64)
+	Status() gospot.DSpotStatus
 }
 
 // Update feeds the DSpot instance embedded in the BaseStat
@@ -67,6 +59,29 @@ func (m *BaseStat) DSpot() *gospot.DSpot {
 // according to normality/abnormality of the event.
 func (m *BaseStat) Update(val float64) int {
 	return m.dspot.Step(val)
+}
+
+// UpProbability computes the probability to get
+// a value higher than the given threshold
+func (m *BaseStat) UpProbability(q float64) float64 {
+	return m.dspot.UpProbability(q)
+}
+
+// DownProbability computes the probability to get
+// a value lower than the given threshold
+func (m *BaseStat) DownProbability(q float64) float64 {
+	return m.dspot.DownProbability(q)
+}
+
+// Status returns the status of the DSpot instance
+// embedded in the stat
+func (m *BaseStat) Status() gospot.DSpotStatus {
+	return m.dspot.Status()
+}
+
+// GetThresholds returns upper and lower decision thresholds
+func (m *BaseStat) GetThresholds() (float64, float64) {
+	return m.dspot.GetLowerThreshold(), m.dspot.GetUpperThreshold()
 }
 
 // Configure loads the DSpot parameters
@@ -136,18 +151,14 @@ func (m *BaseStat) Configure() error {
 // given name. It returns an error when the desired statistic does
 // not exist.
 func StatFromName(statname string) (StatInterface, error) {
-	bs := BaseStat{name: statname, dspot: nil}
-	if err := bs.Configure(); err != nil {
-		return nil, err
+	if stat, exists := AvailableStats[statname]; exists {
+		if err := stat.Configure(); err != nil {
+			return nil, fmt.Errorf("Error while configuring %s: %v",
+				stat.Name(), err)
+		}
+		return stat, nil
 	}
-
-	statConstructor, exists := AvailableStats[statname]
-	if exists {
-		return statConstructor(bs), nil
-	}
-	log.Error().Msg("Unknown statistics")
-	return nil, errors.New("Unknown statistics")
+	return nil, fmt.Errorf("Unknown stat %s", statname)
 }
 
-func main() {
-}
+func main() {}

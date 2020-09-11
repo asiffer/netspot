@@ -6,8 +6,7 @@ package stats
 import "math"
 
 func init() {
-	Register("R_IP",
-		func(bs BaseStat) StatInterface { return &RIP{bs} })
+	Register(&RIP{BaseStat{name: "R_IP"}})
 }
 
 // RIP computes the ratio of ICMP packets

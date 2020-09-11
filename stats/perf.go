@@ -8,12 +8,10 @@ import (
 )
 
 func init() {
-	Register("PERF",
-		func(bs BaseStat) StatInterface {
-			return &Perf{BaseStat: bs,
-				init:     false,
-				lastTime: 0}
-		})
+	Register(&Perf{
+		BaseStat: BaseStat{name: "PERF"},
+		init:     false,
+		lastTime: 0})
 }
 
 // Perf computes the ratio of packets with TCP + SYN flag
