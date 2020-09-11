@@ -106,35 +106,15 @@ func TestLoadStat(t *testing.T) {
 	}
 
 	checkTitle("Loading R_SYN...")
-	id1, err := LoadFromName("R_SYN")
-	if id1 <= 0 {
+	if err := LoadFromName("R_SYN"); err != nil {
 		t.Errorf("Error while loading R_SYN: %v", err)
 		testERROR()
 	} else {
 		testOK()
 	}
 
-	checkTitle("Loading R_ACK...")
-	id2, err := LoadFromName("R_ACK")
-	if id2 != (id1 + 1) {
-		t.Errorf("Error while loading R_ACK: %v", err)
-		testERROR()
-	} else {
-		testOK()
-	}
-
-	checkTitle("Loading AVG_PKT_SIZE...")
-	id3, err := LoadFromName("AVG_PKT_SIZE")
-	if id3 != (id2 + 1) {
-		t.Errorf("Error while loading AVG_PKT_SIZE: %v", err)
-		testERROR()
-	} else {
-		testOK()
-	}
-
 	checkTitle("Reloading R_SYN...")
-	id4, err := LoadFromName("R_SYN")
-	if id4 > 0 {
+	if err := LoadFromName("R_SYN"); err == nil {
 		t.Errorf("Error while re-loading R_SYN: %v", err)
 		testERROR()
 	} else {
@@ -142,8 +122,8 @@ func TestLoadStat(t *testing.T) {
 	}
 
 	checkTitle("Checking number of loaded stats...")
-	if len(GetLoadedStats()) != 3 {
-		t.Errorf("Bad number of loaded counters (expected 3, got %d)", len(GetLoadedStats()))
+	if len(GetLoadedStats()) != 1 {
+		t.Errorf("Bad number of loaded counters (expected 1, got %d)", len(GetLoadedStats()))
 		testERROR()
 	} else {
 		testOK()

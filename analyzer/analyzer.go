@@ -26,12 +26,12 @@ import (
 
 // package variables to manage stats
 var (
-	counterID     = make(map[string]int)              // map CounterName -> counterID (within miner CounterMap)
-	statMap       = make(map[int]stats.StatInterface) // map StatId -> Stat
-	statID        = 0                                 // id of the next loaded stat
-	statValues    = make(map[string]float64)          // the last computed values of the statistics
-	counterValues = make(map[string]uint64)           // temp container of the counter values
-	period        = 0 * time.Second                   // time between two stat updates (= window size)
+	// counterID     = make(map[string]int)                 // map CounterName -> counterID (within miner CounterMap)
+	statMap = make(map[string]stats.StatInterface) // map StatId -> Stat
+	// statID        = 0                                    // id of the next loaded stat
+	statValues = make(map[string]float64) // the last computed values of the statistics
+	// counterValues = make(map[string]uint64)              // temp container of the counter values
+	period = 0 * time.Second // time between two stat updates (= window size)
 )
 
 // mutex
@@ -67,6 +67,17 @@ var (
 
 var err error
 
+// AlreadyLoadedError is raised when a stat is
+// loaded twice
+type AlreadyLoadedError struct {
+	Query string
+	Type  string
+}
+
+func (a *AlreadyLoadedError) Error() string {
+	return fmt.Sprintf("%s %s already loaded", a.Type, a.Query)
+}
+
 //------------------------------------------------------------------------------
 // INITIALIZATION
 //------------------------------------------------------------------------------
@@ -78,11 +89,11 @@ func init() {
 
 // init or reset all the stats variables
 func reset() {
-	counterID = make(map[string]int)
-	statMap = make(map[int]stats.StatInterface)
-	statID = 0
+	// counterID = make(map[string]int)
+	statMap = make(map[string]stats.StatInterface)
+	// statID = 0
 	statValues = make(map[string]float64)
-	counterValues = make(map[string]uint64)
+	// counterValues = make(map[string]uint64)
 	defaultEventChannel = make(chan int)
 	running = false
 }
@@ -102,7 +113,9 @@ func InitConfig() error {
 			return err
 		}
 		for _, s := range toLoad {
-			LoadFromName(s)
+			if err := LoadFromName(s); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -139,66 +152,56 @@ func release() {
 	// Stop()
 }
 
-func isLoaded(statname string) int {
-	for i, stat := range statMap {
-		if statname == stat.Name() {
-			return i
-		}
-	}
-	return -1
+func isLoaded(statname string) bool {
+	_, exists := statMap[statname]
+	return exists
 }
 
-func getcounterValues(ctrnames []string) []uint64 {
+func getcounterValues(ctrvalues map[string]uint64, ctrnames []string) []uint64 {
 	values := make([]uint64, len(ctrnames))
 	for i, name := range ctrnames {
-		values[i] = counterValues[name]
+		values[i] = ctrvalues[name]
 	}
 	return values
 }
 
-func compute(id int) float64 {
-	counters := statMap[id].Requirement()
-	values := getcounterValues(counters)
-	return statMap[id].Compute(values)
-}
+func load(stat stats.StatInterface) error {
+	if stat == nil {
+		return fmt.Errorf("Cannot load null stat")
+	}
 
-func load(stat stats.StatInterface) (int, error) {
-	var id int
-	if stat != nil {
-		if isLoaded(stat.Name()) > 0 {
-			analyzerLogger.Debug().Msgf("Stat %s already loaded", stat.Name())
-			msg := fmt.Sprintf("Stat %s already loaded", stat.Name())
-			return -2, errors.New(msg)
-		}
-		// load the counters
-		for _, ctrname := range stat.Requirement() {
-			id = miner.LoadFromName(ctrname)
-			if id > 0 {
-				counterID[ctrname] = id
+	if isLoaded(stat.Name()) {
+		return &AlreadyLoadedError{Type: "Stat", Query: stat.Name()}
+	}
+	// load the counters
+	for _, ctrname := range stat.Requirement() {
+		if err := miner.Load(ctrname); err != nil {
+			switch err.(type) {
+			case *AlreadyLoadedError:
+				analyzerLogger.Debug().Msgf(err.Error())
+			default:
+				return fmt.Errorf("Error while loading counters of stat %s: %v", stat.Name(), err)
 			}
 		}
-		// increment the stat container
-		statID = statID + 1
-		statMap[statID] = stat
-		analyzerLogger.Debug().Msgf("Loading stat %s", stat.Name())
-		return statID, nil
 	}
-	return -1, errors.New("Cannot load null stat")
+	statMap[stat.Name()] = stat
+	analyzerLogger.Debug().Msgf("Loading stat %s", stat.Name())
+	return nil
+
 }
 
 // unload
-func unload(id int) (int, error) {
+func unload(name string) error {
 	var index int
 	// check the potential counters to remove
-	stat, exists := statMap[id]
+	stat, exists := statMap[name]
 	if !exists {
-		msg := fmt.Sprintf("Unknown Stat id %d", id)
-		return -1, errors.New(msg)
+		return fmt.Errorf("Unknown Stat %s", name)
 	}
 	counters2remove := stat.Requirement()
 	// look if these counters are requested by other stats
-	for i, stat := range statMap {
-		if i != id {
+	for n, stat := range statMap {
+		if n != name {
 			for _, req := range stat.Requirement() {
 				index = find(counters2remove, req)
 				if index >= 0 {
@@ -211,13 +214,13 @@ func unload(id int) (int, error) {
 
 	// We remove all the useless counters
 	for _, ctr := range counters2remove {
-		delete(counterID, ctr)
-		delete(counterValues, ctr)
-		miner.UnloadFromName(ctr)
+		if err := miner.Unload(ctr); err != nil {
+			return fmt.Errorf("Error while unloading %s: %v", ctr, err)
+		}
 	}
 	// we remove the stat
-	delete(statMap, id)
-	return 0, nil
+	delete(statMap, name)
+	return nil
 }
 
 //------------------------------------------------------------------------------
@@ -226,11 +229,10 @@ func unload(id int) (int, error) {
 
 // StatStatus returns the status of the dspot instance monitoring that stat
 func StatStatus(s string) (gospot.DSpotStatus, error) {
-	i := isLoaded(s)
-	if i >= 0 {
-		return statMap[i].DSpot().Status(), nil
+	if !isLoaded(s) {
+		return statMap[s].Status(), nil
 	}
-	return gospot.DSpotStatus{}, fmt.Errorf("%s statistics is not loaded", s)
+	return gospot.DSpotStatus{}, fmt.Errorf("Stat %s is not loaded", s)
 }
 
 // RawStatus returns the current status of the analyzer through a
@@ -308,36 +310,21 @@ func GetAvailableStats() []string {
 // LoadFromName loads the statistics corresponding to the given name
 // and returns the id where it is internally stored. An error is returned
 // when the statistics is unknown.
-func LoadFromName(statname string) (int, error) {
+func LoadFromName(statname string) error {
 	stat, err := stats.StatFromName(statname)
 	if err != nil {
-		return -1, err
+		return fmt.Errorf("Error while getting statistics %s: %v", statname, err)
 	}
-	id, err := load(stat)
-	return id, err
+	return load(stat)
 }
-
-// LoadFromNameWithCustomConfig loads the statistics corresponding to the given name
-// and returns the id where it is internally stored. An error is returned
-// when the statistics is unknown. An additional Map parameter is given so as to
-// change the DSpot attributes.
-// func LoadFromNameWithCustomConfig(statname string, config map[string]interface{}) (int, error) {
-// 	stat, err := stats.StatFromNameWithCustomConfig(statname, config)
-// 	if err != nil {
-// 		return -1, err
-// 	}
-// 	return load(stat)
-// }
 
 // UnloadFromName removes the statistics, so it will not be monitored.
 // It returns 0, nil if the unload is ok, or -1, error otherwise.
-func UnloadFromName(statname string) (int, error) {
-	id := isLoaded(statname)
-	if id > 0 {
-		ret, err := unload(id)
-		return ret, err
+func UnloadFromName(statname string) error {
+	if isLoaded(statname) {
+		return unload(statname)
 	}
-	return -1, fmt.Errorf("%s statistics is not loaded", statname)
+	return fmt.Errorf("Stat %s is not loaded", statname)
 }
 
 // UnloadAll removes all the previously loaded statistics
@@ -345,14 +332,7 @@ func UnloadAll() {
 	for i := range statMap {
 		delete(statMap, i)
 	}
-	for i := range counterValues {
-		delete(counterValues, i)
-	}
-	for i := range counterID {
-		delete(counterID, i)
-	}
 	miner.UnloadAll()
-	statID = 0
 }
 
 // IsRunning checks whether the statistics are currently computed
@@ -424,23 +404,23 @@ func StartAndWait() error {
 // PARAMOUNT BUT UNEXPORTED FUNCTIONS
 //------------------------------------------------------------------------------
 
-func checkSpotOutput(id int, val float64, res int, t time.Time) {
+func checkSpotOutput(stat stats.StatInterface, val float64, res int, t time.Time) {
 	var sa exporter.SpotAlert
 	if res == 1 {
 		sa = exporter.SpotAlert{
 			Status:      "UP_ALERT",
-			Stat:        statMap[id].Name(),
+			Stat:        stat.Name(),
 			Value:       val,
 			Code:        res,
-			Probability: statMap[id].DSpot().UpProbability(val),
+			Probability: stat.UpProbability(val),
 		}
 	} else if res == -1 {
 		sa = exporter.SpotAlert{
 			Status:      "DOWN_ALERT",
-			Stat:        statMap[id].Name(),
+			Stat:        stat.Name(),
 			Value:       val,
 			Code:        res,
-			Probability: statMap[id].DSpot().DownProbability(val),
+			Probability: stat.DownProbability(val),
 		}
 	} else {
 		// do nothing
@@ -452,65 +432,66 @@ func checkSpotOutput(id int, val float64, res int, t time.Time) {
 	}
 }
 
-func analyze() {
-	var val float64
-	var upTh, downTh float64
-	var res int
-	var name string
+func analyze(m map[string]uint64) {
 	curtime := miner.SourceTime
 
 	// the locker is needed in case of a snapshot
-	smux.Lock()
+	// smux.Lock()
+	for _, stat := range statMap {
+		name := stat.Name()
 
-	for id, stat := range statMap {
-		name = stat.Name()
+		downTh, upTh := stat.GetThresholds()
 
-		// log thresholds
-		if dspot := stat.DSpot(); dspot != nil {
-			upTh = dspot.GetUpperThreshold()
-			downTh = dspot.GetLowerThreshold()
-
-			// if upTh is NaN, it means that up data are not monitored or
-			// the calibration has not finished
-			if !math.IsNaN(upTh) {
-				statValues[name+"_UP"] = upTh
-			}
-
-			// if downTh is NaN, it means that down data are not monitored or
-			// the calibration has not finished
-			if !math.IsNaN(downTh) {
-				statValues[name+"_DOWN"] = downTh
-			}
+		// if upTh is NaN, it means that up data are not monitored or
+		// the calibration has not finished
+		if !math.IsNaN(upTh) {
+			statValues[name+"_UP"] = upTh
 		}
+
+		// if downTh is NaN, it means that down data are not monitored or
+		// the calibration has not finished
+		if !math.IsNaN(downTh) {
+			statValues[name+"_DOWN"] = downTh
+		}
+
 		// compute the statistics
-		val = stat.Compute(getcounterValues(stat.Requirement()))
+		ctrValues := getcounterValues(m, stat.Requirement())
+		statValue := stat.Compute(ctrValues)
 
 		// check if the computed statistics is a number
-		if !math.IsNaN(val) {
+		if !math.IsNaN(statValue) {
 			// feed DSpot
-			res = stat.Update(val)
+			res := stat.Update(statValue)
 			// check alert
-			checkSpotOutput(id, val, res, curtime)
+			checkSpotOutput(stat, statValue, res, curtime)
 		}
-		// store statS data
-		statValues[name] = val
+		// store stats data
+		statValues[name] = statValue
 
 	}
-	smux.Unlock()
-
+	// smux.Unlock()
 	// send data to the exporter
 	if err := exporter.Write(curtime, statValues); err != nil {
 		analyzerLogger.Error().Msgf("Error while exporting values: %v", err)
 	}
 }
 
-func run(eventChannel chan int, dataChannel chan map[string]float64) {
+func run(eventChannel chan int, dataChannel chan map[string]float64) error {
+	// start the exporter
+	if err := exporter.Start("test"); err != nil {
+		return err
+	}
+	// defer close
+	defer exporter.Close()
 	// display basic information
 	analyzerLogger.Info().Msg("Start running")
 	// set the running state
 	running = true
 	// sniff
-	minerEvent, minerData := miner.GoSniffAndYieldChannel(period)
+	minerData, err := miner.StartAndYield(period)
+	if err != nil {
+		return fmt.Errorf("Error while starting the miner: %v", err)
+	}
 	// loop
 	for {
 		select {
@@ -519,12 +500,15 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) {
 			case STOP: // stop order
 				analyzerLogger.Debug().Msg("Receiving STOP message")
 				// stop the miner
-				minerEvent <- miner.STOP
+				if err := miner.Stop(); err != nil {
+					analyzerLogger.Error().Msgf("Error while stopping miner: %v", err)
+				}
+				// minerEvent <- miner.STOP
 				// release (put running to false)
 				running = false
 				stopChannel <- 1
 				analyzerLogger.Info().Msg("Stopping stats computation (controller)")
-				return
+				return nil
 			case STAT: // send data
 				smux.Lock()
 				snapshot := make(map[string]float64)
@@ -535,26 +519,23 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) {
 				dataChannel <- snapshot
 			}
 		case m := <-minerData:
-			if m != nil {
-				// retrieve the counter values
-				for name, id := range counterID {
-					counterValues[name] = m[id]
-				}
-				// analyze the stats values (feed dspot, log data/thresholds)
-				analyze()
-			} else {
+			if m == nil {
 				// release
 				running = false
 				analyzerLogger.Info().Msg("Stopping stats computation (miner)")
-				return
+				return nil
 			}
+
+			// analyze the stats values (feed dspot, log data/thresholds)
+			analyze(m)
+
 		}
 	}
 }
 
 // Run open the device to listen
-func Run() {
-	run(defaultEventChannel, defaultDataChannel)
+func Run() error {
+	return run(defaultEventChannel, defaultDataChannel)
 }
 
 // GoRun starts the analyzer and return two communication channels
