@@ -10,8 +10,7 @@ import (
 
 // Cliflag implements a urfave/cli command line provider.
 type Cliflag struct {
-	delim   string
-	context *cli.Context
+	mp map[string]interface{}
 }
 
 // Provider returns a commandline flags provider that returns
@@ -26,19 +25,27 @@ type Cliflag struct {
 // are merged. If they do exist, the flag values are not merged but only
 // the values that have been explicitly set in the command line are merged.
 func Provider(c *cli.Context, delim string) *Cliflag {
+	mp := make(map[string]interface{})
+	for _, name := range c.FlagNames() {
+		mp[name] = c.Value(name)
+		// need to convert to raw go types
+		// for some urfave/cli objects
+		switch mp[name].(type) {
+		case cli.StringSlice:
+			ss, _ := mp[name].(cli.StringSlice)
+			mp[name] = ss.Value()
+		default:
+			// pass
+		}
+	}
 	return &Cliflag{
-		context: c,
-		delim:   delim,
+		mp: maps.Unflatten(mp, delim),
 	}
 }
 
 // Read reads the flag variables and returns a nested conf map.
 func (p *Cliflag) Read() (map[string]interface{}, error) {
-	mp := make(map[string]interface{})
-	for _, name := range p.context.FlagNames() {
-		mp[name] = p.context.Generic(name)
-	}
-	return maps.Unflatten(mp, p.delim), nil
+	return p.mp, nil
 }
 
 // ReadBytes is not supported by the env koanf.

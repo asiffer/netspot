@@ -38,6 +38,7 @@ var defaultConfig = map[string]interface{}{
 	"miner.snapshot_len": 65535,
 	"miner.timeout":      30 * time.Second,
 	"analyzer.period":    1 * time.Second,
+	"analyzer.stats":     make([]string, 0),
 	"spot.depth":         50,
 	"spot.q":             1e-4,
 	"spot.n_init":        1000,
@@ -324,9 +325,11 @@ func LoadFromCli(c *cli.Context) error {
 	}
 	// now load the cli arguments (override the config file)
 	configLogger.Debug().Msgf("Loading cli parameters")
+	// configLogger.Debug().Msgf("Before CLI:\n %+v", konf.All())
 	if err := konf.Load(Provider(c, "."), nil); err != nil {
 		return fmt.Errorf("Error loading config from cli: %v", err)
 	}
+
 	configLogger.Debug().Msgf("Final config:\n %+v", konf.All())
 	configLogger.Info().Msgf("Configuration loaded")
 	return nil
