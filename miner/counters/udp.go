@@ -17,15 +17,16 @@ type UDPCtrInterface interface {
 
 // RunUDPCtr starts an UDP counter
 func RunUDPCtr(ctr UDPCtrInterface, com chan uint64, input <-chan *layers.UDP, wg *sync.WaitGroup) {
-	// reset
+	// reset counter
 	ctr.Reset()
+	// defer done task
+	defer wg.Done()
 	// loop
 	for {
 		select {
 		case signal := <-com:
 			switch signal {
 			case STOP: // stop the counter
-				defer wg.Done()
 				return
 			case GET: // return the value
 				com <- ctr.Value()
@@ -39,7 +40,6 @@ func RunUDPCtr(ctr UDPCtrInterface, com chan uint64, input <-chan *layers.UDP, w
 				for udp := range input {
 					ctr.Process(udp)
 				}
-				defer wg.Done()
 				return
 			}
 		case udp := <-input: // process the packet

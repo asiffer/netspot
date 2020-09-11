@@ -19,13 +19,14 @@ type ARPCtrInterface interface {
 func RunARPCtr(ctr ARPCtrInterface, com chan uint64, input <-chan *layers.ARP, wg *sync.WaitGroup) {
 	// reset
 	ctr.Reset()
+	// defer done task
+	defer wg.Done()
 	// loop
 	for {
 		select {
 		case signal := <-com:
 			switch signal {
 			case STOP: // stop the counter
-				defer wg.Done()
 				return
 			case GET: // return the value
 				com <- ctr.Value()
@@ -39,7 +40,6 @@ func RunARPCtr(ctr ARPCtrInterface, com chan uint64, input <-chan *layers.ARP, w
 				for arp := range input {
 					ctr.Process(arp)
 				}
-				defer wg.Done()
 				return
 			}
 		case arp := <-input: // process the packet

@@ -19,13 +19,14 @@ type TCPCtrInterface interface {
 func RunTCPCtr(ctr TCPCtrInterface, com chan uint64, input <-chan *layers.TCP, wg *sync.WaitGroup) {
 	// reset
 	ctr.Reset()
+	// defer done task
+	defer wg.Done()
 	// loop
 	for {
 		select {
 		case sig := <-com:
 			switch sig {
 			case STOP: // stop the counter
-				defer wg.Done()
 				return
 			case GET: // return the value
 				com <- ctr.Value()
@@ -39,7 +40,6 @@ func RunTCPCtr(ctr TCPCtrInterface, com chan uint64, input <-chan *layers.TCP, w
 				for tcp := range input {
 					ctr.Process(tcp)
 				}
-				defer wg.Done()
 				return
 			}
 		case tcp := <-input: // process the packet

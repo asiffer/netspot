@@ -20,13 +20,14 @@ type PktCtrInterface interface {
 func RunPktCtr(ctr PktCtrInterface, com chan uint64, input <-chan gopacket.Packet, wg *sync.WaitGroup) {
 	// reset
 	ctr.Reset()
+	// defer done task
+	defer wg.Done()
 	// loop
 	for {
 		select {
 		case sig := <-com:
 			switch sig {
 			case STOP: // stop the counter
-				defer wg.Done()
 				return
 			case GET: // return the value
 				com <- ctr.Value()
@@ -40,7 +41,6 @@ func RunPktCtr(ctr PktCtrInterface, com chan uint64, input <-chan gopacket.Packe
 				for pkt := range input {
 					ctr.Process(pkt)
 				}
-				defer wg.Done()
 				return
 			}
 		case pkt := <-input: // process the packet

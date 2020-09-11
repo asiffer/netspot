@@ -19,13 +19,14 @@ type IPv4CtrInterface interface {
 func RunIPv4Ctr(ctr IPv4CtrInterface, com chan uint64, input <-chan *layers.IPv4, wg *sync.WaitGroup) {
 	// reset
 	ctr.Reset()
+	// defer done task
+	defer wg.Done()
 	// loop
 	for {
 		select {
 		case signal := <-com:
 			switch signal {
 			case STOP: // stop the counter
-				defer wg.Done()
 				return
 			case GET: // return the value
 				com <- ctr.Value()
@@ -39,7 +40,6 @@ func RunIPv4Ctr(ctr IPv4CtrInterface, com chan uint64, input <-chan *layers.IPv4
 				for ip := range input {
 					ctr.Process(ip)
 				}
-				defer wg.Done()
 				return
 			}
 		case ip := <-input: // process the packet

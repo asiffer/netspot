@@ -19,13 +19,14 @@ type ICMPv4CtrInterface interface {
 func RunICMPv4Ctr(ctr ICMPv4CtrInterface, com chan uint64, input <-chan *layers.ICMPv4, wg *sync.WaitGroup) {
 	// reset
 	ctr.Reset()
+	// defer done task
+	defer wg.Done()
 	// loop
 	for {
 		select {
 		case signal := <-com:
 			switch signal {
 			case STOP: // stop the counter
-				defer wg.Done()
 				return
 			case GET: // return the value
 				com <- ctr.Value()
@@ -39,7 +40,6 @@ func RunICMPv4Ctr(ctr ICMPv4CtrInterface, com chan uint64, input <-chan *layers.
 				for icmp := range input {
 					ctr.Process(icmp)
 				}
-				defer wg.Done()
 				return
 			}
 		case icmp := <-input: // process the packet

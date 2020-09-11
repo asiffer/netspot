@@ -42,6 +42,16 @@ func GetAvailableCounters() []string {
 	return list
 }
 
+// GetAvailableCounterInterfaces return the list
+// of the registered interfaces
+func GetAvailableCounterInterfaces() []BaseCtrInterface {
+	list := make([]BaseCtrInterface, 0)
+	for _, k := range AvailableCounters {
+		list = append(list, k)
+	}
+	return list
+}
+
 // Register aims to add implemented counters to the slice AvailableCounters
 func Register(ctr BaseCtrInterface) error {
 	if _, exists := AvailableCounters[ctr.Name()]; exists {
