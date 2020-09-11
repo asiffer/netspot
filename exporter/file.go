@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"netspot/config"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/rs/zerolog"
 )
 
 const (
@@ -25,8 +22,6 @@ type File struct {
 	dataAddress      string
 	alarmAddress     string
 	seriesName       string
-	dataLogger       zerolog.Logger
-	alarmLogger      zerolog.Logger
 	dataFileHandler  *os.File
 	alarmFileHandler *os.File
 }
@@ -98,19 +93,20 @@ func (f *File) Init() error {
 
 // Start generate the connection from the module to the endpoint
 func (f *File) Start(series string) error {
+	var err error
 	f.seriesName = series
+	f.updateFileFromSeriesName()
 
-	// init loggers
-	//
+	// init file handlers
 	// data logger
 	if f.data {
-		if err := f.initDataLogger(); err != nil {
+		if f.dataFileHandler, err = os.Create(f.dataAddress); err != nil {
 			return err
 		}
 	}
 	// alarm logger
 	if f.alarm {
-		if err := f.initAlarmLogger(); err != nil {
+		if f.alarmFileHandler, err = os.Create(f.alarmAddress); err != nil {
 			return err
 		}
 	}
@@ -119,12 +115,11 @@ func (f *File) Start(series string) error {
 
 // Write logs data
 func (f *File) Write(t time.Time, data map[string]float64) error {
+
 	if f.data {
-		dlog := f.dataLogger.Log().Time("time", t)
-		for key, value := range data {
-			dlog.Float64(key, value)
-		}
-		dlog.Send()
+		// hope there is no problem
+		f.dataFileHandler.WriteString(jsonifyWithTime(t, data))
+		f.dataFileHandler.Write([]byte{'\n'})
 	}
 	return nil
 }
@@ -132,12 +127,8 @@ func (f *File) Write(t time.Time, data map[string]float64) error {
 // Warn logs alarms
 func (f *File) Warn(t time.Time, s *SpotAlert) error {
 	if f.alarm {
-		wlog := f.alarmLogger.Log().Time("time", t)
-		wlog.Str("Status", s.Status).
-			Str("Stat", s.Stat).
-			Float64("Value", s.Value).
-			Int("Code", s.Code).
-			Float64("Probability", s.Probability).Send()
+		f.alarmFileHandler.WriteString(s.toJSONwithTime(t))
+		f.alarmFileHandler.Write([]byte{'\n'})
 	}
 	return nil
 }
@@ -167,60 +158,70 @@ func (f *File) LogsAlarm() bool {
 	return f.alarm
 }
 
-// Side functions =========================================================== //
-// ========================================================================== //
-// ========================================================================== //
+// // Side functions =========================================================== //
+// // ========================================================================== //
+// // ========================================================================== //
 
-func (f *File) initDataLogger() error {
-	var err error
-	var dataFilePath string
-
-	// get path
-	format := f.dataAddress
-	if strings.Contains(format, "%s") {
-		dataFilePath, err = filepath.Abs(fmt.Sprintf(format, f.seriesName))
-	} else {
-		dataFilePath, err = filepath.Abs(format)
-	}
-	// check format
-	if err != nil {
-		return fmt.Errorf("Error while formatting file path for data (%w)", err)
+func (f *File) updateFileFromSeriesName() {
+	if strings.Contains(f.dataAddress, "%s") {
+		f.dataAddress = fmt.Sprintf(f.dataAddress, f.seriesName)
 	}
 
-	// create file
-	f.dataFileHandler, err = os.Create(dataFilePath)
-	if err != nil {
-		return fmt.Errorf("Error while creating data log file %s (%w)", dataFilePath, err)
+	if strings.Contains(f.alarmAddress, "%s") {
+		f.alarmAddress = fmt.Sprintf(f.alarmAddress, f.seriesName)
 	}
-
-	// init logger
-	f.dataLogger = zerolog.New(f.dataFileHandler).With().Logger()
-	return nil
 }
 
-func (f *File) initAlarmLogger() error {
-	var err error
-	var alarmFilePath string
+// func (f *File) initDataLogger() error {
+// 	var err error
+// 	var dataFilePath string
 
-	// get path
-	format := f.alarmAddress
-	if strings.Contains(format, "%s") {
-		alarmFilePath, err = filepath.Abs(fmt.Sprintf(format, f.seriesName))
-	} else {
-		alarmFilePath, err = filepath.Abs(format)
-	}
-	// check format
-	if err != nil {
-		return fmt.Errorf("Error while formatting file path for alarm (%w)", err)
-	}
+// 	// get path
+// 	format := f.dataAddress
+// 	if strings.Contains(format, "%s") {
+// 		dataFilePath, err = filepath.Abs(fmt.Sprintf(format, f.seriesName))
+// 	} else {
+// 		dataFilePath, err = filepath.Abs(format)
+// 	}
+// 	// check format
+// 	if err != nil {
+// 		return fmt.Errorf("Error while formatting file path for data (%w)", err)
+// 	}
 
-	// create file
-	f.alarmFileHandler, err = os.Create(alarmFilePath)
-	if err != nil {
-		return fmt.Errorf("Error while creating alarm log file %s (%w)", alarmFilePath, err)
-	}
+// 	// create file
+// 	f.dataFileHandler, err = os.Create(dataFilePath)
+// 	if err != nil {
+// 		return fmt.Errorf("Error while creating data log file %s (%w)", dataFilePath, err)
+// 	}
 
-	// init logger
-	f.alarmLogger = zerolog.New(f.alarmFileHandler).With().Logger()
-	return nil
-}
+// 	// init logger
+// 	f.dataLogger = zerolog.New(f.dataFileHandler).With().Logger()
+// 	return nil
+// }
+
+// func (f *File) initAlarmLogger() error {
+// 	var err error
+// 	var alarmFilePath string
+
+// 	// get path
+// 	format := f.alarmAddress
+// 	if strings.Contains(format, "%s") {
+// 		alarmFilePath, err = filepath.Abs(fmt.Sprintf(format, f.seriesName))
+// 	} else {
+// 		alarmFilePath, err = filepath.Abs(format)
+// 	}
+// 	// check format
+// 	if err != nil {
+// 		return fmt.Errorf("Error while formatting file path for alarm (%w)", err)
+// 	}
+
+// 	// create file
+// 	f.alarmFileHandler, err = os.Create(alarmFilePath)
+// 	if err != nil {
+// 		return fmt.Errorf("Error while creating alarm log file %s (%w)", alarmFilePath, err)
+// 	}
+
+// 	// init logger
+// 	f.alarmLogger = zerolog.New(f.alarmFileHandler).With().Logger()
+// 	return nil
+// }
