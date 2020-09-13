@@ -4,7 +4,7 @@
 
 # package details
 PACKAGE_NAME := netspot
-VERSION      := 2.0
+VERSION      := 2.0a
 PACKAGE_DESC := "A simple IDS with statistical learning"
 MAINTAINER   := asiffer
 
