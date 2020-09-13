@@ -55,7 +55,6 @@ DESTDIR              :=
 INSTALL_BIN_DIR      := $(DESTDIR)/usr/bin
 INSTALL_CONF_DIR     := $(DESTDIR)/etc/netspot
 INSTALL_SERVICE_DIR  := $(DESTDIR)/lib/systemd/system
-CTL_INSTALL_CONF_DIR := $(DESTDIR)/etc/netspotctl
 
 
 
@@ -67,7 +66,7 @@ OK := "[\033[32mOK\033[0m]"
 
 # main actions
 default: build
-build: api build_netspot build_netspotctl
+build: api build_netspot
 install: install_bin install_config install_service # post_install
 
 deps:
@@ -82,12 +81,6 @@ build_netspot:
 	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -o $(BIN_DIR)/netspot $(SRC_DIR)/*.go
 	@echo -e $(OK)
 
-build_netspotctl:
-	@echo -e "\033[34m[Building netspotctl]\033[0m"
-	@echo -n "Building go package...               "
-	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -o $(BIN_DIR)/netspotctl $(SRC_DIR)/netspotctl/*.go 
-	@echo -e $(OK)
-
 install_config:
 	@echo -e "\033[34m[Installing configurations]\033[0m"
 	@echo -en "Creating config directories...       "
@@ -97,9 +90,6 @@ install_config:
 	@echo -en "Installing netspot config file...    "
 	@install $(EXTRA_DIR)/netspot.toml $(INSTALL_CONF_DIR)/
 	@echo -e $(OK)
-	@echo -en "Installing netspotctl config file... "
-	@install $(EXTRA_DIR)/netspotctl.toml $(INSTALL_CONF_DIR)/
-	@echo -e $(OK)
 
 install_bin:
 	@echo -e "\033[34m[Installing binaries]\033[0m"
@@ -108,9 +98,6 @@ install_bin:
 	@echo $(OK)
 	@echo -en "Installing netspot...                "
 	@install $(BIN_DIR)/netspot $(INSTALL_BIN_DIR)/
-	@echo -e $(OK)
-	@echo -en "Installing netspotctl...             "
-	@install $(BIN_DIR)/netspotctl $(INSTALL_BIN_DIR)/
 	@echo -e $(OK)
 
 install_service:
