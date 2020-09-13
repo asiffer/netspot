@@ -3,8 +3,6 @@
 package counters
 
 import (
-	"sync"
-
 	"github.com/google/gopacket/layers"
 )
 
@@ -13,37 +11,4 @@ import (
 type ARPCtrInterface interface {
 	BaseCtrInterface
 	Process(*layers.ARP) // method to process a packet
-}
-
-// RunARPCtr starts an ARP counter
-func RunARPCtr(ctr ARPCtrInterface, com chan uint64, input <-chan *layers.ARP, wg *sync.WaitGroup) {
-	// reset
-	ctr.Reset()
-	// defer done task
-	defer wg.Done()
-	// loop
-	for {
-		select {
-		case signal := <-com:
-			switch signal {
-			case STOP: // stop the counter
-				return
-			case GET: // return the value
-				com <- ctr.Value()
-			case RESET: // reset
-				ctr.Reset()
-			case FLUSH: // return the value and reset
-				com <- ctr.Value()
-				ctr.Reset()
-			case TERMINATE:
-				// process the remaining packet
-				for arp := range input {
-					ctr.Process(arp)
-				}
-				return
-			}
-		case arp := <-input: // process the packet
-			ctr.Process(arp)
-		}
-	}
 }
