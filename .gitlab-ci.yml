@@ -13,7 +13,8 @@ variables:
 
 .install-deps: &install-deps
   - apt-get update
-  - apt-get install -y software-properties-common gcc bison flex wget make kmod
+  - apt search linux-headers
+  - apt-get install -y software-properties-common gcc bison flex wget make kmod build-essential autoconf autotools-dev
 
 .build-libraries: &build-libraries
   - cd /; git clone https://github.com/ntop/PF_RING.git
