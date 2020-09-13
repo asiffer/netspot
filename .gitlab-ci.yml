@@ -14,12 +14,16 @@ variables:
 .install-deps: &install-deps
   - apt-get update
   - apt search linux-headers
-  - apt-get install -y software-properties-common gcc bison flex wget make kmod build-essential autoconf autotools-dev
+  - apt-get install -y software-properties-common gcc bison flex wget make kmod build-essential
+
+.install-pf-ring: 
+  - 
 
 .build-libraries: &build-libraries
   - cd /; git clone https://github.com/ntop/PF_RING.git
-  - export BUILD_KERNEL=$(ls -1 /lib/modules | head -n1); apt install -y linux-header-$BUILD_KERNEL; ls -alh /lib/modules
-  - cd /PF_RING/kernel; make; make install
+  # - export BUILD_KERNEL=$(ls -1 /lib/modules | head -n1); apt install -y linux-header-$BUILD_KERNEL; ls -alh /lib/modules
+  # - cd /PF_RING/kernel; make; make install
+  - mkdir -p /usr/local/include/linux/; cp /PF_RING/kernel/linux/pf_ring.h /usr/local/include/linux/pf_ring.h
   - cd /PF_RING/userland/lib; ./configure; make; make install
   - cd /PF_RING/userland/libpcap; ./configure; make; make install
 
