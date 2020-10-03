@@ -81,6 +81,13 @@ build_netspot:
 	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -o $(BIN_DIR)/netspot $(SRC_DIR)/*.go
 	@echo -e $(OK)
 
+build_netspot_musl:
+	@echo -e "\033[34m[Building netspot (musl)]\033[0m"
+	@export GOPATH=$(GOPATH)
+	@echo -n "Building go package...               "
+	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -a -ldflags '-extldflags "-static"' -o $(BIN_DIR)/netspot $(SRC_DIR)/*.go
+	@echo -e $(OK)
+
 install_config:
 	@echo -e "\033[34m[Installing configurations]\033[0m"
 	@echo -en "Creating config directories...       "
