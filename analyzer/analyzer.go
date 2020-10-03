@@ -396,8 +396,7 @@ func StartAndWait() error {
 	}
 	analyzerLogger.Info().Msg("Starting stats computation")
 	analyzerLogger.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-	Run()
-	return nil
+	return Run()
 }
 
 //------------------------------------------------------------------------------
@@ -490,6 +489,7 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 	// sniff
 	minerData, err := miner.StartAndYield(period)
 	if err != nil {
+		running = false
 		return fmt.Errorf("Error while starting the miner: %v", err)
 	}
 	// loop

@@ -20,8 +20,8 @@ import (
 var (
 	HeaderWidth = 100
 	HeaderSym   = "-"
-	pcapFile1   = "/data/pcap/4SICS-GeekLounge-151020.pcap"
-	pcapFile2   = "/data/pcap/201111111400.dump"
+	pcapFile1   = "/data/pcap/snort.log.1425823194.pcap"
+	pcapFile2   = "/data/pcap/202002071400.pcap"
 	pcapFile3   = "/data/kitsune/Mirai/Mirai_pcap.pcap"
 )
 
@@ -76,9 +76,14 @@ func init() {
 	if err := findTestFiles(); err != nil {
 		panic(err)
 	}
-
-	InitLogger()
 	config.LoadDefaults()
+
+	miner.InitLogger()
+	if err := miner.InitConfig(); err != nil {
+		panic(err)
+	}
+	InitLogger()
+
 }
 
 func testOK() {
@@ -180,7 +185,10 @@ func TestZero(t *testing.T) {
 
 	// small
 	// pcapFile1 : ~420min
-	miner.SetDevice(pcapFile1)
+	if err := miner.SetDevice(pcapFile1); err != nil {
+		t.Error(err)
+	}
+	fmt.Println("AFTER:", miner.GetDevice())
 	period = 5 * time.Minute
 
 	// huge
@@ -191,7 +199,9 @@ func TestZero(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	// miner.StartSniffing()
 	a := time.Now()
-	StartAndWait()
+	if err := StartAndWait(); err != nil {
+		t.Error(err)
+	}
 	b := time.Since(a)
 	fmt.Printf("Timing: %f\n", b.Seconds())
 	// fmt.Println("Reset")
@@ -200,7 +210,7 @@ func TestZero(t *testing.T) {
 }
 func TestLivePcapSmall(t *testing.T) {
 	// SetLogging(0)
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	// zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	config.Clean()
 	config.LoadDefaults()
 	exporter.Load("console")
@@ -245,7 +255,7 @@ func TestLivePcapHuge(t *testing.T) {
 	UnloadAll()
 	// LoadFromName("R_SYN")
 	// LoadFromName("AVG_PKT_SIZE")
-	// LoadFromName("R_ACK")
+	LoadFromName("R_ACK")
 	// LoadFromName("R_DST_SRC")
 	// LoadFromName("R_ICMP")
 
@@ -273,9 +283,13 @@ func TestLivePcapHuge(t *testing.T) {
 	// if !miner.IsSniffing() {
 	// 	t.Error("Error: no sniffing")
 	// }
-	Start()
+	if err := Start(); err != nil {
+		t.Error(err)
+	}
 	time.Sleep(4 * time.Second)
-	Stop()
+	if err := Stop(); err != nil {
+		t.Error(err)
+	}
 	time.Sleep(1 * time.Second)
 }
 
@@ -330,62 +344,70 @@ func TestLivePerfs(t *testing.T) {
 	exporter.Zero()
 }
 
-func TestLivePcapMirai(t *testing.T) {
-	title(t.Name())
-	// SetLogging(1)
-	Zero()
+// func TestLivePcapMirai(t *testing.T) {
+// 	title(t.Name())
+// 	// SetLogging(1)
+// 	Zero()
 
-	extra := map[string]interface{}{
-		"spot.PERF.depth":  100,
-		"spot.PERF.n_init": 1000,
-		"spot.PERF.level":  0.98,
-		"spot.PERF.q":      1e-3,
-		"spot.PERF.down":   false,
-		"spot.PERF.up":     true,
-	}
-	if err := config.LoadForTest(extra); err != nil {
-		t.Errorf("Error while loading extra config")
-	}
+// 	extra := map[string]interface{}{
+// 		"spot.PERF.depth":  100,
+// 		"spot.PERF.n_init": 1000,
+// 		"spot.PERF.level":  0.98,
+// 		"spot.PERF.q":      1e-3,
+// 		"spot.PERF.down":   false,
+// 		"spot.PERF.up":     true,
+// 	}
+// 	if err := config.LoadForTest(extra); err != nil {
+// 		t.Errorf("Error while loading extra config")
+// 	}
 
-	LoadFromName("PERF")
+// 	LoadFromName("PERF")
 
-	// Mirai
-	// pcapFile3 : 7137s
-	miner.SetDevice(pcapFile3)
-	period = 10 * time.Second
-	SetPeriod(period)
-	// logDataToFile = true
-	// SetOutputDir("/tmp")
+// 	// Mirai
+// 	// pcapFile3 : 7137s
+// 	miner.SetDevice(pcapFile3)
+// 	period = 10 * time.Second
+// 	SetPeriod(period)
+// 	// logDataToFile = true
+// 	// SetOutputDir("/tmp")
 
-	// miner.SetTickPeriod(period)
-	// miner.StartSniffing()
-	// if !miner.IsSniffing() {
-	// 	t.Error("Error: no sniffing")
-	// }
+// 	// miner.SetTickPeriod(period)
+// 	// miner.StartSniffing()
+// 	// if !miner.IsSniffing() {
+// 	// 	t.Error("Error: no sniffing")
+// 	// }
 
-	StartAndWait()
-	// StartStats()
-	// fmt.Println("START")
-	// time.Sleep(10 * time.Second)
-	// fmt.Println("STOP")
-	// StopStats()
-}
+// 	StartAndWait()
+// 	// StartStats()
+// 	// fmt.Println("START")
+// 	// time.Sleep(10 * time.Second)
+// 	// fmt.Println("STOP")
+// 	// StopStats()
+// }
 
 func TestLive(t *testing.T) {
 	title(t.Name())
+	UnloadAll()
 	config.Clean()
 	config.LoadDefaults()
 	config.LoadForTest(map[string]interface{}{
 		"analyzer.stats": []string{"R_ARP", "R_ACK"},
 	})
 
+	if err := miner.InitConfig(); err != nil {
+		t.Error(err)
+	}
 	if err := InitConfig(); err != nil {
 		t.Error(err)
 	}
 
 	for _, f := range testFiles {
-		miner.SetDevice(f)
-
+		if err := miner.SetDevice(f); err != nil {
+			t.Error(err)
+		}
+		if err := StartAndWait(); err != nil {
+			t.Error(err)
+		}
 	}
 
 }
