@@ -37,6 +37,12 @@ func Start() (DataChannel, error) {
 	go sniff(internalEventChannel, data)
 	for !sniffing {
 		// wait for sniffing
+		select {
+		case <-internalEventChannel:
+			return data, fmt.Errorf("Something bad happened")
+		default:
+			// pass
+		}
 	}
 	return data, nil
 }
@@ -56,6 +62,12 @@ func StartAndYield(period time.Duration) (DataChannel, error) {
 	go sniffAndYield(period, internalEventChannel, data)
 	for !sniffing {
 		// wait for sniffing
+		select {
+		case <-internalEventChannel:
+			return data, fmt.Errorf("Something bad happened")
+		default:
+			// pass
+		}
 	}
 	return data, nil
 }
@@ -67,6 +79,7 @@ func Stop() error {
 	}
 	minerLogger.Info().Msgf("Stopping counter")
 	internalEventChannel <- STOP
+	// internalEventChannel <- STOP
 	for sniffing {
 		// wait for stop sniffing
 	}
