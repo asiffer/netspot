@@ -176,7 +176,7 @@ func TestLoadAll(t *testing.T) {
 
 func TestBasics(t *testing.T) {
 	title(t.Name())
-	Zero()
+	defer Clear()
 	setNullConfig()
 	InitLogger()
 
@@ -252,48 +252,32 @@ func TestBasics(t *testing.T) {
 
 func TestLoading(t *testing.T) {
 	title(t.Name())
-
+	defer Clear()
 	setFullConfig()
 	// zerolog.SetGlobalLevel(zerolog.Disabled)
-	err := Zero()
-	if err != nil {
+
+	if err := Zero(); err != nil {
 		t.Error(err)
 	}
 
-	checkTitle("Loading 'file'")
-	err = Load("file")
-	if err != nil {
-		testERROR()
-		t.Error(err)
-	} else {
-		testOK()
+	for _, m := range available {
+		checkTitle(fmt.Sprintf("Loading '%s'", m.Name()))
+		if err := Load(m.Name()); err != nil {
+			testERROR()
+			t.Error(err)
+		} else {
+			testOK()
+		}
 	}
 
-	checkTitle("Reloading 'file'")
-	err = Load("file")
-	if err == nil {
-		testERROR()
-		t.Error(err)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Loading 'socket'")
-	err = Load("socket")
-	if err != nil || findExportingModule("socket") == -1 {
-		testERROR()
-		t.Error(err)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Unloading 'socket'")
-	err = Unload("socket")
-	if err != nil || findExportingModule("socket") >= 0 {
-		testERROR()
-		t.Error(err)
-	} else {
-		testOK()
+	for _, m := range available {
+		checkTitle(fmt.Sprintf("Reloading '%s'", m.Name()))
+		if err := Load(m.Name()); err == nil {
+			testERROR()
+			t.Error(err)
+		} else {
+			testOK()
+		}
 	}
 
 	checkTitle("Resetting")
@@ -309,7 +293,7 @@ func TestLoading(t *testing.T) {
 
 func TestInit(t *testing.T) {
 	title(t.Name())
-
+	defer Clear()
 	InitLogger()
 	InitConfig()
 	t.Logf("%+v\n", GenericStatus())
@@ -317,8 +301,10 @@ func TestInit(t *testing.T) {
 
 func TestBasicStart(t *testing.T) {
 	title(t.Name())
-
 	Zero()
+	config.Clean()
+	config.InitConfig()
+	defer Zero()
 
 	// config
 	configExample := []byte(`
@@ -337,10 +323,10 @@ alarm = true
 	InitLogger()
 	InitConfig()
 
-	if err := Load("console"); err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("%+v\n", GenericStatus())
+	// if err := Load("console"); err != nil {
+	// 	t.Fatal(err)
+	// }
+	// t.Logf("%+v\n", GenericStatus())
 
 	checkTitle("Starting")
 	if err := Start("test"); err != nil {
@@ -393,11 +379,13 @@ alarm = true
 
 func TestStartCloseAll(t *testing.T) {
 	title("Testing start/close function")
+	defer Clear()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}
 
 	checkTitle("Init full config")
+
 	if err := InitConfig(); err != nil {
 		testERROR()
 		t.Error(err)

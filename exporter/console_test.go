@@ -35,6 +35,7 @@ func TestInitStartCloseConsole(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		testOK()
+		defer Unload(c.Name())
 	}
 
 	checkTitle("Start")
@@ -65,6 +66,7 @@ func TestConsoleWriteAndWarn(t *testing.T) {
 	if err := c.Init(); err != nil {
 		t.Error(err)
 	}
+	defer Unload(c.Name())
 	t.Log(c)
 
 	// prepare data
@@ -114,10 +116,11 @@ func TestConsoleStatus(t *testing.T) {
 		t.Error(err)
 	}
 
-	f := Console{}
-	if err := f.Init(); err != nil {
+	c := Console{}
+	if err := c.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(c.Name())
 
-	t.Logf("%v+\n", f.Status())
+	t.Logf("%v+\n", c.Status())
 }

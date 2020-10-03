@@ -24,7 +24,7 @@ func init() {
 
 func TestInitStartCloseFile(t *testing.T) {
 	title("Testing File exporter")
-
+	Clear()
 	if err := setFullConfig(); err != nil {
 		t.Fatal(err)
 	}
@@ -32,11 +32,13 @@ func TestInitStartCloseFile(t *testing.T) {
 	f := File{}
 
 	checkTitle("Initialization")
+	// Clear()
 	if err := f.Init(); err != nil {
 		testERROR()
 		t.Fatal(err)
 	} else {
 		testOK()
+		defer Unload(f.Name())
 	}
 
 	checkTitle("Start")
@@ -56,6 +58,7 @@ func TestInitStartCloseFile(t *testing.T) {
 	}
 }
 func TestStartFile(t *testing.T) {
+	defer Unload("file")
 	title("Testing start of File exporter")
 
 	if err := setFullConfig(); err != nil {
@@ -66,6 +69,7 @@ func TestStartFile(t *testing.T) {
 	if err := f.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(f.Name())
 
 	if err := f.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -115,6 +119,7 @@ func TestFileWriteAndWarn(t *testing.T) {
 	if err := f.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(f.Name())
 
 	if err := f.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -137,14 +142,15 @@ func TestFileWriteAndWarn(t *testing.T) {
 	f.Warn(now, &alert)
 
 	f.Close()
+	fmt.Println(f.dataAddress)
 
-	d, err := ioutil.ReadFile(fmt.Sprintf(f.dataAddress, f.seriesName))
+	d, err := ioutil.ReadFile(f.dataAddress)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(string(d))
 
-	a, err := ioutil.ReadFile(fmt.Sprintf(f.alarmAddress, f.seriesName))
+	a, err := ioutil.ReadFile(f.alarmAddress)
 	if err != nil {
 		t.Error(err)
 	}
@@ -173,6 +179,7 @@ alarm = "/tmp/netspot.alarm"
 	if err := f.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(f.Name())
 
 	t.Logf("%v+\n", f.Status())
 

@@ -108,6 +108,7 @@ func GenericStatus() map[string]interface{} {
 // Load loads a new module (without initialization)
 func Load(name string) error {
 	if isLoaded(name) {
+		// return nil
 		return fmt.Errorf("The '%s' module is already loaded", name)
 	}
 	loaded = append(loaded, available[name])

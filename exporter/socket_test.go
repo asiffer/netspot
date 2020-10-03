@@ -39,10 +39,13 @@ func Error(msg string, e error) {
 func startSocket(addr string) (net.Listener, error) {
 	// data socket
 	proto, endpoint, err := parseAddress(addr)
-	// remove if it exists
-	os.Remove(endpoint)
 	if err != nil {
 		return nil, err
+	}
+	// remove if it exists
+	if _, err := os.Stat(endpoint); err == nil {
+		// path to endpoint exists
+		os.Remove(endpoint)
 	}
 	return net.Listen(proto, endpoint)
 }
@@ -125,6 +128,7 @@ func TestInitStartCloseSocket(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		testOK()
+		defer Unload(s.Name())
 	}
 
 	if !s.LogsData() {
@@ -157,7 +161,7 @@ func TestInitStartCloseSocket(t *testing.T) {
 
 func TestStartSocket(t *testing.T) {
 	title(t.Name())
-
+	Clear()
 	// init config
 	if err := setFullConfig(); err != nil {
 		t.Fatal(err)
@@ -173,6 +177,7 @@ func TestStartSocket(t *testing.T) {
 	if err := s.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(s.Name())
 
 	if err := s.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -213,11 +218,13 @@ func TestStartSocket(t *testing.T) {
 
 func TestCSVEncoder(t *testing.T) {
 	title(t.Name())
+	config.Clean()
+	config.InitConfig()
 
-	// init config
-	if err := setFullConfig(); err != nil {
-		t.Fatal(err)
-	}
+	// // init config
+	// if err := setFullConfig(); err != nil {
+	// 	t.Fatal(err)
+	// }
 
 	c := []byte(`
 	[exporter.socket]
@@ -245,6 +252,7 @@ func TestCSVEncoder(t *testing.T) {
 	if err := s.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(s.Name())
 
 	if err := s.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -304,10 +312,12 @@ func TestCSVEncoder(t *testing.T) {
 
 func TestJSONEncoder(t *testing.T) {
 	title(t.Name())
+	config.Clean()
+	config.InitConfig()
 	// init config
-	if err := setFullConfig(); err != nil {
-		t.Fatal(err)
-	}
+	// if err := setFullConfig(); err != nil {
+	// 	t.Fatal(err)
+	// }
 	c := []byte(`
 	[exporter.socket]
 	format = "json"
@@ -331,6 +341,7 @@ func TestJSONEncoder(t *testing.T) {
 	if err := s.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(s.Name())
 
 	if err := s.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -378,6 +389,9 @@ func TestJSONEncoder(t *testing.T) {
 func TestGobEncoder(t *testing.T) {
 	title(t.Name())
 
+	config.Clean()
+	config.InitConfig()
+
 	c := []byte(`
 	[exporter.socket]
 	format = "gob"
@@ -401,6 +415,7 @@ func TestGobEncoder(t *testing.T) {
 	if err := s.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(s.Name())
 
 	if err := s.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -446,6 +461,8 @@ func TestGobEncoder(t *testing.T) {
 
 func TestSocketWarn(t *testing.T) {
 	title(t.Name())
+	config.Clean()
+	config.InitConfig()
 
 	c := []byte(`
 	[exporter.socket]
@@ -470,6 +487,7 @@ func TestSocketWarn(t *testing.T) {
 	if err := s.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(s.Name())
 
 	if err := s.Start("wtf"); err != nil {
 		t.Fatal(err)
@@ -528,10 +546,11 @@ func TestSocketStatus(t *testing.T) {
 		t.Error(err)
 	}
 
-	f := Socket{}
-	if err := f.Init(); err != nil {
+	s := Socket{}
+	if err := s.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(s.Name())
 
-	t.Logf("%v+\n", f.Status())
+	t.Logf("%v+\n", s.Status())
 }

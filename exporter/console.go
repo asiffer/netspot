@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"netspot/config"
-	"os"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -53,8 +52,8 @@ func (c *Console) Init() error {
 // Start generate the connection from the shipper to the endpoint
 func (c *Console) Start(string) error {
 	// init loggers
-	c.dataLogger = zerolog.New(os.Stdout).With().Logger()
-	c.alarmLogger = zerolog.New(os.Stdout).With().Logger()
+	// c.dataLogger = zerolog.New(os.Stdout).With().Logger()
+	// c.alarmLogger = zerolog.New(os.Stdout).With().Logger()
 	return nil
 }
 

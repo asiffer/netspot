@@ -22,6 +22,7 @@ func TestInitInflux(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		testOK()
+		defer Unload(inf.Name())
 	}
 	t.Log(inf)
 
@@ -69,6 +70,7 @@ func TestInfluxWriteAndWarn(t *testing.T) {
 	if err := inf.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(inf.Name())
 	inf.Start("wtf0")
 
 	// prepare data
@@ -131,6 +133,7 @@ func TestInfluxStatus(t *testing.T) {
 	if err := inf.Init(); err != nil {
 		t.Fatal(err)
 	}
+	defer Unload(inf.Name())
 
 	t.Logf("%v+\n", inf.Status())
 }
