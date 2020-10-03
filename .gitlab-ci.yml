@@ -47,18 +47,10 @@ build_amd64:
   script:
     - cd /go/src/netspot
     - make build_netspot_musl
-    # - make debian
-  # after_script:
-    # - mv bin/netspot bin/netspot-amd64
-    # - mv bin/netspotctl bin/netspotctl-amd64
-    # - python3 .badge.gitlab-ci.py -d /go/src/netspot/bin -a $CI_JOB_NAME -o $CI_JOB_NAME.svg
   artifacts:
     name: $ARTIFACT_NAME_TEMPLATE
     paths:
       - bin/netspot
-  #     - bin/netspotctl
-  #     - dist/debian/*.deb
-  #     - $CI_JOB_NAME.svg
 
 # build_armhf:
 #   stage: build
@@ -153,19 +145,21 @@ build_amd64:
 #     name: $ARTIFACT_NAME_TEMPLATE
 #     paths:
 #       - dist/docker/*
-test_amd64:
-  image: $GO_IMAGE
-  stage: test
-  only:
-    - web
-  services:
-    - name: influxdb:1.7.10
-      alias: influxdb
-  before_script:
-    - # TODO: download pcap files
-  script:
-    - go test -cover -coverprofile=.coverage ./...
-  after_script:
-    - go tool cover -func .coverage|tail -n1
-  coverage: '/[0-9]*\.[0-9]*/'
+
+
+# test_amd64:
+#   image: $GO_IMAGE
+#   stage: test
+#   only:
+#     - web
+#   services:
+#     - name: influxdb:1.7.10
+#       alias: influxdb
+#   before_script:
+#     - # TODO: download pcap files
+#   script:
+#     - go test -cover -coverprofile=.coverage ./...
+#   after_script:
+#     - go tool cover -func .coverage|tail -n1
+#   coverage: '/[0-9]*\.[0-9]*/'
   
