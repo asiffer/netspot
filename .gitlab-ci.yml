@@ -41,9 +41,9 @@ build_amd64:
   only:
     - web
   before_script:
+    - ln -s /builds/netspot/netspot /go/src/netspot
     - *install-deps
     - *build-libraries
-    - ln -s /builds/netspot/netspot /go/src/netspot
   script:
     - cd /go/src/netspot
     - make build_netspot_musl
