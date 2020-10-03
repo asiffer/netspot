@@ -7,7 +7,6 @@ package miner
 
 import (
 	"errors"
-	"fmt"
 	"netspot/miner/counters"
 	"os"
 	"sync"
@@ -76,6 +75,7 @@ var dispatcher = NewDispatcher()
 
 // Events
 const (
+	ERR uint8 = 255
 	// STOP stops a counter
 	STOP uint8 = 0
 	// GET trigger a snapshot of the counters
@@ -181,6 +181,7 @@ func closeDevice() {
 
 func openDevice() (*gopacket.PacketSource, error) {
 	var err error
+
 	if iface {
 		// in case of network interface
 		// use PF_RING
@@ -211,9 +212,9 @@ func openDevice() (*gopacket.PacketSource, error) {
 
 	// Otherwise use libpcap
 	handle, err = pcap.OpenOffline(device)
-
 	if err != nil {
-		minerLogger.Error().Msg(fmt.Sprintf("Error while opening device (%s)", err))
+		minerLogger.Error().Msgf("Error while opening device: %v", err)
+		return nil, err
 	}
 
 	// init the packet source from the handler
@@ -226,11 +227,12 @@ func sniffAndYield(period time.Duration, event EventChannel, data DataChannel) e
 	defer close(data)
 
 	packetSource, err := openDevice()
-	minerLogger.Debug().Msgf("Device %s open (%v)", device, err)
 	if err != nil {
+		minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
+		// send back error
+		event <- ERR
 		return err
 	}
-	minerLogger.Debug().Msgf("Device %s open", device)
 	defer closeDevice()
 	minerLogger.Debug().Msgf("Device %s open", device)
 
@@ -242,7 +244,7 @@ func sniffAndYield(period time.Duration, event EventChannel, data DataChannel) e
 	dispatcher.init()
 	// now we are sniffing!
 	sniffing = true
-
+	minerLogger.Debug().Msgf("Sniffing...")
 	// loop over the incoming packets
 	for {
 		select {
@@ -305,6 +307,9 @@ func sniff(event EventChannel, data DataChannel) error {
 
 	packetSource, err := openDevice()
 	if err != nil {
+		minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
+		// send back error
+		event <- ERR
 		return err
 	}
 	defer closeDevice()
