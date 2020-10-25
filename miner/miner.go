@@ -7,15 +7,14 @@ package miner
 
 import (
 	"errors"
+	"fmt"
 	"netspot/miner/counters"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/google/gopacket"
-	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"github.com/google/gopacket/pfring"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -64,10 +63,10 @@ var (
 
 // Packet sniffing/parsing
 var (
-	handle     *pcap.Handle
-	ringHandle *pfring.Ring
-	parser     *gopacket.DecodingLayerParser
-	err        error
+	handle *pcap.Handle
+	// ringHandle *pfring.Ring
+	parser *gopacket.DecodingLayerParser
+	err    error
 )
 
 // Dispatcher
@@ -140,6 +139,11 @@ func GetAvailableCounters() []string {
 	return names
 }
 
+// IsSniffing returns the sniffing status
+func IsSniffing() bool {
+	return sniffing
+}
+
 // i/o function ============================================================= //
 // ========================================================================== //
 // ========================================================================== //
@@ -166,205 +170,143 @@ func GetLoadedCounters() []string {
 	return dispatcher.loadedCounters()
 }
 
+// GetSourceTime returns the time given by the current packet source
+func GetSourceTime() int64 {
+	return SourceTime.UnixNano()
+}
+
 // Sniffing function ======================================================== //
 // ========================================================================== //
 // ========================================================================== //
 
-func closeDevice() {
-	if ringHandle != nil {
-		ringHandle.Close()
-	}
-	if handle != nil {
-		handle.Close()
-	}
-}
+// openDevice returns a handle on the packet source (interface of file)
+func openDevice() (*pcap.Handle, error) {
 
-func openDevice() (*gopacket.PacketSource, error) {
-	var err error
-
-	if iface {
-		// in case of network interface
-		// use PF_RING
-		flag := pfring.FlagTimestamp
-		if promiscuous {
-			flag = flag | pfring.FlagPromisc
-		}
-		ringHandle, err = pfring.NewRing(device, uint32(snapshotLen), flag)
-		if err != nil {
-			return nil, err
-		}
-		// PF_RING has a ton of optimizations and tweaks to
-		// make sure you get just the packets you want. For
-		// example, if you're only using pfring to read packets,
-		// consider running:
-		ringHandle.SetSocketMode(pfring.ReadOnly)
-
-		// If you only care about packets received on your
-		// interface (not those transmitted by the interface),
-		// you can run:
-		ringHandle.SetDirection(pfring.ReceiveOnly)
-
-		if err = ringHandle.Enable(); err != nil { // Must do this!, or you get no packets!
-			return nil, err
-		}
-		return gopacket.NewPacketSource(ringHandle, layers.LinkTypeEthernet), nil
+	// Offline mode ----------------------------------------------------------
+	// -----------------------------------------------------------------------
+	if !IsDeviceInterface() {
+		return pcap.OpenOffline(device)
 	}
 
-	// Otherwise use libpcap
-	handle, err = pcap.OpenOffline(device)
+	// Online mode -----------------------------------------------------------
+	// -----------------------------------------------------------------------
+	inactive, err := pcap.NewInactiveHandle(device)
 	if err != nil {
-		minerLogger.Error().Msgf("Error while opening device: %v", err)
+		return nil, err
+	}
+	defer inactive.CleanUp()
+
+	// config ----------------------------------------------
+	if err := inactive.SetSnapLen(int(snapshotLen)); err != nil {
 		return nil, err
 	}
 
-	// init the packet source from the handler
-	return gopacket.NewPacketSource(handle, handle.LinkType()), nil
+	if timeout == 0 {
+		if err := inactive.SetImmediateMode(true); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := inactive.SetTimeout(timeout); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := inactive.SetPromisc(promiscuous); err != nil {
+		return nil, err
+	}
+
+	// Finally, create the actual handle by calling Activate:
+	return inactive.Activate() // after this, inactive is no longer valid
 }
 
-// sniffAndYield opens a device and starts to sniff.
-// It sends counters snapshot at given period
-func sniffAndYield(period time.Duration, event EventChannel, data DataChannel) error {
+// sniff open the device and call either the offline sniffer or the
+// online one
+func sniff(period time.Duration, event EventChannel, data DataChannel) {
+	// data channel should be closed to send a 'nil' object
+	// to the analyzer. This is the way the analyzer understands
+	// that the miner has ended.
 	defer close(data)
 
-	packetSource, err := openDevice()
+	// Open the device
+	handle, err := openDevice()
 	if err != nil {
 		minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
-		// send back error
 		event <- ERR
-		return err
+		return
 	}
-	defer closeDevice()
-	minerLogger.Debug().Msgf("Device %s open", device)
+	defer handle.Close()
+	minerLogger.Debug().Msgf("Device %s is open", device)
 
-	packetsChan := packetSource.Packets()
-	// init timestamp
-	firstPacket := <-packetsChan
-	lastTimestamp := firstPacket.Metadata().Timestamp
+	// TODO: BPF hook
+	// if err := handle.SetBPFFilter(bpf); err != nil {
+	// 	minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
+	// 	event <- ERR
+	// 	return err
+	// }
+
+	// Create the packet source
+	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	// set decoding options
+	packetSource.DecodeOptions.Lazy = true
+	packetSource.DecodeOptions.NoCopy = true
+	packetSource.Lazy = true
+	packetSource.NoCopy = true
+	// packet channel
+	packetChan := packetSource.Packets()
 	// Start all the counters (if they are not running)
 	dispatcher.init()
-	// now we are sniffing!
-	sniffing = true
-	minerLogger.Debug().Msgf("Sniffing...")
-	// loop over the incoming packets
-	for {
-		select {
-		// manage events
-		case e, _ := <-event:
-			switch e {
-			case STOP:
-				// the counters are stopped
-				minerLogger.Debug().Msg("Receiving STOP")
-				dispatcher.terminate()
-				sniffing = false
-				return nil
-			case GET:
-				// counter values are retrieved and sent
-				// to the channel.
-				minerLogger.Debug().Msg("Receiving GET")
-				data <- dispatcher.getAll()
-			case FLUSH:
-				// counter values are retrieved and sent
-				// to the channel. The counters are also
-				// reset.
-				minerLogger.Debug().Msg("Receiving FLUSH")
-				data <- dispatcher.flushAll()
-			default:
-				minerLogger.Debug().Msgf("Receiving unknown event (%v)", e)
-			}
-		// parse packet
-		case packet, ok := <-packetsChan:
-			// check whether it is the last packet or not
-			if ok {
-				SourceTime = packet.Metadata().Timestamp
-				// update time and check if data must be sent through the channel
-				if lastTimestamp.Add(period).Before(SourceTime) {
-					lastTimestamp = SourceTime
-					dispatcher.terminate()
-					data <- dispatcher.flushAll()
-				}
-				dispatcher.pool.Add(1)
-				// in all cases dispatch the packet to the counters
-				go dispatcher.dissect(packet)
-			} else {
-				// if there is no packet anymore, we stop it
-				minerLogger.Info().Msgf("No packets to parse anymore (%d parsed packets).",
-					dispatcher.receivedPackets)
-				dispatcher.terminate()
-				sniffing = false
-				return nil
-			}
-		}
-
+	// run
+	if IsDeviceInterface() {
+		err = sniffOnline(packetChan, period, event, data)
+	} else {
+		err = sniffOffline(packetChan, period, event, data)
 	}
 
+	if err != nil {
+		minerLogger.Error().Msgf("Error while sniffing: %v", err)
+		event <- ERR
+	}
 }
 
-// sniff open the device and start to sniff packets.
-// These packets are sent to the the dispatcher which
-// increment counters. It does not flush automatically
-func sniff(event EventChannel, data DataChannel) error {
-	defer close(data)
-
-	packetSource, err := openDevice()
-	if err != nil {
-		minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
-		// send back error
-		event <- ERR
-		return err
+// Start starts the miner and demands it to send
+// counter values at given period
+func Start(period time.Duration) (DataChannel, error) {
+	if sniffing {
+		return nil, fmt.Errorf("Already sniffing")
 	}
-	defer closeDevice()
+	if len(dispatcher.loadedCounters()) == 0 {
+		return nil, fmt.Errorf("No counters loaded")
+	}
+	// create data channel
+	data := make(DataChannel)
+	minerLogger.Info().Msgf("Start sniffing %s", device)
+	minerLogger.Debug().Msgf("Loaded counters: %v", dispatcher.loadedCounters())
+	// sniff
+	go sniff(period, internalEventChannel, data)
 
-	packetsChan := packetSource.Packets()
-	// Start all the counters (if they are not running)
-	dispatcher.init()
-	// now we are sniffing!
-	sniffing = true
-
-	// loop over the incoming packets
-	for {
+	// wait for sniffing
+	for !sniffing {
 		select {
-		// manage events
-		case e, _ := <-event:
-			switch e {
-			case STOP:
-				// the counters are stopped
-				minerLogger.Debug().Msg("Receiving STOP")
-				dispatcher.terminate()
-				sniffing = false
-				return nil
-			case GET:
-				// counter values are retrieved and sent
-				// to the channel.
-				minerLogger.Debug().Msg("Receiving GET")
-				data <- dispatcher.getAll()
-			case FLUSH:
-				// counter values are retrieved and sent
-				// to the channel. The counters are also
-				// reset.
-				minerLogger.Debug().Msg("Receiving FLUSH")
-				data <- dispatcher.flushAll()
-			default:
-				minerLogger.Debug().Msgf("Receiving unknown event (%v)", e)
-			}
-		// parse packet
-		case packet, ok := <-packetsChan:
-			// check whether it is the last packet or not
-			if ok {
-				dispatcher.pool.Add(1)
-				// dispatch packet to the counters
-				go dispatcher.dissect(packet)
-			} else {
-				// if there is no packet anymore, we stop it
-				minerLogger.Info().Msgf("No packets to parse anymore (%d parsed packets).",
-					dispatcher.receivedPackets)
-				dispatcher.terminate()
-				sniffing = false
-				return nil
-			}
+		case <-internalEventChannel: // error case
+			return data, fmt.Errorf("Something bad happened")
+		default:
+			// pass
 		}
-
 	}
+	return data, nil
+}
 
+// Stop stops to sniff the device
+func Stop() error {
+	if !sniffing {
+		return fmt.Errorf("The miner is already stopped")
+	}
+	minerLogger.Info().Msgf("Stopping counter")
+	internalEventChannel <- STOP
+	for sniffing {
+		// wait for stop sniffing
+	}
+	return nil
 }
 
 // Side functions =========================================================== //

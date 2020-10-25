@@ -64,7 +64,7 @@ func findTestFiles() error {
 	if err != nil {
 		return err
 	}
-	testFiles := make([]string, len(infos))
+	testFiles = make([]string, len(infos))
 	for i, f := range infos {
 		testFiles[i] = path.Join(testDir, f.Name())
 	}
@@ -185,8 +185,9 @@ func TestZero(t *testing.T) {
 
 	// small
 	// pcapFile1 : ~420min
-	if err := miner.SetDevice(pcapFile1); err != nil {
-		t.Error(err)
+
+	if err := miner.SetDevice(testFiles[0]); err != nil {
+		t.Fatal(err)
 	}
 	fmt.Println("AFTER:", miner.GetDevice())
 	period = 5 * time.Minute
@@ -227,7 +228,7 @@ func TestLivePcapSmall(t *testing.T) {
 	// small
 	// pcapFile1 : ~420min
 	// logDataToFile = true
-	miner.SetDevice(pcapFile1)
+	miner.SetDevice(testFiles[1])
 	SetPeriod(5 * time.Minute)
 
 	// miner.SetTickPeriod(period)

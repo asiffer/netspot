@@ -123,7 +123,7 @@ func TestRun(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err := Start()
+	_, err := Start(30 * time.Second)
 	if err != nil {
 		t.Error(err)
 	}
@@ -153,7 +153,7 @@ func TestRunWithPeriod(t *testing.T) {
 		t.Error(err)
 	}
 
-	data, err := StartAndYield(1 * time.Second)
+	data, err := Start(1 * time.Second)
 
 	if err != nil {
 		t.Error(err)
@@ -197,7 +197,7 @@ func TestRunInterface(t *testing.T) {
 	go genTraffic()
 
 	// run
-	data, err := StartAndYield(1 * time.Second)
+	data, err := Start(1 * time.Second)
 	if err != nil {
 		t.Error(err)
 	}

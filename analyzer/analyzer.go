@@ -487,7 +487,7 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 	// set the running state
 	running = true
 	// sniff
-	minerData, err := miner.StartAndYield(period)
+	minerData, err := miner.Start(period)
 	if err != nil {
 		running = false
 		return fmt.Errorf("Error while starting the miner: %v", err)
