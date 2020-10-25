@@ -36,7 +36,7 @@ var defaultConfig = map[string]interface{}{
 	"miner.device":       "any",
 	"miner.promiscuous":  true,
 	"miner.snapshot_len": 65535,
-	"miner.timeout":      30 * time.Second,
+	"miner.timeout":      0,
 	"analyzer.period":    1 * time.Second,
 	"analyzer.stats":     make([]string, 0),
 	"spot.depth":         50,
@@ -282,11 +282,7 @@ func GetDuration(key string) (time.Duration, error) {
 	if !HasKey(key) {
 		return 0, fmt.Errorf("Key %s does not exist", key)
 	}
-	d := konf.Duration(key)
-	if d == 0 {
-		return 0, fmt.Errorf("Error while parsing key %s", key)
-	}
-	return d, nil
+	return konf.Duration(key), nil
 }
 
 // SetValue defines a value of a parameter
