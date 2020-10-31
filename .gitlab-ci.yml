@@ -4,53 +4,96 @@ stages:
   - build
 
 variables:
-  # LIBPCAP_VERSION: "1.9.1"
+  LIBPCAP_VERSION: "1.9.1"
+  LIBPCAP_DIR: "/libpcap"
+  PACKAGES: "nano bash linux-headers git flex bison wget make bluez-dev bluez"
+  CGO_ENABLED: 1
+  CGO_LDFLAGS: "-L$LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION"
+  CGO_CFLAGS: "-O2 -I$LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION"
+  GCC_VERSION: "9.2.0"
+  MUSL_CROSS_MAKE_VERSION: "v15"
   TZ: "Europe/Paris"
   ARTIFACT_NAME_TEMPLATE: "$CI_JOB_NAME"
-  # GO_IMAGE: "golang:1.15.2-buster"
-  # PACKAGES: "software-properties-common byacc flex dpkg-dev python3 python3-pip debhelper"
   BUILD_IMAGE: "golang:1.15.2-alpine"
-  PACKAGES: "bash linux-headers build-base git flex bison"
-
-
-# .install-deps: &install-deps
-#   - apt-get update
-#   - apt-get install -y software-properties-common gcc bison flex wget make kmod build-essential
+  
 
 
 .install-deps: &install-deps
   - apk update
   - apk add $PACKAGES
 
+.get-libpcap-src: &get-libpcap-src
+  - $CI_PROJECT_DIR/dev/image/get_libpcap_sources.sh
 
-.build-libraries: &build-libraries
-  - cd /; git clone https://github.com/ntop/PF_RING.git
-  - mkdir -p /usr/local/include/linux/; cp /PF_RING/kernel/linux/pf_ring.h /usr/local/include/linux/pf_ring.h
-  - cp /go/src/netspot/extra/strdup.c /PF_RING/userland/lib
-  - cd /PF_RING/userland/lib; ./configure;
-  - sed -i 's/pfring_hw_filtering.o/pfring_hw_filtering.o strdup.o/' Makefile;
-  - make; make install
-  - cp /go/src/netspot/extra/strdup.c /PF_RING/userland/libpcap
-  - cd /PF_RING/userland/libpcap; ./configure
-  - sed -i 's/etherent.c/etherent.c strdup.c/' Makefile;
-  - make; make install
+# .build-libraries: &build-libraries
+#   - cd /; git clone https://github.com/ntop/PF_RING.git
+#   - mkdir -p /usr/local/include/linux/; cp /PF_RING/kernel/linux/pf_ring.h /usr/local/include/linux/pf_ring.h
+#   - cp /go/src/netspot/extra/strdup.c /PF_RING/userland/lib
+#   - cd /PF_RING/userland/lib; ./configure;
+#   - sed -i 's/pfring_hw_filtering.o/pfring_hw_filtering.o strdup.o/' Makefile;
+#   - make; make install
+#   - cp /go/src/netspot/extra/strdup.c /PF_RING/userland/libpcap
+#   - cd /PF_RING/userland/libpcap; ./configure
+#   - sed -i 's/etherent.c/etherent.c strdup.c/' Makefile;
+#   - make; make install
 
 build_amd64:
   stage: build
   image: $BUILD_IMAGE
   only:
     - web
+  variables:
+    TARGET_ARCH: x86_64-linux
   before_script:
     - ln -s /builds/netspot/netspot /go/src/netspot
     - *install-deps
-    - *build-libraries
+    - *get-libpcap-src
+    - $CI_PROJECT_DIR/dev/image/install_toolchain.sh
   script:
-    - cd /go/src/netspot
-    - make build_netspot_musl
+    - $CI_PROJECT_DIR/dev/build/builder.sh $TARGET_ARCH
   artifacts:
     name: $ARTIFACT_NAME_TEMPLATE
     paths:
-      - bin/netspot
+      - bin/netspot-$TARGET_ARCH
+
+build_arm:
+  stage: build
+  image: $BUILD_IMAGE
+  only:
+    - web
+  variables:
+    TARGET_ARCH: arm-linux
+  before_script:
+    - ln -s /builds/netspot/netspot /go/src/netspot
+    - *install-deps
+    - *get-libpcap-src
+    - $CI_PROJECT_DIR/dev/image/install_toolchain.sh
+  script:
+    - $CI_PROJECT_DIR/dev/build/builder.sh $TARGET_ARCH
+  artifacts:
+    name: $ARTIFACT_NAME_TEMPLATE
+    paths:
+      - bin/netspot-$TARGET_ARCH
+
+
+build_aarch64:
+  stage: build
+  image: $BUILD_IMAGE
+  only:
+    - web
+  variables:
+    TARGET_ARCH: aarch64-linux
+  before_script:
+    - ln -s /builds/netspot/netspot /go/src/netspot
+    - *install-deps
+    - *get-libpcap-src
+    - $CI_PROJECT_DIR/dev/image/install_toolchain.sh
+  script:
+    - $CI_PROJECT_DIR/dev/build/builder.sh $TARGET_ARCH
+  artifacts:
+    name: $ARTIFACT_NAME_TEMPLATE
+    paths:
+      - bin/netspot-$TARGET_ARCH
 
 # build_armhf:
 #   stage: build
