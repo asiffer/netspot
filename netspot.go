@@ -25,6 +25,9 @@ import (
 	cli "github.com/urfave/cli/v2"
 )
 
+// Version is the netspot version
+var Version = "v2.0b"
+
 var (
 	configFile string
 	logLevel   int
@@ -123,7 +126,7 @@ var (
 		Name:                 "netspot",
 		Usage:                "A simple IDS with statistical learning",
 		Authors:              []*cli.Author{{Name: "asr"}},
-		Version:              "2.0a",
+		Version:              Version,
 		Copyright:            "GPLv3",
 		Description:          removeCharacters(desc, []string{"\n"}),
 		EnableBashCompletion: true,

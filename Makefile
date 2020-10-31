@@ -92,7 +92,6 @@ install_config:
 	@echo -e "\033[34m[Installing configurations]\033[0m"
 	@echo -en "Creating config directories...       "
 	@mkdir -p $(INSTALL_CONF_DIR)
-	@mkdir -p $(CTL_INSTALL_CONF_DIR)
 	@echo $(OK)
 	@echo -en "Installing netspot config file...    "
 	@install $(EXTRA_DIR)/netspot.toml $(INSTALL_CONF_DIR)/
