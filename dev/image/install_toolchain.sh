@@ -30,5 +30,5 @@ for ARCH in $TARGET_ARCH; do
     # get the toolchain
     wget "${BASE_URL}/gcc-$GCC_VERSION-$FULL_ARCH.tar.xz"
     # decompress and install it in the root
-    tar -C / -xvf "gcc-$GCC_VERSION-$FULL_ARCH-musl.tar.xz"
+    tar -C / -xvf "gcc-$GCC_VERSION-$FULL_ARCH.tar.xz"
 done
