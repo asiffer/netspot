@@ -22,8 +22,13 @@ BASE_URL=https://github.com/just-containers/musl-cross-make/releases/download/$M
 
 cd /tmp
 for ARCH in $TARGET_ARCH; do
+    FULL_ARCH=$ARCH-musl
+    if [ "$ARCH" == "arm-linux" ]; then
+        FULL_ARCH=$ARCH-musleabihf
+    fi
+
     # get the toolchain
-    wget "${BASE_URL}/gcc-$GCC_VERSION-$ARCH.tar.xz"
+    wget "${BASE_URL}/gcc-$GCC_VERSION-$FULL_ARCH.tar.xz"
     # decompress and install it in the root
-    tar -C / -xvf "gcc-$GCC_VERSION-$ARCH.tar.xz"
+    tar -C / -xvf "gcc-$GCC_VERSION-$FULL_ARCH-musl.tar.xz"
 done
