@@ -2,46 +2,68 @@
 # NetSpot Makefile #
 # ---------------- #
 
-# package details
-PACKAGE_NAME := netspot
-VERSION      := 2.0a
-PACKAGE_DESC := "A simple IDS with statistical learning"
-MAINTAINER   := asiffer
-
 # Shell for $shell commands
 SHELL        := /bin/bash
 
+# Fancyness
+SEP  := $(shell printf "%80s" | tr " " "-")
+OK   := "[\033[32mOK\033[0m]"
+
+
 GOEXEC       := $(shell which go)
 GOPATH       := ${GOPATH}
+
+$(info $(SEP))
 $(info GO="$(GOEXEC)")
 $(info GOPATH="$(GOPATH)")
+
+# package details
+PACKAGE_NAME := netspot
+VERSION      := $(shell $(GOEXEC) test -v -run ./netspot_test.go:TestVersion | grep netspot_test | awk -F ' ' '{print $$2}')
+PACKAGE_DESC := "A simple IDS with statistical learning"
+MAINTAINER   := asiffer
+
+
 
 # environment
 ARCH ?= $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
 OS   ?= $(shell $(GOEXEC) env | grep GOOS=   | sed -e 's/GOOS=//'   -e 's/"//g' )
+CC   ?= $(shell command -v cc)
+AR   ?= $(shell command -v ar)
+LD   ?= $(shell command -v ld)
+
 
 # Print environment variable
 $(info ARCH="$(ARCH)")
 $(info OS="$(OS)")
+$(info CC="$(CC)")
+$(info AR="$(AR)")
+$(info LD="$(LD)")
+
 
 # sources
 SRC_DIR   := $(shell pwd)
 EXTRA_DIR := $(SRC_DIR)/extra
 
 $(info SRC_DIR="$(SRC_DIR)")
+$(info VERSION="$(VERSION)")
+$(info $(SEP))
 
 # API
 API_DIR         := $(SRC_DIR)/api
 PROTO_CC        := $(shell command -v protoc)
 PROTO_INCLUDE   := -I$(API_DIR) -I/usr/include/google/protobuf/
 # -I/home/asr/Documents/Work/go/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.9.0/third_party/googleapis/
-PROTO_MODULES   := miner
+PROTO_MODULES   := netspot
 PROTO_FILES     := $(foreach mod, $(PROTO_MODULES), $(API_DIR)/$(mod).proto) 
 INTERFACE_FILES := $(foreach mod, $(PROTO_MODULES), $(API_DIR)/$(mod).pb.go) 
 
 # golang compiler
-GO                   := GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
+GO                   := CC=$(CC) LD=$(LD) GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
 GO_BUILD_EXTRA_FLAGS := 
+
+# CGO
+
 
 # build directories
 BIN_DIR    := $(SRC_DIR)/bin
@@ -56,10 +78,6 @@ INSTALL_BIN_DIR      := $(DESTDIR)/usr/bin
 INSTALL_CONF_DIR     := $(DESTDIR)/etc/netspot
 INSTALL_SERVICE_DIR  := $(DESTDIR)/lib/systemd/system
 
-
-
-# fancyness
-OK := "[\033[32mOK\033[0m]"
 
 # PHONY actions
 .PHONY: build debian docker snap api
@@ -147,9 +165,7 @@ api: $(INTERFACE_FILES)
 
 
 clean:
-	@echo -en "Removing auto-generated gRPC files   "
-	@rm -f $(API_DIR)/*.pb.go
+	@echo -en "Removing netspot binary   "
+	@rm -f $(BIN_DIR)/netspot
 	@echo -e $(OK)
 
-purge:
-	# rm -rf $(PKG_DIR)

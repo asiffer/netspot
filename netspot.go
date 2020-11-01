@@ -20,13 +20,12 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/ini.v1"
 
 	cli "github.com/urfave/cli/v2"
 )
 
 // Version is the netspot version
-var Version = "v2.0b"
+var Version = "2.0a"
 
 var (
 	configFile string
@@ -185,17 +184,6 @@ func initSubpackages() error {
 	return nil
 }
 
-func overrideConfigValues(file *ini.File, c *cli.Context) {
-	// override device
-	if c.IsSet("device") {
-		file.Section("miner").Key("device").SetValue(c.String("device"))
-	}
-	// override endpoint
-	if c.IsSet("endpoint") {
-		file.Section("api").Key("endpoint").SetValue(c.String("endpoint"))
-	}
-}
-
 //------------------------------------------------------------------------------
 // SIDE FUNCTIONS
 //------------------------------------------------------------------------------
@@ -245,18 +233,18 @@ func initConsoleWriter() {
 	// output := zerolog.ConsoleWriter{Out: os.Stderr}
 	output.FormatLevel = func(i interface{}) string {
 		switch fmt.Sprintf("%s", i) {
-		case "warn":
-			return "\033[1;33mWARNING\033[0m"
-		case "info":
-			return "\033[1;32m   INFO\033[0m"
-		case "fatal":
-			return "\033[1;31m  FATAL\033[0m"
-		case "error":
-			return "\033[1;31m  ERROR\033[0m"
 		case "debug":
-			return "\033[0;37m  DEBUG\033[0m"
+			return "\033[0;090m  DEBUG\033[0m"
+		case "info":
+			return "\033[0;092m   INFO\033[0m"
+		case "warn":
+			return "\033[0;093mWARNING\033[0m"
+		case "error":
+			return "\033[0;091m  ERROR\033[0m"
+		case "fatal":
+			return "\033[0;101m  FATAL\033[0m"
 		case "panic":
-			return "\033[1;31m  PANIC\033[0m"
+			return "\033[0;101m  PANIC\033[0m"
 		default:
 			return fmt.Sprintf("%s", i)
 		}
@@ -328,7 +316,6 @@ func initConsoleWriter() {
 func setLogging(level int) {
 	l := zerolog.Level(level)
 	zerolog.SetGlobalLevel(l)
-	// managerLogger.Info().Msgf("Enabling logging (level %s)", l.String())
 }
 
 // disableLogging disable the log output. Warning! It disables the log
@@ -342,9 +329,9 @@ func initConfig(c *cli.Context) error {
 	// update logging level
 	setLogging(c.Int("log-level"))
 
-	// init the config package only
+	// init the 'config' package only
 	if err := config.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Exporter: %v", err)
+		return fmt.Errorf("Error while initializing the 'config' package: %v", err)
 	}
 
 	// load config
