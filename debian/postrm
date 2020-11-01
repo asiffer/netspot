@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# fancyness
-OK="[\033[32mOK\033[0m]"
-
-echo -n "Removing user 'netspot'...           "
-userdel netspot
-echo $OK
