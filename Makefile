@@ -7,47 +7,28 @@ SHELL        := /bin/bash
 
 # Fancyness
 SEP  := $(shell printf "%80s" | tr " " "-")
-OK   := "[\033[32mOK\033[0m]"
+OK   := "[\033[92mOK\033[0m]"
 
-
-GOEXEC       := $(shell which go)
-GOPATH       := ${GOPATH}
-
-$(info $(SEP))
-$(info GO="$(GOEXEC)")
-$(info GOPATH="$(GOPATH)")
+# environment
+GOEXEC := $(shell which go)
+GOPATH := ${GOPATH}
+ARCH   ?= $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
+OS     ?= $(shell $(GOEXEC) env | grep GOOS=   | sed -e 's/GOOS=//'   -e 's/"//g' )
+CC     ?= $(shell command -v cc)
+AR     ?= $(shell command -v ar)
+LD     ?= $(shell command -v ld)
 
 # package details
 PACKAGE_NAME := netspot
-VERSION      := $(shell $(GOEXEC) test -v -run ./netspot_test.go:TestVersion | grep netspot_test | awk -F ' ' '{print $$2}')
+VERSION      := $(shell grep Version netspot.go | sed -e 's/[",]//g' -e 's/Version://g' -e 's/[\t\ ]//g')
 PACKAGE_DESC := "A simple IDS with statistical learning"
 MAINTAINER   := asiffer
 
 
 
-# environment
-ARCH ?= $(shell $(GOEXEC) env | grep GOARCH= | sed -e 's/GOARCH=//' -e 's/"//g' )
-OS   ?= $(shell $(GOEXEC) env | grep GOOS=   | sed -e 's/GOOS=//'   -e 's/"//g' )
-CC   ?= $(shell command -v cc)
-AR   ?= $(shell command -v ar)
-LD   ?= $(shell command -v ld)
-
-
-# Print environment variable
-$(info ARCH="$(ARCH)")
-$(info OS="$(OS)")
-$(info CC="$(CC)")
-$(info AR="$(AR)")
-$(info LD="$(LD)")
-
-
 # sources
 SRC_DIR   := $(shell pwd)
 EXTRA_DIR := $(SRC_DIR)/extra
-
-$(info SRC_DIR="$(SRC_DIR)")
-$(info VERSION="$(VERSION)")
-$(info $(SEP))
 
 # API
 API_DIR         := $(SRC_DIR)/api
@@ -60,10 +41,8 @@ INTERFACE_FILES := $(foreach mod, $(PROTO_MODULES), $(API_DIR)/$(mod).pb.go)
 
 # golang compiler
 GO                   := CC=$(CC) LD=$(LD) GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
-GO_BUILD_EXTRA_FLAGS := 
-
-# CGO
-
+GO_LDFLAGS           := -s -w
+GO_BUILD_EXTRA_FLAGS := -a
 
 # build directories
 BIN_DIR    := $(SRC_DIR)/bin
@@ -78,13 +57,25 @@ INSTALL_BIN_DIR      := $(DESTDIR)/usr/bin
 INSTALL_CONF_DIR     := $(DESTDIR)/etc/netspot
 INSTALL_SERVICE_DIR  := $(DESTDIR)/lib/systemd/system
 
+# Print environment variable
+$(info $(SEP))
+$(info GO="$(GOEXEC)")
+$(info GOPATH="$(GOPATH)")
+$(info ARCH="$(ARCH)")
+$(info OS="$(OS)")
+$(info CC="$(CC)")
+$(info AR="$(AR)")
+$(info LD="$(LD)")
+$(info SRC_DIR="$(SRC_DIR)")
+$(info VERSION="$(VERSION)")
+$(info $(SEP))
 
 # PHONY actions
 .PHONY: build debian docker snap api
 
 # main actions
 default: build
-build: api build_netspot
+build: build_netspot
 install: install_bin install_config install_service # post_install
 
 deps:
@@ -93,21 +84,22 @@ deps:
 	@echo -e $(OK)
 
 build_netspot:
-	@echo -e "\033[34m[Building netspot]\033[0m"
+	@echo -e "\033[93m[Building netspot]\033[0m"
 	@export GOPATH=$(GOPATH)
 	@echo -n "Building go package...               "
-	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -o $(BIN_DIR)/netspot $(SRC_DIR)/*.go
+	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -ldflags='$(GO_LDFLAGS)' -o $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS) $(SRC_DIR)/*.go
 	@echo -e $(OK)
 
-build_netspot_musl:
-	@echo -e "\033[34m[Building netspot (musl)]\033[0m"
+build_netspot_static:
+	@echo -e "\033[93m[Building netspot (musl)]\033[0m"
 	@export GOPATH=$(GOPATH)
+	$(eval GO_LDFLAGS += -extldflags "-static")
 	@echo -n "Building go package...               "
-	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -a -ldflags '-extldflags "-static"' -o $(BIN_DIR)/netspot $(SRC_DIR)/*.go
+	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -ldflags='$(GO_LDFLAGS)' -o $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS) $(SRC_DIR)/*.go
 	@echo -e $(OK)
 
 install_config:
-	@echo -e "\033[34m[Installing configurations]\033[0m"
+	@echo -e "\033[93m[Installing configurations]\033[0m"
 	@echo -en "Creating config directories...       "
 	@mkdir -p $(INSTALL_CONF_DIR)
 	@echo $(OK)
@@ -116,7 +108,7 @@ install_config:
 	@echo -e $(OK)
 
 install_bin:
-	@echo -e "\033[34m[Installing binaries]\033[0m"
+	@echo -e "\033[93m[Installing binaries]\033[0m"
 	@echo -en "Creating directory...                "
 	@mkdir -p $(INSTALL_BIN_DIR)
 	@echo $(OK)
@@ -128,7 +120,7 @@ install_service:
 	@echo -en "Creating directory...                "
 	@mkdir -p $(INSTALL_SERVICE_DIR)
 	@echo -e $(OK)
-	@echo -e "\033[34m[Installing service]\033[0m"
+	@echo -e "\033[93m[Installing service]\033[0m"
 	@echo -en "Installing netspot service file...   "
 	@install $(EXTRA_DIR)/netspot.service $(INSTALL_SERVICE_DIR)/
 	@echo -e $(OK)

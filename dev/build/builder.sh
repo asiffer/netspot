@@ -49,8 +49,7 @@ build_libpcap() {
 # $1 target-arch (arm-linux, x86_64-linux, aarch64-linux)
 build_netspot() {
     cd $GOPATH/src/netspot
-    export LD_LIBRARY_PATH=$LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION
-    CC=$CC AR=$AR LD=$LD go build -o bin/netspot-$1 -a -ldflags '-X "main.Version=v2.0" -s -w -extldflags "-static"' netspot.go
+    make build_netspot_static
 }
 
 #

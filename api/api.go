@@ -4,35 +4,105 @@
 package api
 
 import (
-	context "context"
 	"fmt"
 	"net"
+	"net/http"
 	"netspot/config"
-	"netspot/miner"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	grpc "google.golang.org/grpc"
 )
 
 var (
 	apiLogger zerolog.Logger
-	server    *grpc.Server
+	router    *mux.Router
 	network   string
 	address   string
 )
 
-var (
-	emptyResponse = &Empty{}
-)
-
-// init sets the default configuration
+// init does nothin here
 func init() {
 	// for socket, see https://golang.org/pkg/net/#Listen
-	// // default config
-	// viper.SetDefault("api.network", "tcp")
-	// viper.SetDefault("api.address", "localhost:11000")
+}
+
+// removePort removes port from a source address if present
+// "[::1]:58292" => "[::1]"
+func removePort(s string) string {
+	idx := strings.LastIndex(s, ":")
+	if idx == -1 {
+		return s
+	}
+	return s[:idx]
+}
+
+// requestSource returns ip address of the client making the request,
+// taking into account http proxies
+func requestSource(r *http.Request) string {
+	hdrRealIP := r.Header.Get("X-Real-Ip")
+	hdrForwardedFor := r.Header.Get("X-Forwarded-For")
+	if hdrRealIP == "" && hdrForwardedFor == "" {
+		return removePort(r.RemoteAddr)
+	}
+	if hdrForwardedFor != "" {
+		// X-Forwarded-For is potentially a list of addresses separated with ","
+		parts := strings.Split(hdrForwardedFor, ",")
+		for i, p := range parts {
+			parts[i] = strings.TrimSpace(p)
+		}
+		if len(parts) == 1 {
+			return parts[0]
+		}
+		return fmt.Sprintf("%s (%s)", parts[0], strings.Join(parts[1:], ", "))
+	}
+	return hdrRealIP
+}
+
+// this function wraps an handler to add basic logging
+func logRequestHandler(h http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		// print logs
+		apiLogger.Info().Msgf("%s %s", r.Method, r.RequestURI)
+		apiLogger.Debug().Msgf("body: %s, from: %s, referer: %s, user_agent: %s",
+			r.Body,
+			requestSource(r),
+			r.Header.Get("Referer"),
+			r.Header.Get("User-Agent"))
+		// call the original http.Handler we're wrapping
+		h.ServeHTTP(w, r)
+	}
+
+	// http.HandlerFunc wraps a function so that it
+	// implements http.Handler interface
+	return http.HandlerFunc(fn)
+}
+
+// RunHandler returns the current config
+func RunHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO
+}
+
+// ConfigHandler returns the current config
+func ConfigHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		if data, err := config.JSON(); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			w.Write(data)
+		}
+
+	default:
+		msg := fmt.Sprintf("Method %s not supported", r.Method)
+		apiLogger.Warn().Msg(msg)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(msg))
+
+	}
+
 }
 
 // InitLogger initialize the sublogger for API
@@ -52,7 +122,11 @@ func InitConfig() error {
 	}
 
 	// init server
-	server = grpc.NewServer()
+	// server = grpc.NewServer()
+	router := mux.NewRouter()
+	router.HandleFunc("/api/run", RunHandler)
+	router.HandleFunc("/api/config", ConfigHandler)
+	http.Handle("/", logRequestHandler(router))
 	// register sub-API
 	// RegisterManagerServer(server, &Manager{})
 	// RegisterMinerServer(server, &Miner{})
@@ -89,26 +163,26 @@ func InitConfig() error {
 // ========================================================================== //
 
 // Miner API
-type Miner struct{}
+// type Miner struct{}
 
 // GetAvailableDevices return a list of all the interfaces
 // netspot can listen on
-func (m *Miner) GetAvailableDevices(ctx context.Context, in *Empty) (*Devices, error) {
-	available := miner.GetAvailableDevices()
-	devices := Devices{Value: make([]*Device, len(available))}
-	for i, d := range available {
-		devices.Value[i] = &Device{Value: d}
-	}
-	return &devices, nil
-}
+// func (m *Miner) GetAvailableDevices(ctx context.Context, in *Empty) (*Devices, error) {
+// 	available := miner.GetAvailableDevices()
+// 	devices := Devices{Value: make([]*Device, len(available))}
+// 	for i, d := range available {
+// 		devices.Value[i] = &Device{Value: d}
+// 	}
+// 	return &devices, nil
+// }
 
 // SetDevice defines the interface or capture file netspot will sniff
-func (m *Miner) SetDevice(ctx context.Context, in *Device) (*Empty, error) {
-	if miner.SetDevice(in.Value) != nil {
-		return emptyResponse, fmt.Errorf("The device %s is neither a valid interface nor an existing network capture file", in.Value)
-	}
-	return emptyResponse, nil
-}
+// func (m *Miner) SetDevice(ctx context.Context, in *Device) (*Empty, error) {
+// 	if miner.SetDevice(in.Value) != nil {
+// 		return emptyResponse, fmt.Errorf("The device %s is neither a valid interface nor an existing network capture file", in.Value)
+// 	}
+// 	return emptyResponse, nil
+// }
 
 // GetNbParsedPackets returns the current number of parsed packets
 // if the counter PKTS is loaded
@@ -118,9 +192,9 @@ func (m *Miner) SetDevice(ctx context.Context, in *Device) (*Empty, error) {
 // }
 
 // GetStatus returns the current status of the miner
-func (m *Miner) GetStatus(ctx context.Context, in *Empty) (*Status, error) {
-	return &Status{Value: miner.RawStatus()}, nil
-}
+// func (m *Miner) GetStatus(ctx context.Context, in *Empty) (*Status, error) {
+// 	return &Status{Value: miner.RawStatus()}, nil
+// }
 
 // Server =================================================================== //
 // ========================================================================== //
@@ -136,7 +210,8 @@ func Serve() error {
 	}
 	apiLogger.Info().Msgf("Start listening on %s://%s",
 		network, address)
-	return server.Serve(lis)
+
+	return http.Serve(lis, nil)
 }
 
 // Utils ==================================================================== //

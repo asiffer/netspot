@@ -109,6 +109,7 @@ func InitConfig() error {
 
 	if config.HasKey("analyzer.stats") {
 		toLoad, err := config.GetStringList("analyzer.stats")
+		fmt.Println("TOLOAD:", toLoad)
 		if err != nil {
 			return err
 		}

@@ -126,7 +126,6 @@ func GetDevice() string {
 // SetDevice sets the device to listen. It can be either an interface or
 // a capture file (ex: .pcap)
 func SetDevice(dev string) error {
-	fmt.Println(availableDevices, dev)
 	if contains(availableDevices, dev) {
 		device = dev
 		iface = true

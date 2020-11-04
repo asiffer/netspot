@@ -4,6 +4,7 @@
 package config
 
 import (
+	js "encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,7 +39,7 @@ var defaultConfig = map[string]interface{}{
 	"miner.snapshot_len": 65535,
 	"miner.timeout":      0,
 	"analyzer.period":    1 * time.Second,
-	"analyzer.stats":     make([]string, 0),
+	"analyzer.stats":     []string{},
 	"spot.depth":         50,
 	"spot.q":             1e-4,
 	"spot.n_init":        1000,
@@ -130,6 +131,11 @@ func InitConfig() error {
 	return konf.Load(confmap.Provider(defaultConfig, "."), nil)
 }
 
+// JSON return the current config
+func JSON() ([]byte, error) {
+	return js.Marshal(konf.Raw())
+}
+
 // Debug prints all the config
 func Debug() {
 	konf.Print()
@@ -172,9 +178,9 @@ func GetStringList(key string) ([]string, error) {
 		return nil, fmt.Errorf("Key %s does not exist", key)
 	}
 	s := konf.Strings(key)
-	if len(s) == 0 {
-		return nil, fmt.Errorf("Error while parsing key %s", key)
-	}
+	// if len(s) == 0 {
+	// 	return nil, fmt.Errorf("Error while parsing key %s", key)
+	// }
 	return s, nil
 }
 

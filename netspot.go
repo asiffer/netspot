@@ -24,9 +24,6 @@ import (
 	cli "github.com/urfave/cli/v2"
 )
 
-// Version is the netspot version
-var Version = "2.0a"
-
 var (
 	configFile string
 	logLevel   int
@@ -47,7 +44,6 @@ var (
 			Name:    "config",
 			Aliases: []string{"c"},
 			Usage:   "Load configuration from `FILE`",
-			// Value:   "./netspot.toml",
 		},
 		&cli.IntFlag{
 			Name:    "log-level",
@@ -125,7 +121,7 @@ var (
 		Name:                 "netspot",
 		Usage:                "A simple IDS with statistical learning",
 		Authors:              []*cli.Author{{Name: "asr"}},
-		Version:              Version,
+		Version:              "2.0a",
 		Copyright:            "GPLv3",
 		Description:          removeCharacters(desc, []string{"\n"}),
 		EnableBashCompletion: true,
