@@ -48,7 +48,9 @@ var (
 )
 
 var (
-	stopChannel = make(chan int, 1)
+	// ackChannel aims to send info
+	// internally to the analyzer
+	ackChannel = make(chan int, 1)
 )
 
 // Events to get data
@@ -59,6 +61,10 @@ const (
 	STAT int = 1
 	// PERF aims to get the current miner performances
 	PERF int = 2
+	// STARTED is a message saying that the analyzers has started
+	STARTED int = 10
+	// STOPPED is a message saying that the analyzerd has stopped
+	STOPPED int = 11
 )
 
 var (
@@ -146,12 +152,6 @@ func find(sl []string, str string) int {
 }
 
 // SPECIFIC --------------------------------------------------------------------
-
-func release() {
-	running = false
-	// stopChannel <- 1
-	// Stop()
-}
 
 func isLoaded(statname string) bool {
 	_, exists := statMap[statname]
@@ -352,7 +352,7 @@ func Stop() error {
 		timeout5 := time.After(5 * time.Second)
 		for {
 			select {
-			case <-stopChannel:
+			case <-ackChannel:
 				// good
 				return nil
 			case <-timeout2:
@@ -380,13 +380,14 @@ func StatValues() map[string]float64 {
 // Start starts the analysis
 // func Start() error {
 func Start() error {
+	var err error
 	if len(GetLoadedStats()) == 0 {
 		return errors.New("No stats loaded")
 	}
 	analyzerLogger.Info().Msg("Starting stats computation")
 	analyzerLogger.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-	defaultEventChannel, defaultDataChannel = GoRun()
-	return nil
+	defaultEventChannel, defaultDataChannel, err = GoRun()
+	return err
 }
 
 // StartAndWait starts the analysis. It will stop only when no packets
@@ -477,22 +478,30 @@ func analyze(m map[string]uint64) {
 }
 
 func run(eventChannel chan int, dataChannel chan map[string]float64) error {
-	// start the exporter
-	if err := exporter.Start("test"); err != nil {
-		return err
-	}
-	// defer close
-	defer exporter.Close()
 	// display basic information
 	analyzerLogger.Info().Msg("Start running")
 	// set the running state
 	running = true
-	// sniff
-	minerData, err := miner.Start(period)
+	// set running to false when exits
+	defer func() { running = false }()
+
+	// start the miner
+	minerData, series, err := miner.Start(period)
 	if err != nil {
-		running = false
 		return fmt.Errorf("Error while starting the miner: %v", err)
 	}
+
+	// start the exporter
+	if err := exporter.Start(series); err != nil {
+		// stop the miner
+		miner.Stop()
+		return fmt.Errorf("Error while starting the exporter: %v", err)
+	}
+	// defer close the exporter
+	defer exporter.Close()
+
+	// send a message saying that the loop starts
+	ackChannel <- STARTED
 	// loop
 	for {
 		select {
@@ -501,13 +510,8 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 			case STOP: // stop order
 				analyzerLogger.Debug().Msg("Receiving STOP message")
 				// stop the miner
-				if err := miner.Stop(); err != nil {
-					analyzerLogger.Error().Msgf("Error while stopping miner: %v", err)
-				}
-				// minerEvent <- miner.STOP
-				// release (put running to false)
-				running = false
-				stopChannel <- 1
+				miner.Stop()
+				ackChannel <- STOPPED
 				analyzerLogger.Info().Msg("Stopping stats computation (controller)")
 				return nil
 			case STAT: // send data
@@ -522,7 +526,6 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 		case m := <-minerData:
 			if m == nil {
 				// release
-				running = false
 				analyzerLogger.Info().Msg("Stopping stats computation (miner)")
 				return nil
 			}
@@ -541,11 +544,19 @@ func Run() error {
 
 // GoRun starts the analyzer and return two communication channels
 // event and data
-func GoRun() (chan int, chan map[string]float64) {
+func GoRun() (chan int, chan map[string]float64, error) {
 	eventChannel := make(chan int)
 	dataChannel := make(chan map[string]float64)
 	go run(eventChannel, dataChannel)
-	return eventChannel, dataChannel
+
+	// check the status
+	switch msg := <-ackChannel; msg {
+	case STARTED:
+		return eventChannel, dataChannel, nil
+	default:
+		return eventChannel, dataChannel, fmt.Errorf("The analyzer has not well started (receive code %d)", msg)
+	}
+
 }
 
 //------------------------------------------------------------------------------
