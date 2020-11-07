@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"netspot/miner/counters"
 	"os"
+	"path"
+	"strings"
 	"sync"
 	"time"
 
@@ -109,6 +111,20 @@ func Zero() error {
 	minerLogger.Info().Msg("Miner package has been reset")
 	return nil
 
+}
+
+// seriesName returns the name of the series according
+// to the device it sniffs
+func seriesName() string {
+	if IsDeviceInterface() {
+		t := time.Now()
+		f := t.Format(time.StampMilli)
+		f = strings.Replace(f, " ", "-", -1)
+		return fmt.Sprintf("%s-%s", device, f)
+	}
+	p := path.Base(device)
+	ext := path.Ext(p)
+	return strings.Replace(p, ext, "", -1)
 }
 
 // Information function ===================================================== //
@@ -269,13 +285,16 @@ func sniff(period time.Duration, event EventChannel, data DataChannel) {
 }
 
 // Start starts the miner and demands it to send
-// counter values at given period
-func Start(period time.Duration) (DataChannel, error) {
+// counter values at given period. It returns the
+// channel where counters are sent and the name of
+// the series
+func Start(period time.Duration) (DataChannel, string, error) {
+	series := seriesName()
 	if sniffing {
-		return nil, fmt.Errorf("Already sniffing")
+		return nil, series, fmt.Errorf("Already sniffing")
 	}
 	if len(dispatcher.loadedCounters()) == 0 {
-		return nil, fmt.Errorf("No counters loaded")
+		return nil, series, fmt.Errorf("No counters loaded")
 	}
 	// create data channel
 	data := make(DataChannel)
@@ -288,18 +307,21 @@ func Start(period time.Duration) (DataChannel, error) {
 	for !sniffing {
 		select {
 		case <-internalEventChannel: // error case
-			return data, fmt.Errorf("Something bad happened")
+			return data, series, fmt.Errorf("Something bad happened")
 		default:
 			// pass
 		}
 	}
-	return data, nil
+	return data, series, nil
 }
 
 // Stop stops to sniff the device
+// It waits until the miner is stopped
+// (returns always nil)
 func Stop() error {
 	if !sniffing {
-		return fmt.Errorf("The miner is already stopped")
+		minerLogger.Warn().Msg("The miner is already stopped")
+		return nil
 	}
 	minerLogger.Info().Msgf("Stopping counter")
 	internalEventChannel <- STOP

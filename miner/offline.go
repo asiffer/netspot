@@ -10,8 +10,10 @@ import (
 // It sends counters snapshot at given period
 func sniffOffline(packetChan chan gopacket.Packet, period time.Duration, event EventChannel, data DataChannel) error {
 	// now we are sniffing!
-	sniffing = true
 	minerLogger.Debug().Msgf("Sniffing...")
+	sniffing = true
+	// set running to false when exits
+	defer func() { sniffing = false }()
 
 	// Treat the first packet
 	pkt := <-packetChan
@@ -30,7 +32,6 @@ func sniffOffline(packetChan chan gopacket.Packet, period time.Duration, event E
 				// the counters are stopped
 				minerLogger.Debug().Msg("Receiving STOP")
 				dispatcher.terminate()
-				sniffing = false
 				return nil
 			default:
 				minerLogger.Debug().Msgf("Receiving unknown event (%v)", e)
@@ -43,7 +44,6 @@ func sniffOffline(packetChan chan gopacket.Packet, period time.Duration, event E
 				minerLogger.Info().Msgf("No packets to parse anymore (%d parsed packets).",
 					dispatcher.receivedPackets)
 				dispatcher.terminate()
-				sniffing = false
 				return nil
 			}
 

@@ -70,8 +70,10 @@ func sniffOnline(packetChan chan gopacket.Packet, period time.Duration, event Ev
 	timeSource := time.Tick(period)
 
 	// now we are sniffing!
-	sniffing = true
 	minerLogger.Debug().Msgf("Sniffing...")
+	sniffing = true
+	// set running to false when exits
+	defer func() { sniffing = false }()
 
 	// loop over the incoming packets
 	for {
@@ -87,7 +89,6 @@ func sniffOnline(packetChan chan gopacket.Packet, period time.Duration, event Ev
 				// the counters are stopped
 				minerLogger.Debug().Msg("Receiving STOP")
 				dispatcher.terminate()
-				sniffing = false
 				return nil
 			default:
 				minerLogger.Debug().Msgf("Receiving unknown event (%v)", e)
@@ -100,7 +101,6 @@ func sniffOnline(packetChan chan gopacket.Packet, period time.Duration, event Ev
 				minerLogger.Info().Msgf("No packets to parse anymore (%d parsed packets).",
 					dispatcher.receivedPackets)
 				dispatcher.terminate()
-				sniffing = false
 				return nil
 			}
 
