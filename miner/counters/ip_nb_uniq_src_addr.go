@@ -16,7 +16,7 @@ func init() {
 type NbUniqSrcAddr struct {
 	BaseCtr
 	Addr map[string]bool
-	mux  sync.RWMutex
+	mux  sync.Mutex
 }
 
 // Name returns the name of the counter (method of BaseCtrInterface)
@@ -32,17 +32,15 @@ func (nusa *NbUniqSrcAddr) Value() uint64 {
 // Reset resets the counter
 func (nusa *NbUniqSrcAddr) Reset() {
 	nusa.mux.Lock()
-	for k := range nusa.Addr {
-		delete(nusa.Addr, k)
-	}
-	nusa.mux.Unlock()
+	defer nusa.mux.Unlock()
+	nusa.Addr = make(map[string]bool)
 }
 
 // Process update the counter according to data it receives
 func (nusa *NbUniqSrcAddr) Process(ip *layers.IPv4) {
 	nusa.mux.Lock()
+	defer nusa.mux.Unlock()
 	nusa.Addr[ip.SrcIP.String()] = true
-	nusa.mux.Unlock()
 }
 
 // END OF NbUniqSrcAddr

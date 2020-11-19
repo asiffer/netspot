@@ -6,6 +6,7 @@
 package exporter
 
 import (
+	"errors"
 	"fmt"
 	"netspot/config"
 	"os"
@@ -19,10 +20,12 @@ import (
 var (
 	// loaded stores all the loaded ExportingModules
 	loaded = make([]ExportingModule, 0)
-	// available modules
+	// available modules. It is filled at compile time
 	available = make(map[string]ExportingModule)
 	// logger
 	exporterLogger zerolog.Logger
+	// state
+	started = false
 )
 
 // ExportingModule is the general interface which denotes
@@ -30,8 +33,6 @@ var (
 type ExportingModule interface {
 	// Return the name of the module
 	Name() string
-	// Returns the status of the modules (all the options etc.)
-	Status() map[string]interface{}
 	// Init the module (init some variables)
 	Init() error
 	// Start the module (make it ready to receive data)
@@ -40,8 +41,20 @@ type ExportingModule interface {
 	Write(time.Time, map[string]float64) error
 	// Aimed to write alerts
 	Warn(time.Time, *SpotAlert) error
-	// CLose the module
+	// Close the module
 	Close() error
+}
+
+func init() {
+
+}
+
+// reset the variables of the package
+func reset() {
+	// loaded stores all the loaded ExportingModules
+	loaded = make([]ExportingModule, 0)
+	// state
+	started = false
 }
 
 // Main functions =========================================================== //
@@ -57,6 +70,10 @@ func InitLogger() {
 // The modules must be given within the [exporter] section,
 // like [exporter.file]
 func InitConfig() error {
+	// reset first
+	if err := Zero(); err != nil {
+		return err
+	}
 	// loop over the known exporting modules
 	for _, module := range available {
 		// it inits the module
@@ -95,14 +112,9 @@ func AvailableExportingModules() []string {
 	return ah
 }
 
-// GenericStatus returns the current status of the exporter through a
-// basic map. It is designed to JSON marshalling.
-func GenericStatus() map[string]interface{} {
-	m := make(map[string]interface{})
-	for _, module := range loaded {
-		m[module.Name()] = module.Status()
-	}
-	return m
+// HasStarted returns the internal state of the exporter
+func HasStarted() bool {
+	return started
 }
 
 // Load loads a new module (without initialization)
@@ -139,13 +151,9 @@ func Start(series string) error {
 			return err
 		}
 	}
+	started = true
 	exporterLogger.Info().Msgf("Exporting modules are ready to receive data")
 	return nil
-}
-
-// Clear removes all the loaded ExportingModule
-func Clear() {
-	loaded = make([]ExportingModule, 0)
 }
 
 // Write sends data to all the ExportingModule
@@ -170,23 +178,26 @@ func Warn(t time.Time, s *SpotAlert) error {
 	return nil
 }
 
-// Close does the job
+// Close does the job. It is like 'Stop' in the
+// other packages
 func Close() error {
 	for _, h := range loaded {
 		if err := h.Close(); err != nil {
 			return err
 		}
 	}
+	started = false
 	return nil
 }
 
-// Zero combines close and clear
+// Zero wraps the reset function
 func Zero() error {
-	if err := Close(); err != nil {
-		return err
+	if HasStarted() {
+		exporterLogger.Error().Msg("Cannot reload, exporter is active")
+		return errors.New("Cannot reload, exporter is active")
 	}
-	Clear()
-	exporterLogger.Info().Msg("Resetting data export")
+	reset()
+	exporterLogger.Info().Msg("Exporter package (re)loaded")
 	return nil
 }
 

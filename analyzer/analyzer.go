@@ -50,7 +50,7 @@ var (
 var (
 	// ackChannel aims to send info
 	// internally to the analyzer
-	ackChannel = make(chan int, 1)
+	ackChannel = make(chan int)
 )
 
 // Events to get data
@@ -93,20 +93,25 @@ func init() {
 	reset()
 }
 
-// init or reset all the stats variables
+// reset the variables of the package
 func reset() {
-	// counterID = make(map[string]int)
+	// internal structures
 	statMap = make(map[string]stats.StatInterface)
-	// statID = 0
 	statValues = make(map[string]float64)
-	// counterValues = make(map[string]uint64)
+	// event channel
 	defaultEventChannel = make(chan int)
+	defaultDataChannel = make(chan map[string]float64)
+	// running state
 	running = false
 }
 
 // InitConfig load the stats according to
 // the config file
 func InitConfig() error {
+	// reset first
+	if err := Zero(); err != nil {
+		return err
+	}
 	p, err := config.GetDuration("analyzer.period")
 	if err != nil {
 		return err
@@ -115,7 +120,6 @@ func InitConfig() error {
 
 	if config.HasKey("analyzer.stats") {
 		toLoad, err := config.GetStringList("analyzer.stats")
-		fmt.Println("TOLOAD:", toLoad)
 		if err != nil {
 			return err
 		}
@@ -236,26 +240,8 @@ func StatStatus(s string) (gospot.DSpotStatus, error) {
 	return gospot.DSpotStatus{}, fmt.Errorf("Stat %s is not loaded", s)
 }
 
-// RawStatus returns the current status of the analyzer through a
-// basic map. It is designed to a future print.
-func RawStatus() map[string]string {
-	m := make(map[string]string)
-	m["period"] = fmt.Sprint(period)
-	m["statistics"] = fmt.Sprint(GetLoadedStats())
-	return m
-}
-
-// GenericStatus returns the current status of the analyzer through a
-// basic map. It is designed to JSON marshalling.
-func GenericStatus() map[string]interface{} {
-	return map[string]interface{}{
-		"period":     period,
-		"statistics": GetLoadedStats(),
-	}
-}
-
 // Zero aims to zero the internal state of the analyzer. So it removes all
-// the loaded stats, initialize some variables [and read the config file](NOT ANYMORE).
+// the loaded stats, initialize some variables.
 func Zero() error {
 	if IsRunning() {
 		analyzerLogger.Error().Msg("Cannot reload, monitoring in progress")
@@ -348,8 +334,8 @@ func Stop() error {
 		// send the STOP msg
 		defaultEventChannel <- STOP
 		// check that it did stop
-		timeout2 := time.After(2 * time.Second)
-		timeout5 := time.After(5 * time.Second)
+		timeout2 := time.After(5 * time.Second)
+		timeout5 := time.After(10 * time.Second)
 		for {
 			select {
 			case <-ackChannel:
@@ -365,7 +351,7 @@ func Stop() error {
 			}
 		}
 	}
-	return errors.New("The analyzer is not running")
+	return fmt.Errorf("The analyzer is not running")
 }
 
 // StatValues return a current snapshot of the stat values (and their thresholds)
@@ -380,25 +366,43 @@ func StatValues() map[string]float64 {
 // Start starts the analysis
 // func Start() error {
 func Start() error {
-	var err error
+	if running {
+		return fmt.Errorf("The analyzer is already running")
+	}
 	if len(GetLoadedStats()) == 0 {
 		return errors.New("No stats loaded")
 	}
 	analyzerLogger.Info().Msg("Starting stats computation")
 	analyzerLogger.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-	defaultEventChannel, defaultDataChannel, err = GoRun()
-	return err
+
+	// ensure ackChannel is blocking
+	ackChannel = make(chan int, 0)
+	go run()
+
+	// check the status
+	switch msg := <-ackChannel; msg {
+	case STARTED:
+		return nil
+	default:
+		return fmt.Errorf("The analyzer has not well started (receive code %d)", msg)
+	}
 }
 
 // StartAndWait starts the analysis. It will stop only when no packets
 // have to be processed (ex: pcap file)
 func StartAndWait() error {
+	if running {
+		return fmt.Errorf("The analyzer is already running")
+	}
 	if len(GetLoadedStats()) == 0 {
 		return errors.New("No stats loaded")
 	}
 	analyzerLogger.Info().Msg("Starting stats computation")
 	analyzerLogger.Debug().Msg(fmt.Sprint("Loaded stats: ", GetLoadedStats()))
-	return Run()
+
+	// ignore ackChannel messages by adding a buffer
+	ackChannel = make(chan int, 5)
+	return run()
 }
 
 //------------------------------------------------------------------------------
@@ -477,7 +481,7 @@ func analyze(m map[string]uint64) {
 	}
 }
 
-func run(eventChannel chan int, dataChannel chan map[string]float64) error {
+func run() error {
 	// display basic information
 	analyzerLogger.Info().Msg("Start running")
 	// set the running state
@@ -485,32 +489,34 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 	// set running to false when exits
 	defer func() { running = false }()
 
-	// start the miner
-	minerData, series, err := miner.Start(period)
-	if err != nil {
-		return fmt.Errorf("Error while starting the miner: %v", err)
-	}
-
+	// get the name of the series based on the
+	// sniffed device
+	series := miner.GetSeriesName()
 	// start the exporter
 	if err := exporter.Start(series); err != nil {
-		// stop the miner
-		miner.Stop()
 		return fmt.Errorf("Error while starting the exporter: %v", err)
 	}
 	// defer close the exporter
 	defer exporter.Close()
+
+	// start the miner
+	minerData, err := miner.Start(period)
+	if err != nil {
+		return fmt.Errorf("Error while starting the miner: %v", err)
+	}
 
 	// send a message saying that the loop starts
 	ackChannel <- STARTED
 	// loop
 	for {
 		select {
-		case e := <-eventChannel:
+		case e := <-defaultEventChannel:
 			switch e {
 			case STOP: // stop order
 				analyzerLogger.Debug().Msg("Receiving STOP message")
 				// stop the miner
 				miner.Stop()
+				analyzerLogger.Info().Msg("Miner has stopped")
 				ackChannel <- STOPPED
 				analyzerLogger.Info().Msg("Stopping stats computation (controller)")
 				return nil
@@ -521,7 +527,7 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 					snapshot[s] = v
 				}
 				smux.Unlock()
-				dataChannel <- snapshot
+				defaultDataChannel <- snapshot
 			}
 		case m := <-minerData:
 			if m == nil {
@@ -531,32 +537,11 @@ func run(eventChannel chan int, dataChannel chan map[string]float64) error {
 			}
 
 			// analyze the stats values (feed dspot, log data/thresholds)
+			// It sends the data to the exporter too
 			analyze(m)
 
 		}
 	}
-}
-
-// Run open the device to listen
-func Run() error {
-	return run(defaultEventChannel, defaultDataChannel)
-}
-
-// GoRun starts the analyzer and return two communication channels
-// event and data
-func GoRun() (chan int, chan map[string]float64, error) {
-	eventChannel := make(chan int)
-	dataChannel := make(chan map[string]float64)
-	go run(eventChannel, dataChannel)
-
-	// check the status
-	switch msg := <-ackChannel; msg {
-	case STARTED:
-		return eventChannel, dataChannel, nil
-	default:
-		return eventChannel, dataChannel, fmt.Errorf("The analyzer has not well started (receive code %d)", msg)
-	}
-
 }
 
 //------------------------------------------------------------------------------

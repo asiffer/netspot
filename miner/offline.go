@@ -8,30 +8,30 @@ import (
 
 // sniffOffline opens an interface and starts to sniff.
 // It sends counters snapshot at given period
-func sniffOffline(packetChan chan gopacket.Packet, period time.Duration, event EventChannel, data DataChannel) error {
+func sniffOffline(packetChan chan gopacket.Packet, period time.Duration) error {
 	// now we are sniffing!
 	minerLogger.Debug().Msgf("Sniffing...")
 	sniffing = true
 	// set running to false when exits
-	defer func() { sniffing = false }()
+	defer release()
 
 	// Treat the first packet
-	pkt := <-packetChan
-	dispatcher.pool.Add(1)
-	go dispatcher.dissect(pkt)
+	firstPacket := <-packetChan
+	dispatcher.dispatch(firstPacket)
 	// init the first timestamp
-	lastTick := pkt.Metadata().Timestamp
+	lastTick := firstPacket.Metadata().Timestamp
 
 	// loop over the incoming packets
 	for {
 		select {
 		// manage events
-		case e, _ := <-event:
+		case e, _ := <-internalEventChannel:
 			switch e {
 			case STOP:
 				// the counters are stopped
 				minerLogger.Debug().Msg("Receiving STOP")
 				dispatcher.terminate()
+				minerLogger.Debug().Msg("Dispatcher has terminated")
 				return nil
 			default:
 				minerLogger.Debug().Msgf("Receiving unknown event (%v)", e)
@@ -48,18 +48,15 @@ func sniffOffline(packetChan chan gopacket.Packet, period time.Duration, event E
 			}
 
 			// in real packet case, dispatch the packet to the counters
-			dispatcher.pool.Add(1)
-			go dispatcher.dissect(packet)
+			dispatcher.dispatch(packet)
 
 			// update the timestamp
 			SourceTime = packet.Metadata().Timestamp
 			// send data at given period
 			if SourceTime.Sub(lastTick) > period {
 				lastTick = SourceTime
-				dispatcher.terminate()
-				data <- dispatcher.flushAll()
+				externalDataChannel <- dispatcher.terminateAndFlushAll()
 			}
-
 		}
 
 	}

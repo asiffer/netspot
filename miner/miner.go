@@ -41,8 +41,9 @@ var (
 
 // Storing/Accessing the counters
 var (
-	mux, valmux          sync.RWMutex         // Locker for the counter map access
-	internalEventChannel = make(EventChannel) // to receive events
+	mux, valmux          sync.RWMutex            // Locker for the counter map access
+	internalEventChannel = make(EventChannel, 1) // to receive events
+	externalDataChannel  = make(DataChannel, 1)  // to send data to the analyzer
 )
 
 // Status
@@ -53,7 +54,7 @@ var (
 	snapshotLen      int32         // the maximum size to read for each packet
 	promiscuous      bool          // promiscuous mode of the interface
 	timeout          time.Duration // time to wait if nothing happens
-	sniffing         bool          // tells if the package is currently sniffing
+	sniffing         = false       // tells if the package is currently sniffing
 )
 
 // Time
@@ -89,7 +90,30 @@ const (
 // ========================================================================== //
 // ========================================================================== //
 
-func init() {}
+func init() {
+	reset()
+}
+
+// reset the variables of the package
+func reset() {
+	// create data channel
+	// they must be buffered to avoid blocking steps.
+	// I had this kind of probleme when a STOP msg is sent
+	// to the analyzer during the flush of the miner: the miner
+	// wants to send flushed data to the analyzer, but the
+	// analyzer waits for the miner to end.
+	internalEventChannel = make(EventChannel, 1)
+	externalDataChannel = make(DataChannel, 1)
+
+	// reset the dispatcher
+	dispatcher = NewDispatcher()
+
+	// update device list
+	availableDevices = GetAvailableDevices()
+
+	// sniffing
+	sniffing = false
+}
 
 // InitLogger initializes a specific logger for the miner package
 func InitLogger() {
@@ -104,18 +128,16 @@ func Zero() error {
 		return errors.New("Cannot reload, sniffing in progress")
 	}
 
-	// reset the dispatcher
-	dispatcher = NewDispatcher()
-
+	reset()
 	// everything is ok
-	minerLogger.Info().Msg("Miner package has been reset")
+	minerLogger.Info().Msg("Miner package (re)loaded")
 	return nil
 
 }
 
-// seriesName returns the name of the series according
+// GetSeriesName returns the name of the series according
 // to the device it sniffs
-func seriesName() string {
+func GetSeriesName() string {
 	if IsDeviceInterface() {
 		t := time.Now()
 		f := t.Format(time.StampMilli)
@@ -195,6 +217,12 @@ func GetSourceTime() int64 {
 // ========================================================================== //
 // ========================================================================== //
 
+func release() {
+	close(externalDataChannel)
+	externalDataChannel = make(DataChannel, 1)
+	sniffing = false
+}
+
 // openDevice returns a handle on the packet source (interface of file)
 func openDevice() (*pcap.Handle, error) {
 
@@ -237,17 +265,17 @@ func openDevice() (*pcap.Handle, error) {
 
 // sniff open the device and call either the offline sniffer or the
 // online one
-func sniff(period time.Duration, event EventChannel, data DataChannel) {
+func sniff(period time.Duration) {
 	// data channel should be closed to send a 'nil' object
 	// to the analyzer. This is the way the analyzer understands
 	// that the miner has ended.
-	defer close(data)
+	// defer close(data)
 
 	// Open the device
 	handle, err := openDevice()
 	if err != nil {
 		minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
-		event <- ERR
+		internalEventChannel <- ERR
 		return
 	}
 	defer handle.Close()
@@ -273,46 +301,43 @@ func sniff(period time.Duration, event EventChannel, data DataChannel) {
 	dispatcher.init()
 	// run
 	if IsDeviceInterface() {
-		err = sniffOnline(packetChan, period, event, data)
+		err = sniffOnline(packetChan, period)
 	} else {
-		err = sniffOffline(packetChan, period, event, data)
+		err = sniffOffline(packetChan, period)
 	}
 
 	if err != nil {
 		minerLogger.Error().Msgf("Error while sniffing: %v", err)
-		event <- ERR
+		internalEventChannel <- ERR
 	}
 }
 
 // Start starts the miner and demands it to send
 // counter values at given period. It returns the
-// channel where counters are sent and the name of
-// the series
-func Start(period time.Duration) (DataChannel, string, error) {
-	series := seriesName()
+// channel where counters are sent
+func Start(period time.Duration) (DataChannel, error) {
 	if sniffing {
-		return nil, series, fmt.Errorf("Already sniffing")
+		return nil, fmt.Errorf("Already sniffing")
 	}
 	if len(dispatcher.loadedCounters()) == 0 {
-		return nil, series, fmt.Errorf("No counters loaded")
+		return nil, fmt.Errorf("No counters loaded")
 	}
-	// create data channel
-	data := make(DataChannel)
+
 	minerLogger.Info().Msgf("Start sniffing %s", device)
 	minerLogger.Debug().Msgf("Loaded counters: %v", dispatcher.loadedCounters())
 	// sniff
-	go sniff(period, internalEventChannel, data)
+	go sniff(period)
 
 	// wait for sniffing
 	for !sniffing {
 		select {
 		case <-internalEventChannel: // error case
-			return data, series, fmt.Errorf("Something bad happened")
+			return externalDataChannel, fmt.Errorf("Something bad happened")
 		default:
 			// pass
 		}
 	}
-	return data, series, nil
+	return externalDataChannel, nil
 }
 
 // Stop stops to sniff the device
@@ -323,8 +348,11 @@ func Stop() error {
 		minerLogger.Warn().Msg("The miner is already stopped")
 		return nil
 	}
-	minerLogger.Info().Msgf("Stopping counter")
+	minerLogger.Info().Msgf("Stopping counter...")
+	// send STOP msg to the sniff function
 	internalEventChannel <- STOP
+
+	minerLogger.Info().Msgf("Wait for stop sniffing...")
 	for sniffing {
 		// wait for stop sniffing
 	}

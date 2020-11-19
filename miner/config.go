@@ -16,10 +16,15 @@ import (
 
 // InitConfig initializes the miner package from the config module
 func InitConfig() error {
+	if err := Zero(); err != nil {
+		return err
+	}
+
 	key := "miner.device"
 	s, err := config.GetString(key)
 	if err != nil {
 		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		return err
 	}
 	if err := SetDevice(s); err != nil {
 		return err
@@ -29,6 +34,7 @@ func InitConfig() error {
 	l, err := config.GetInt(key)
 	if err != nil {
 		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		return err
 	}
 	if err := SetSnapshotLen(int32(l)); err != nil {
 		return err
@@ -38,6 +44,7 @@ func InitConfig() error {
 	p, err := config.GetBool(key)
 	if err != nil {
 		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		return err
 	}
 	if err := SetPromiscuous(p); err != nil {
 		return err
@@ -47,6 +54,7 @@ func InitConfig() error {
 	t, err := config.GetDuration(key)
 	if err != nil {
 		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		return err
 	}
 	if err := SetTimeout(t); err != nil {
 		return err
@@ -56,28 +64,6 @@ func InitConfig() error {
 	minerLogger.Debug().Msg(fmt.Sprint("Available counters: ", counters.GetAvailableCounters()))
 	minerLogger.Info().Msg("Miner package configured")
 	return nil
-}
-
-// RawStatus returns the current status of the miner through a
-// basic map. It is designed to a future print.
-func RawStatus() map[string]string {
-	return map[string]string{
-		"promiscuous":  fmt.Sprintf("%v", promiscuous),
-		"timeout":      fmt.Sprint(timeout),
-		"device":       device,
-		"snapshot_len": fmt.Sprintf("%d", snapshotLen),
-	}
-}
-
-// GenericStatus returns the current status of the analyzer through a
-// basic map. It is designed to JSON marshalling.
-func GenericStatus() map[string]interface{} {
-	return map[string]interface{}{
-		"promiscuous":  promiscuous,
-		"timeout":      timeout,
-		"device":       device,
-		"snapshot_len": snapshotLen,
-	}
 }
 
 // GetNumberOfDevices returns the number of available devices (interfaces)

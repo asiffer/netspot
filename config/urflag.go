@@ -27,15 +27,18 @@ type Cliflag struct {
 func Provider(c *cli.Context, delim string) *Cliflag {
 	mp := make(map[string]interface{})
 	for _, name := range c.FlagNames() {
-		mp[name] = c.Value(name)
-		// need to convert to raw go types
-		// for some urfave/cli objects
-		switch mp[name].(type) {
-		case cli.StringSlice:
-			ss, _ := mp[name].(cli.StringSlice)
-			mp[name] = ss.Value()
-		default:
-			// pass
+		// ignore short flags (aliases)
+		if len(name) > 1 {
+			mp[name] = c.Value(name)
+			// need to convert to raw go types
+			// for some urfave/cli objects
+			switch mp[name].(type) {
+			case cli.StringSlice:
+				ss, _ := mp[name].(cli.StringSlice)
+				mp[name] = ss.Value()
+			default:
+				// pass
+			}
 		}
 	}
 	return &Cliflag{

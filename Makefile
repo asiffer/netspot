@@ -20,7 +20,7 @@ LD     ?= $(shell command -v ld)
 
 # package details
 PACKAGE_NAME := netspot
-VERSION      := $(shell grep Version netspot.go | sed -e 's/[",]//g' -e 's/Version://g' -e 's/[\t\ ]//g')
+VERSION      := $(shell grep Version cmd/app.go | sed -e 's/[",]//g' -e 's/Version://g' -e 's/[\t\ ]//g')
 PACKAGE_DESC := "A simple IDS with statistical learning"
 MAINTAINER   := asiffer
 
@@ -95,7 +95,7 @@ build_netspot_static:
 	@export GOPATH=$(GOPATH)
 	$(eval GO_LDFLAGS += -extldflags "-static")
 	@echo -n "Building go package...               "
-	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -ldflags='$(GO_LDFLAGS)' -o $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS) $(SRC_DIR)/*.go
+	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -ldflags='$(GO_LDFLAGS)' -o $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS)-static $(SRC_DIR)/*.go
 	@echo -e $(OK)
 
 install_config:

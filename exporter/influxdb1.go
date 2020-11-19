@@ -33,6 +33,8 @@ type InfluxDB struct {
 
 func init() {
 	RegisterAndSetDefaults(&InfluxDB{}, map[string]interface{}{
+		"exporter.influxdb.data":       false,
+		"exporter.influxdb.alarm":      false,
 		"exporter.influxdb.address":    "http://127.0.0.1:8086",
 		"exporter.influxdb.database":   "netspot",
 		"exporter.influxdb.username":   "netspot",
@@ -49,35 +51,6 @@ func init() {
 // Name returns the name of the exporter
 func (i *InfluxDB) Name() string {
 	return "influxdb"
-}
-
-// Options return the parameters of the shipper
-// func (i *InfluxDB) Options() map[string]string {
-// 	return map[string]string{
-// 		"data":  "A boolean to activate console data logging",
-// 		"alarm": "A boolean to activate console alarm logging",
-// 		"address": `A string which gives the full address of the influxdb instance.
-// Ex: http://localhost:8086`,
-// 		"database":   "A string which sets the database to use",
-// 		"username":   "A string which defines the user which connects to the database",
-// 		"password":   "A string which defines the corresponding password",
-// 		"batch_size": "A positive integer which sets the number of records which are sent in a row",
-// 		"agent_name": "A string which gives an additional tag to the records",
-// 	}
-// }
-
-// Status return the status of the shipper
-func (i *InfluxDB) Status() map[string]interface{} {
-	m := map[string]interface{}{
-		"batch_size": i.batchSize,
-		"agent_name": i.agentName,
-	}
-	if i.data || i.alarm {
-		m["address"] = i.address
-		m["username"] = i.username
-		m["database"] = i.database
-	}
-	return m
 }
 
 // Init reads the config of the module

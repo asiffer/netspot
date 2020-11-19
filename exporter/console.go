@@ -30,14 +30,6 @@ func (c *Console) Name() string {
 	return "console"
 }
 
-// Status return the status of the shipper
-func (c *Console) Status() map[string]interface{} {
-	return map[string]interface{}{
-		"data":  c.data,
-		"alarm": c.alarm,
-	}
-}
-
 // Init defines the options of the module from the config
 func (c *Console) Init() error {
 	c.data = config.MustBool("exporter.console.data")

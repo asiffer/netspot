@@ -12,6 +12,58 @@ import (
 func init() {
 }
 
+// TESTING STRUCTURE ======================================= //
+// ========================================================= //
+// ========================================================= //
+
+// WaitGroup
+// type WaitGroup struct {
+// 	wg    *sync.WaitGroup
+// 	count int64
+// }
+
+// func NewWaitGroup() *WaitGroup {
+// 	var wg sync.WaitGroup
+// 	return &WaitGroup{
+// 		wg:    &wg,
+// 		count: 0,
+// 	}
+// }
+
+// func (w *WaitGroup) Add(delta int) {
+// 	atomic.AddInt64(&w.count, int64(delta))
+// 	w.wg.Add(delta)
+// }
+
+// func (w *WaitGroup) Done() {
+// 	atomic.AddInt64(&w.count, -1)
+// 	w.wg.Done()
+// }
+
+// func (w *WaitGroup) Wait() {
+// 	w.wg.Wait()
+// }
+
+// func (w *WaitGroup) WaitDebug() {
+// 	com := make(chan int)
+// 	go func() {
+// 		w.Wait()
+// 		com <- 0
+// 	}()
+
+// 	for {
+// 		select {
+// 		case <-com:
+// 			return
+// 		default:
+// 			fmt.Println(atomic.LoadInt64(&w.count))
+// 			time.Sleep(1000 * time.Millisecond)
+// 		}
+// 	}
+// }
+
+// ========================================================= //
+
 // CounterList is a structure which precises
 // the types of the counters. It aims to accelerate
 // the packet parsing and... it seems to work :)
@@ -27,10 +79,10 @@ type CounterList struct {
 // Dispatcher is the main structures which manage
 // the counters
 type Dispatcher struct {
-	receivedPackets uint64
 	pool            sync.WaitGroup
 	list            *CounterList
 	counters        map[string]counters.BaseCtrInterface
+	receivedPackets uint64
 }
 
 // NewDispatcher init a new Dispatcher
@@ -106,9 +158,6 @@ func (d *Dispatcher) dissect(pkt gopacket.Packet) {
 	// internal pool
 	defer d.pool.Done()
 
-	// basic counter
-	d.receivedPackets++
-
 	for _, ctr := range d.list.pkt {
 		ctr.Process(pkt)
 	}
@@ -147,6 +196,13 @@ func (d *Dispatcher) dissect(pkt gopacket.Packet) {
 
 }
 
+// dispatch
+func (d *Dispatcher) dispatch(packet gopacket.Packet) {
+	d.pool.Add(1)
+	d.receivedPackets++
+	go d.dissect(packet)
+}
+
 // terminate wait for all the dissect operations
 // to finish
 func (d *Dispatcher) terminate() {
@@ -164,8 +220,16 @@ func (d *Dispatcher) flushAll() map[string]uint64 {
 		// reset counter
 		ctr.Reset()
 	}
-
 	return data
+}
+
+// terminateAndflushAll terminates the goroutines,
+// gets the values of every counter and resets them.
+func (d *Dispatcher) terminateAndFlushAll() map[string]uint64 {
+	// terminate
+	d.terminate()
+	// flush counters
+	return d.flushAll()
 }
 
 // getAll gets the values of every counter

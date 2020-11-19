@@ -34,6 +34,8 @@ type Socket struct {
 
 func init() {
 	RegisterAndSetDefaults(&Socket{}, map[string]interface{}{
+		"exporter.socket.data":   nil,
+		"exporter.socket.alarm":  nil,
 		"exporter.socket.format": "json",
 		"exporter.socket.tag":    "netspot",
 	})
@@ -57,44 +59,12 @@ func (s *Socket) Name() string {
 	return "socket"
 }
 
-// Options return the parameters of the shipper
-// func (s *Socket) Options() map[string]string {
-// 	return map[string]string{
-// 		"data": `A string which gives the socket where data will be sent.
-// The format is the following: [proto]://[address].
-// Ex: unix:///tmp/netspot_data.socket
-//     tcp://127.0.0.1:4000`,
-// 		"alarm": `A string which gives the socket where alarms will be sent.
-// The format is the following: [proto]://[address].
-// Ex: unix:///tmp/netspot_alarm.socket
-//     udp://127.0.0.1:4000`,
-// 		"tag": "A string which sets a tag when data are sent ('netspot' by default)",
-// 		"format": `A string which defines the sending format (data/alarm).
-// It currently accepts "csv", "json" and "gob" (golang binary format)`,
-// 	}
-// }
-
-// Status return the status of the shipper
-func (s *Socket) Status() map[string]interface{} {
-	m := map[string]interface{}{
-		"tag":    s.tag,
-		"format": s.format,
-	}
-	if s.data {
-		m["data"] = s.dataAddress
-		if s.alarm {
-			m["alarm"] = s.alarmAddress
-		}
-	}
-	return m
-}
-
-// Init reads the config of the shipper
+// Init reads the config of the exporting module
 func (s *Socket) Init() error {
 	var err error
 	// update options
-	s.data = config.HasKey("exporter.socket.data")
-	s.alarm = config.HasKey("exporter.socket.alarm")
+	s.data = config.HasNotNilKey("exporter.socket.data")
+	s.alarm = config.HasNotNilKey("exporter.socket.alarm")
 
 	// retrieve addresses (no check is done)
 	if s.data {

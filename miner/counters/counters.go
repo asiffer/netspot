@@ -62,4 +62,8 @@ func Register(ctr BaseCtrInterface) error {
 }
 
 // BaseCtr is the basic counter object
-type BaseCtr int
+// It is actually a uint64. This choice is
+// made to align counter structures on 32bits
+// syystems (choosing int creates an error in
+// sync.AddUInt64 function).
+type BaseCtr uint64

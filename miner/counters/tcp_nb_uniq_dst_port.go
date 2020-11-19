@@ -3,6 +3,8 @@
 package counters
 
 import (
+	"sync"
+
 	"github.com/google/gopacket/layers"
 )
 
@@ -13,6 +15,7 @@ func init() {
 // NbUniqDstPort gives the number of unique source addresses
 type NbUniqDstPort struct {
 	BaseCtr
+	mux  sync.Mutex
 	port map[uint16]bool
 }
 
@@ -28,11 +31,15 @@ func (nudp *NbUniqDstPort) Value() uint64 {
 
 // Reset resets the counter
 func (nudp *NbUniqDstPort) Reset() {
+	nudp.mux.Lock()
+	defer nudp.mux.Unlock()
 	nudp.port = make(map[uint16]bool)
 }
 
 // Process update the counter according to data it receives
 func (nudp *NbUniqDstPort) Process(tcp *layers.TCP) {
+	nudp.mux.Lock()
+	defer nudp.mux.Unlock()
 	nudp.port[uint16(tcp.DstPort)] = true
 }
 

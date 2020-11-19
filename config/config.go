@@ -25,7 +25,10 @@ import (
 
 // Konf is the global koanf instance.
 // Use "." as the key path delimiter. This can be "/" or any character.
-var konf = koanf.New(".")
+var (
+	konf      = koanf.New(".")
+	savedKonf *koanf.Koanf // fallback
+)
 
 var (
 	// logger
@@ -157,7 +160,21 @@ func RegisterDefaultConfig(m map[string]interface{}) {
 
 // HasKey checks if a key is given in the config file
 func HasKey(key string) bool {
-	return konf.Exists(key)
+	// the konf.Keys() list the 'end' keys
+	// for instance 'miner' is not a valid key
+	// but 'miner.device' is.
+	for _, k := range konf.Keys() {
+		if key == k {
+			return true
+		}
+	}
+	return false
+}
+
+// HasNotNilKey checks if a key is given in the config file
+// anf if its value is not nil
+func HasNotNilKey(key string) bool {
+	return konf.Exists(key) && konf.Get(key) != nil
 }
 
 // GetString returns a string key
@@ -367,9 +384,46 @@ func LoadForTestRawToml(raw []byte) error {
 	return konf.Load(rawbytes.Provider(raw), toml.Parser())
 }
 
+// LoadFromRawJSON loads from raw bytes
+func LoadFromRawJSON(raw []byte) error {
+	data, err := json.Parser().Unmarshal(raw)
+	if err != nil {
+		return err
+	}
+	// check keys
+	for key := range data {
+		if !HasKey(key) {
+			return fmt.Errorf("The key '%s' is unknown", key)
+		}
+	}
+	return konf.Load(confmap.Provider(data, "."), nil)
+}
+
 // Clean remove all config keys
 func Clean() {
 	konf = koanf.New(".")
+}
+
+// Save/Restore ============================================================= //
+// ========================================================================== //
+// ========================================================================== //
+
+// Save copy the configuration
+func Save() {
+	savedKonf = konf.Copy()
+	configLogger.Debug().Msg("Configuration saved")
+}
+
+// Fallback keeps the last saved configurtion and
+// restores it as the current config
+func Fallback() error {
+	if savedKonf == nil {
+		return fmt.Errorf("No configuration to restore")
+	}
+	konf = savedKonf.Copy()
+	savedKonf = nil
+	configLogger.Debug().Msg("Configuration restored")
+	return nil
 }
 
 func main() {}
