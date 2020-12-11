@@ -1,6 +1,6 @@
 name: Build
 on:
-  repository_dispatch:
+  workflow_dispatch:
     types: update
     branches:
       - v2.0
