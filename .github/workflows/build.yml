@@ -2,12 +2,14 @@ name: Build
 on:
   repository_dispatch:
     types: update
+    branches:
+      - v2.0
 jobs:
   build:
-    name: Build (amd64)
+    name: Build (all architectures)
     runs-on: ubuntu-latest
     container: 
-      image: golang:1.15.3-alpine
+      image: golang:1.15.4-alpine
       env:
         LIBPCAP_VERSION: 1.9.1
         LIBPCAP_DIR: /libpcap
