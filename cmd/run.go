@@ -42,7 +42,7 @@ func RunListStats(c *cli.Context) error {
 
 // RunPrintDefaults prints the default configuration
 func RunPrintDefaults(c *cli.Context) error {
-	return config.Print()
+	return config.PrintTOML()
 }
 
 // Run starts netspot
