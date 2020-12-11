@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/rpc v1.2.0
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab
 	github.com/knadh/koanf v0.14.0
+	github.com/pelletier/go-toml v1.7.0
 	github.com/rs/zerolog v1.20.0
 	github.com/spf13/viper v1.7.1
 	github.com/urfave/cli v1.22.5
