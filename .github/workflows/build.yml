@@ -1,9 +1,6 @@
 name: Build
 on:
   workflow_dispatch:
-    types: update
-    branches:
-      - v2.0
 jobs:
   build:
     name: Build (all architectures)
