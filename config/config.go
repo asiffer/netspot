@@ -21,6 +21,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+
+	gotoml "github.com/pelletier/go-toml"
 )
 
 // Konf is the global koanf instance.
@@ -52,6 +54,28 @@ var defaultConfig = map[string]interface{}{
 	"spot.alert":         true,
 	"spot.bounded":       true,
 	"spot.max_excess":    200,
+}
+
+var usage = map[string]string{
+	"api.endpoint":       "Address of the server (service mode)",
+	"miner.device":       "Name of the interface to listen or dump/pcap file path",
+	"miner.promiscuous":  "Enable promiscuous mode (interface capture)",
+	"miner.snapshot_len": "Maximum size of the packets (interface capture)",
+	"miner.timeout":      "Maximum delay before receiving packets (interface capture)",
+	"analyzer.period":    "Time between two statistics computations",
+	"analyzer.stats":     "List of stats to load at startup",
+	"spot.depth":         "Number of observations to build a local model",
+	"spot.q": `Anomaly probability threshold. Extreme events 
+ with probability lower than q will be flagged`,
+	"spot.n_init": "Number of initial observations to calibrate SPOT",
+	"spot.level": `Tail quantile. Extreme events with probability lower than 
+ 1-level are considered in the tail on the input distribution`,
+	"spot.up":    "Flag upper extreme events",
+	"spot.down":  "Flag lower extreme events",
+	"spot.alert": "Enable flagging",
+	"spot.bounded": `Enable bounded mode. It limits the number of tail 
+ observations for parameter estimation`,
+	"spot.max_excess": "Number of tail observations. (see spot.bounded)",
 }
 
 // networks accpeted by golang/net/Dial
@@ -144,14 +168,15 @@ func Debug() {
 	konf.Print()
 }
 
-// RegisterDefaultConfig add default parameters
+// RegisterDefault add default parameter
 // in the default config. This function should be called
 // in a init() function (before other config load)
-func RegisterDefaultConfig(m map[string]interface{}) {
-	configLogger.Debug().Msgf("Setting default config: %v", m)
-	for k, v := range m {
-		defaultConfig[k] = v
-	}
+func RegisterDefault(parameter string, value interface{}, usg string) {
+	configLogger.Debug().Msgf("Setting default config: %s=%v",
+		parameter,
+		value)
+	defaultConfig[parameter] = value
+	usage[parameter] = usg
 }
 
 // ========================================================================== //
@@ -407,6 +432,37 @@ func Clean() {
 // Save/Restore ============================================================= //
 // ========================================================================== //
 // ========================================================================== //
+
+// PrintTOML prints the default config to stdout through
+// the TOML format
+func PrintTOML() error {
+	// init an empty tree
+	tree, err := gotoml.TreeFromMap(map[string]interface{}{})
+	if err != nil {
+		return err
+	}
+	for k, v := range defaultConfig {
+		switch t := v.(type) {
+		case nil:
+			tree.SetWithComment(k, usage[k], true, "")
+		case time.Duration:
+			tree.SetWithComment(k, usage[k], true, t.String())
+		case int:
+			tree.SetWithComment(k, usage[k], true, int64(t))
+		default:
+			tree.SetWithComment(k, usage[k], true, v)
+		}
+
+	}
+
+	str, err := tree.ToTomlString()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(str)
+	return nil
+}
 
 // Save copy the configuration
 func Save() {
