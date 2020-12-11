@@ -32,16 +32,16 @@ type InfluxDB struct {
 }
 
 func init() {
-	RegisterAndSetDefaults(&InfluxDB{}, map[string]interface{}{
-		"exporter.influxdb.data":       false,
-		"exporter.influxdb.alarm":      false,
-		"exporter.influxdb.address":    "http://127.0.0.1:8086",
-		"exporter.influxdb.database":   "netspot",
-		"exporter.influxdb.username":   "netspot",
-		"exporter.influxdb.password":   "netspot",
-		"exporter.influxdb.batch_size": 10,
-		"exporter.influxdb.agent_name": "local",
-	})
+	Register(&InfluxDB{})
+	RegisterParameter("influxdb.data", false, "Send data to InfluxDB")
+	RegisterParameter("influxdb.alarm", false, "Send alarms to InfluxDB")
+	RegisterParameter("influxdb.address", "http://127.0.0.1:8086", "Address of the InfluxDB")
+	RegisterParameter("influxdb.database", "netspot", "Name of the database")
+	RegisterParameter("influxdb.username", "netspot", "Username (credentials)")
+	RegisterParameter("influxdb.password", "netspot", "Password (credentials)")
+	RegisterParameter("influxdb.batch_size", 10, "Number of data to send in a row")
+	RegisterParameter("influxdb.agent_name", "local", "Additional tag for index purpose")
+
 }
 
 // Main functions =========================================================== //

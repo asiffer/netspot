@@ -33,12 +33,13 @@ type Socket struct {
 }
 
 func init() {
-	RegisterAndSetDefaults(&Socket{}, map[string]interface{}{
-		"exporter.socket.data":   nil,
-		"exporter.socket.alarm":  nil,
-		"exporter.socket.format": "json",
-		"exporter.socket.tag":    "netspot",
-	})
+	Register(&Socket{})
+	RegisterParameter("socket.data", nil, "Socket to send data")
+	RegisterParameter("socket.alarm", nil, "Socket to send alarms")
+	RegisterParameter("socket.format", "json", "Sending format (json, csv or gob)")
+	RegisterParameter("socket.tag", "netspot",
+		`Addtional tag (if the socket 
+		 receives several streams)`)
 }
 
 func checkFormat(f string) error {

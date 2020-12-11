@@ -15,6 +15,8 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	cli "github.com/urfave/cli/v2"
 )
 
 var (
@@ -26,6 +28,8 @@ var (
 	exporterLogger zerolog.Logger
 	// state
 	started = false
+	// additional cli flags
+	additionalFlags = make([]cli.Flag, 0)
 )
 
 // ExportingModule is the general interface which denotes
@@ -43,6 +47,14 @@ type ExportingModule interface {
 	Warn(time.Time, *SpotAlert) error
 	// Close the module
 	Close() error
+}
+
+// ModuleParameter is a more general object to register
+// exporting modules
+type ModuleParameter struct {
+	value   interface{}
+	example interface{}
+	info    string
 }
 
 func init() {
@@ -98,9 +110,17 @@ func Register(s ExportingModule) {
 // RegisterAndSetDefaults makes a new module available
 // Moreover it provides the default value of an exporter
 // It must be called in the init() function of the module
-func RegisterAndSetDefaults(s ExportingModule, m map[string]interface{}) {
-	available[s.Name()] = s
-	config.RegisterDefaultConfig(m)
+// func RegisterAndSetDefaults(s ExportingModule, m map[string]interface{}) {
+// 	available[s.Name()] = s
+// 	config.RegisterDefaultConfig(m)
+// }
+
+// RegisterParameter is a helper function to
+// make exporting module parameters available.
+// The name must have the form "<module name>.<parameter>"
+func RegisterParameter(name string, value interface{}, usage string) {
+	// set default config
+	config.RegisterDefault(fmt.Sprintf("exporter.%s", name), value, usage)
 }
 
 // AvailableExportingModules returns the list of the available exporting modules

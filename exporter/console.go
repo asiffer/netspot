@@ -23,6 +23,8 @@ type Console struct {
 func init() {
 	// register the exporter
 	Register(&Console{})
+	RegisterParameter("console.data", false, "Print data to the console")
+	RegisterParameter("console.alarm", nil, "Print alarms to the console")
 }
 
 // Name returns the name of the exporter

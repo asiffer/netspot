@@ -27,12 +27,9 @@ type File struct {
 }
 
 func init() {
-	RegisterAndSetDefaults(&File{},
-		map[string]interface{}{
-			"exporter.file.data":  nil,
-			"exporter.file.alarm": nil,
-		})
-
+	Register(&File{})
+	RegisterParameter("file.data", nil, "File to export data")
+	RegisterParameter("file.alarm", nil, "File to export the alarms")
 }
 
 // Main functions =========================================================== //
