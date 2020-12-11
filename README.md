@@ -4,275 +4,99 @@
 
 # netspot
 
+A simple IDS with statistical learning
 
 
-<table style="width: 100%; display: block;">
-<tr>
-<img src="assets/netspot.png" alt="drawing" width="400" align="left" style="display: block; margin: 10px;"/>
-</tr>
-<tr>
-<code>netspot</code> is a simple <it>anomaly-based</it> network IDS written in <code>Go</code> (based on <a href="https://github.com/google/gopacket"><code>GoPacket</code></a>).
+## Overview
 
-The <code>netspot</code> core uses <a href="https://asiffer.github.io/libspot/"><code>SPOT</code></a>, a statistical learning algorithm so as to detect abnormal behaviour in network traffic. 
+**netspot** is a simple anomaly-based network IDS written in `Go` (based on [GoPacket](https://github.com/google/gopacket))
 
-<code>netspot</code> works as a server and can be controlled trough an HTTP REST API (a <code>Go</code> RPC endpoint is also available).
-The current package embeds a client: <code>netspotctl</code> but the latter could be in a different package in the future.
-</tr>
-</table>
-<br>
-<br>
+The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic.
 
+![SPOT algorithm](assets/netspot4.png)
 
+**netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
 
-<!-- <div style="width: 100%; display: block">-</div> -->
-
-## Table of contents
-
-  - [Table of contents](#table-of-contents)
-  - [The SPOT algorithm through a single picture](#the-spot-algorithm-through-a-single-picture)
-  - [Installation](#installation)
-    - [Binaries](#binaries)
-    - [From sources](#from-sources)
-    - [Debian package](#debian-package)
-    - [Docker container](#docker-container)
-  - [Get started](#get-started)
-    - [Starting the server](#starting-the-server)
-    - [Endpoints](#endpoints)
-    - [HTTPS](#https)
-    - [Configuring the server with](#configuring-the-server-with)
-    - [Running](#running)
-    - [Stop/Reset](#stopreset)
-  - [REST API](#rest-api)
-  - [Architecture overview](#architecture-overview)
-    - [Miner](#miner)
-    - [Analyzer](#analyzer)
-    - [Alarms](#alarms)
-  - [What's next?](#whats-next)
-  - [Notes](#notes)
-
-
-
-
-
-## The SPOT algorithm through a single picture
-
-As *a good sketch is better than a long speech*, we illustrate what the [`SPOT`](https://asiffer.github.io/libspot/) algorithm does below.
-
-<center><img src="assets/plot.png" alt="drawing" width="90%"/></center>
 
 ## Installation
 
 ### Binaries
 
 The latest compiled binaries can be found on the released tag. 
-A `systemd` service file and the default configurations (server and client) can be found in the [extra](extra/) folder.
 
 ### From sources
-
-You naturally have to clone the git repository and build the binaries. The building process requires a `Go` compiler
-and some dependencies that you can get with `make deps`.
-
-```console
-$ git clone github.com/asiffer/netspot.git
-$ cd netspot
-$ make deps
-$ make
-$ sudo make install
-```
-
-The installation step puts the two executables in `$(DESTDIR)/usr/bin`, the configuration file in `$(DESTDIR)/etc/netspot` and the `systemd` service file in `$(DESTDIR)/lib/systemd/system`. By default `$(DESTDIR)` is empty.
-
-### Debian package
-
-
-`netspot` (and its built-in client) can be installed through `debian` packages. Three architectures are available: [`amd64`](https://github.com/asiffer/netspot/releases/download/v1.3.1/netspot_1.3.1_amd64.deb), [`armhf`](https://github.com/asiffer/netspot/releases/download/v1.3.1/netspot_1.3.1_armhf.deb) and [`aarch64`](https://github.com/asiffer/netspot/releases/download/v1.3.1/netspot_1.3.1_arm64.deb) (for a Raspberry Pi for instance).
-
-
-
-### Docker container
-
-A [`docker`](https://github.com/asiffer/netspot/releases/download/v1.3.1/docker-netspot-amd64_1.3.1.tar.gz) image (based on `alpine`) also exists. Some options can naturally be added to start a new container.
-
-```console
-$ docker run --rm --name=netspot \
-             --net=host \
-             -p 11000:11000 \
-             -p 11001:11001 \
-             -v netspot.toml:/etc/netspot/netspot.toml \
-                asiffer/netspot-amd64:1.3.1
-```
 
 
 ## Get started
 
-### Starting the server
+Basically, you can run `netspot` on a network interface. In the example below,
+`netspot` monitors the `PERF` statistics (packet processing rate) on the `eth0` interface. 
+The computation period is `1s` and the values are printed to the console (`-v`).
 
-Basically, you can start the server by executing the binary.
-```console
-$ netspot
+```sh
+netspot run -d eth0 -s PERF -p 1s -v
 ```
 
-Some options are loaded by default. First `netspot` reads the `/etc/netspot/netspot.toml` config file. 
-So you can have some errors (missing file, unknown device etc.) but this is not problem since it can be changed afterwards.
-
-If you want to change some options while starting, some of them can be overriden by command-line parameters.
-```console
-netspot --device eth0 --output-dir /tmp
-```
-In this case, `netspot` reads  `/etc/netspot/netspot.toml` and then it changes the sniffed device and the directory where the results will be stored.
-Otherwise these options can be set directly in the config file (you can also use another config file with the `-c` flag).
-
-### Endpoints
-
-By default, `netspot` exposes two endpoints:
-- **HTTP** (`127.0.0.1:11000`)
-- **Go RPC** (`127.0.0.1:11001`)
-
-While the HTTP API is rather general, the RPC endpoint is likely to be useful only for Go clients (like the built-in client: `netspotctl`).
-
-You can modify or desactivate the endpoints through CLI flags.
-```console
-$ netspot --no-rpc --http 127.0.0.1:15000
+You can also analyze a capture file.
+```sh
+netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
 ```
 
-### HTTPS
+All these command-line options can be set in a config file:
+```toml
+# netspot.toml
 
-TLS can be set up on the HTTP endpoint. For this purpose, you need to provide a certificate and a key. You can create a RSA key and a self-signed certificate with `openssl` for instance:
+[miner]
+device = "~/file.pcap"
 
-```console
-$ openssl req -newkey rsa:4096 -nodes -keyout key.pem -x509 -out cert.pem
+[analyzer]
+period = "500ms"
+stats = ["PERF", "R_SYN"]
+
+[exporter.console]
+data = true
 ```
 
-Then the HTTPS configuration can be set-up either in the config file or in the cli flags.
-```console
-$ netspot --tls --cert cert.pem --key key.pem  
-```
-
-### Configuring the server with `netspotctl`
-
-The `netspot` server can be managed by the `Go` built-in client `netspotctl`. When the server is up, you can easily run the client, opening then a new CLI.
-
-```console
-$ netspotctl
-Connected to netspot server (localhost:11001)
-netspot >
-```
-
-Now you can run some commands. In particular we can access the configuration of the server:
-
-```console
-netspot > config
-Miner
-     snapshot_length   65535
-         promiscuous   true
-             timeout   20s
-              device   lo
-
-Analyzer
-          statistics   [PERF R_SYN R_ACK]
-              period   1s
-            influxdb   false
-                file   true
-              output   /tmp
-```
-
-We can see several things. First the configuration is divided into two categories: `Miner`, which deals with the network capture and `Analyzer` which manages the statistics and the outputs.
-
-#### Miner
-
-In the above example, we see that the server is ready to sniff the `lo` device (loopback) in promiscuous mode (the snapshot length if the maximum size to read for each packet and the timeout is roughly the maximum delay between two received packets, see the [libpcap documentation](https://www.tcpdump.org/manpages/pcap.3pcap.html) for more details).
-
-These configurations can be changed with the `set` command
-```console
-netspot > set device enp2s0
-```
-
-The device can also be a capture file, thus we can indicate the [absolute path] of the file we want to analyze.
-
-```console
-netspot > set device /data/pcap/capture.pcap
-```
-
-#### Analyzer
-
-The analyzer defines what is monitored. So we can choose the statistics to look at (`load` and `unload` commands) and also at which interval they are computed (`period`). As we have seen above, the `config` command gives the current status of the server (the statistics already loaded and the period).
-
-To load a new statistic
-```console
-netspot > load R_IP
-```
-
-To unload a statistic
-```console
-netspot > unload R_SYN
-```
-
-To change the period
-```console
-netspot > set period 500ms
-```
-
-Moreover we can tune the outputs of the server. Basically, `netspot` creates 3 files:
-- The raw statistics (computed every `period`)
-- The SPOT thresholds which are automatically computed
-- The anomalies (when a stat is higher or lower than the SPOT threshold)
-
-These files are located is a user-defined directory (`/tmp` by default) but you can change it.
-```console
-netspot > set directory ./
+```sh
+netspot run --config netspot.toml
 ```
 
 
-`netspot` also embeds an `influxdb` client but it can only be set up through a configuration file.
+All the available statistics can be listed with the `netspot  ls` command.
 
-### Running `netspot`
 
-Once the server is well configured (device, monitored statistics, computation period, output directory...), you can start the analysis. From `netspotctl`:
-```console
-netspot > start
+
+To print the default config (in TOML format only), you can run the following command:
+```sh
+netspot defaults
 ```
 
-If you want to perform a simple analysis of a capture file, the server can be started offline. You can either give the path to a configuration file,
+### Netspot As A Service
 
-```console
-$ netspot -c /path/to/a/config/file --run
+Even if it is not the main way to use **netspot**, it can 
+run as a service, exposing a minimal REST API.
+
+```sh
+netspot serve
 ```
 
-or provide command-line arguments (don't forget that `netspot` will still look at `/etc/netspot/netspot.toml` first)
-```console
-$ netspot --device /path/to/pcap \
-          --period 1s \
-          --load-stat R_SYN --load-stat R_ACK \
-          --output-dir ./ \
-          --run
+By default it listens at `tcp://localhost:11000` but it can be changed with the `-e` flag.
+
+```sh
+netspot serve -e unix:///tmp/netspot.sock
 ```
 
-### Stop/Reset
-
-You can easily stop `netspot` with `netspotctl`.
-```console
-netspot > stop
-```
-
-When the analysis is stopped, the internal state is not reset. It means that the behaviours learnt by `netspot` remain. So, you can start again the analysis (on another device for instance) without information loss.
-If you want to reset the server, you have to precisely invoke the `reset ` command
-```console
-netspot > reset
-```
-
-This command unloads all statistics, so the possibly learnt behaviours are lost.
+| Method | Path           | Description |
+|--------|----------------|-------------|
+| `GET`  | `/api/config`  | Get the current config (JSON output) |
+| `POST` | `/api/config`  | Change the config (JSON expected) |
+| `POST`  | `/api/run`  | Manage the status of netspot (start/stop) |
 
 
-## REST API
-
-The current implementation of `netspot` embeds a `Go` client. However, `netspot` can be managed by other clients since it exposes a REST API.
-
-The description of the API respects the [OpenAPI](https://swagger.io/specification/) standard and can be found [here](api/openapi.yaml). 
-The endpoints are detailed in the [api](api/) folder.
 
 ## Architecture overview
 
-<center><img src="assets/archi.svg" alt="Architecture" width="90%" /></center>
+![architecture](assets/netspot-archi.png)
 
 
 At the lowest level, `netspot` parse packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
@@ -282,39 +106,10 @@ At a given frequency, counter values are retrieved so as to build **statistics**
 
 Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. This algorithm learns the *normal* behaviour of the statistic and constantly updates its knowledge. When an abnormal value occurs, `SPOT` triggers an alarm.
 
-A logging system stores the stat values and the corresponding thresholds either to files or to an [influxdb](https://www.influxdata.com/) instance.
+The analyzer forwards statistics values, SPOT thresholds and SPOT alarms to the `exporter`. This last component dispatch
+these information modules that binds to different backends 
+(console, file, socket or InfluxDB database).
 
-### Miner
-
-The goal of the `miner` is threefold:
-* parse incoming packets
-* dispatch layers to the concerned counters
-* send snapshots along time (at the desired frequency)
-
-<!-- ![miner](assets/miner.svg) -->
-<center><img src="assets/miner.svg" alt="Miner" width="90%" /></center>
-
-The dispatching is done concurrently to increase performances. However when a snapshot has to be done, packets parsing is paused and we wait for all the counters to finish to process the last layers they receive. It seems like it's long, but actually it's quite fast.
-
-Many counters are already implemented within `netspot` like
-* number of SYN packets;
-* number of ICMP packets;
-* number of IP packets;
-* number of unique source IP addresses...
-
-but `netspot` is designed to be modular, so every user is free to developed its own counter insofar as it respects the basic counter layout.
-
-
-
-### Analyzer
-
-Above the counters we can build network statistics on fixed-time intervals \(t\). For instance with the counters #SYN and #IP, the ratio of SYN packets can be computed: R_SYN = #SYN/#IP.
-
-Every statistic embeds a `SPOT` instance to monitor itself. Like the counters, you can define all the desired statistics in so far as the required counters are implemented.
-
-### Alarms
-
-When a `SPOT` instance finds an abnormal value, it merely logs it (currently to a file or to InfluxDB).
 
 ## What's next?
 
@@ -325,6 +120,14 @@ About the API, I am definitely looking at `gRPC` to both
 control the server and also receive data.
 
 ## Notes
+
+### Version 2.0a
+This is the second big refactoring. Many things have changed, making the way to use **netspot** more *modern*.
+
+- Single and statically-compiled binary. Forget about the server, just run the binary on what you want (a server mode still exists but it is rather minimal)
+- Better performances! I think that **netspot** can process 
+twice as fast: **1M pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+. 
+- Developper process has been improved so as to "easily" add new counters, statistics and exporting modules.
 
 ### Version 1.3
 
