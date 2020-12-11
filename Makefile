@@ -87,7 +87,6 @@ build_netspot_static:
 	@$(GO) build $(GO_BUILD_EXTRA_FLAGS) -ldflags='$(GO_LDFLAGS)' -o $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS)-static $(SRC_DIR)/*.go
 	@echo -e $(OK)
 
-
 install_bin:
 	@echo -e "\033[93m[Installing binaries]\033[0m"
 	@echo -en "Creating directory...                "
@@ -97,12 +96,10 @@ install_bin:
 	@install $(BIN_DIR)/netspot $(INSTALL_BIN_DIR)/
 	@echo -e $(OK)
 
-
 snap:
 	snapcraft
 	mkdir -p $(SNAP_DIR)
 	mv *.snap $(SNAP_DIR)
-
 
 clean:
 	@echo -en "Removing netspot binary   "

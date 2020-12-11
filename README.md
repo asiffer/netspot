@@ -1,6 +1,3 @@
-![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg?branch=master)
-
----
 
 # netspot
 
@@ -18,14 +15,24 @@ The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a stat
 **netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
 
 
+
+
 ## Installation
 
 ### Binaries
 
 The latest compiled binaries can be found on the released tag. 
 
-### From sources
+### Building from sources
 
+
+To build **netspot** from sources, you mainly need a `Go` compiler and `libpcap-dev`.
+
+```sh
+git clone -b v2.0 https://github.com/asiffer/netspot.git
+cd netspot
+make
+```
 
 ## Get started
 
