@@ -22,7 +22,7 @@ jobs:
         TARGET_ARCH: x86_64-linux-musl arm-linux-musleabihf aarch64-linux-musl
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Get libpcap sources
         run: dev/image/get_libpcap_sources.sh
