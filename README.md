@@ -87,7 +87,9 @@ run as a service, exposing a minimal REST API.
 netspot serve
 ```
 
-By default it listens at `tcp://localhost:11000` but it can be changed with the `-e` flag.
+By default it listens at `tcp://localhost:11000` but it can be changed with the `-e` flag. For instance, if you want to monitor the loopback
+interface, the API trafic must not pollute what **netspot** monitors,
+so you ca consider a unix socket.
 
 ```sh
 netspot serve -e unix:///tmp/netspot.sock
@@ -118,13 +120,12 @@ these information modules that binds to different backends
 (console, file, socket or InfluxDB database).
 
 
-## What's next?
+## Roadmap
 
-I am currently splitting the analyzer, extracting a kind of "exporter" module to manage i/o (data, thresholds and alarms)
-
-Moreover, I think that I will also separate the client. 
-About the API, I am definitely looking at `gRPC` to both
-control the server and also receive data.
+- [ ] Rework unit tests
+- [ ] Enrich documentation
+- [ ] Frontend? TUI?
+- [ ] Port `netspot` to arduino :)
 
 ## Notes
 
