@@ -6,8 +6,7 @@ package stats
 import "math"
 
 func init() {
-	Register("R_ARP",
-		func(bs BaseStat) StatInterface { return &RARP{bs} })
+	Register(&RARP{BaseStat{name: "R_ARP"}})
 }
 
 // RARP computes the ratio of ICMP packets

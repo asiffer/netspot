@@ -8,7 +8,7 @@ import (
 
 func TestIPCounter(t *testing.T) {
 	title("Testing IP counter")
-	ctr := &IP{IPCtr: NewIPCtr(), Counter: 0}
+	ctr := &IP{Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "IP" {
 		testERROR()

@@ -9,18 +9,14 @@ import (
 )
 
 func init() {
-	Register("NB_UNIQ_DST_ADDR", func() BaseCtrInterface {
-		return &NbUniqDstAddr{
-			IPCtr: NewIPCtr(),
-			Addr:  make(map[string]bool)}
-	})
+	Register(&NbUniqDstAddr{Addr: make(map[string]bool)})
 }
 
 // NbUniqDstAddr gives the number of unique source addresses
 type NbUniqDstAddr struct {
-	IPCtr
+	BaseCtr
 	Addr map[string]bool
-	mux  sync.RWMutex
+	mux  sync.Mutex
 }
 
 // Name returns the name of the counter (method of BaseCtrInterface)
@@ -36,17 +32,15 @@ func (nuda *NbUniqDstAddr) Value() uint64 {
 // Reset resets the counter
 func (nuda *NbUniqDstAddr) Reset() {
 	nuda.mux.Lock()
-	for k := range nuda.Addr {
-		delete(nuda.Addr, k)
-	}
-	nuda.mux.Unlock()
+	defer nuda.mux.Unlock()
+	nuda.Addr = make(map[string]bool)
 }
 
 // Process update the counter according to data it receives
 func (nuda *NbUniqDstAddr) Process(ip *layers.IPv4) {
 	nuda.mux.Lock()
+	defer nuda.mux.Unlock()
 	nuda.Addr[ip.DstIP.String()] = true
-	nuda.mux.Unlock()
 }
 
 // END OF NbUniqDstAddr

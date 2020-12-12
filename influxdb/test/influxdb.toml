@@ -1,8 +1,0 @@
-[influxdb]
-username = "John"
-password= "Doe"
-database = "db"
-batch_size = 23
-agent_name = "007"
-addr = "127.0.0.1"
-port = 8086

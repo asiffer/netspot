@@ -9,16 +9,12 @@ import (
 )
 
 func init() {
-	Register("IP", func() BaseCtrInterface {
-		return &IP{
-			IPCtr:   NewIPCtr(),
-			Counter: 0}
-	})
+	Register(&IP{Counter: 0})
 }
 
 // IP is an IP counter counting the number of IP packets
 type IP struct {
-	IPCtr
+	BaseCtr
 	Counter uint64
 }
 

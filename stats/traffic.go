@@ -6,12 +6,11 @@ package stats
 import "math"
 
 func init() {
-	Register("TRAFFIC",
-		func(bs BaseStat) StatInterface {
-			return &Traffic{BaseStat: bs,
-				init:     false,
-				lastTime: 0}
-		})
+	Register(&Traffic{
+		BaseStat: BaseStat{name: "TRAFFIC"},
+		init:     false,
+		lastTime: 0},
+	)
 }
 
 // Traffic computes the ratio number of IP packets / time window size

@@ -1,7 +1,8 @@
 // miner.go
 
 // Package miner aims to read either network interfaces or
-// network captures to increment basic counters.
+// network captures to increment basic counters. This is
+// the lowest layer of netspot.
 package miner
 
 import (
@@ -9,6 +10,8 @@ import (
 	"fmt"
 	"netspot/miner/counters"
 	"os"
+	"path"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,7 +19,6 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
 //----------------------------------------------------------------------------//
@@ -27,7 +29,7 @@ import (
 type EventChannel chan uint8
 
 // DataChannel defines a channel to send counters data
-type DataChannel chan map[int]uint64
+type DataChannel chan map[string]uint64
 
 // TimeChannel defines a channel to send time ticks
 type TimeChannel chan time.Time
@@ -39,88 +41,78 @@ var (
 
 // Storing/Accessing the counters
 var (
-	counterMap          map[int]counters.BaseCtrInterface // Map id->counter
-	counterID           int                               // Id to store counters in counterMap
-	counterValues       map[int]uint64                    // temp container to store counter values
-	mux, valmux         sync.RWMutex                      // Locker for the counter map access
-	defaultEventChannel EventChannel                      // to receive events
-	defaultDataChannel  DataChannel                       // internal channel to send snapshots
-	// builtinCounterMap   map[int]string
+	mux, valmux          sync.RWMutex            // Locker for the counter map access
+	internalEventChannel = make(EventChannel, 1) // to receive events
+	externalDataChannel  = make(DataChannel, 1)  // to send data to the analyzer
 )
-
-// var (
-// 	// Miner built-in counters
-// 	builtinCounters []string
-// )
 
 // Status
 var (
-	// AvailableDevices is the list of available interfaces
-	AvailableDevices []string
+	availableDevices = GetAvailableDevices()
 	device           string        // name of the device (interface of pcap file)
 	iface            bool          // tells if the packet source is an interface
 	snapshotLen      int32         // the maximum size to read for each packet
 	promiscuous      bool          // promiscuous mode of the interface
 	timeout          time.Duration // time to wait if nothing happens
-	// nbParsedPkts     uint64        // the number of parsed packets
-	sniffing bool // tells if the package is currently sniffing
+	sniffing         = false       // tells if the package is currently sniffing
 )
 
 // Time
 var (
 	// SourceTime is the clock given by the packet capture
-	SourceTime         time.Time
-	tickPeriod         time.Duration // time between two data sending (if stat computation)
-	last               time.Time     // time of the last data sending
-	defaultTimeChannel TimeChannel   // channel sending time (at a given frequency in practice)
-	sendTicks          bool          // tells if ticks have to be sent
-	remoteTimeChannel  TimeChannel
+	SourceTime = time.Now()
+	last       = time.Now()
 )
 
 // Packet sniffing/parsing
 var (
 	handle *pcap.Handle
+	// ringHandle *pfring.Ring
 	parser *gopacket.DecodingLayerParser
 	err    error
 )
 
+// Dispatcher
+var dispatcher = NewDispatcher()
+
 // Events
 const (
+	ERR uint8 = 255
 	// STOP stops a counter
 	STOP uint8 = 0
 	// GET trigger a snapshot of the counters
 	GET uint8 = 1
 	// FLUSH trigger a snapshot of the counters and reset them
-	FLUSH uint8 = 3
+	FLUSH uint8 = 2
 )
 
-// Specific IDs
-// const (
-// 	// SourceTimeID is the default id of the SOURCE_TIME built-in counter
-// 	SourceTimeID int = 1000
-// 	// RealTimeID is the default id of the REAL_TIME built-in counter
-// 	RealTimeID int = 1001
-// 	// PacketsID is the default id of the PACKETS built-in counter
-// 	PacketsID int = 1002
-// )
+// Custom error ============================================================= //
+// ========================================================================== //
+// ========================================================================== //
 
 func init() {
-	// Default configuration
-	viper.SetDefault("miner.device", "any")
-	viper.SetDefault("miner.snapshot_len", int32(65535))
-	viper.SetDefault("miner.promiscuous", true)
-	viper.SetDefault("miner.timeout", 30*time.Second)
-	// Default configuration
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-	// Reset all variables
-	Zero()
+	reset()
 }
 
-// initChannels creates the default event channel and the
-// default data channel
-func initChannels() {
-	defaultDataChannel = make(DataChannel)
-	defaultEventChannel = make(EventChannel)
+// reset the variables of the package
+func reset() {
+	// create data channel
+	// they must be buffered to avoid blocking steps.
+	// I had this kind of probleme when a STOP msg is sent
+	// to the analyzer during the flush of the miner: the miner
+	// wants to send flushed data to the analyzer, but the
+	// analyzer waits for the miner to end.
+	internalEventChannel = make(EventChannel, 1)
+	externalDataChannel = make(DataChannel, 1)
+
+	// reset the dispatcher
+	dispatcher = NewDispatcher()
+
+	// update device list
+	availableDevices = GetAvailableDevices()
+
+	// sniffing
+	sniffing = false
 }
 
 // InitLogger initializes a specific logger for the miner package
@@ -128,64 +120,51 @@ func InitLogger() {
 	minerLogger = log.With().Str("module", "MINER").Logger()
 }
 
-// func loadBuiltinCounters() {
-// 	for _, ctr := range builtinCounters {
-// 		id := LoadFromName(ctr)
-// 		// keep the id in the memory
-// 		builtinCounterMap[ctr] = id
-// 	}
-// }
-
-// registerAsBuiltin registers a miner built-in counter to the
-// counter subpackage. It adds it to the built-in counter list
-// func registerAsBuiltin(name string, sc counters.CounterConstructor) {
-// 	counters.Register(name, sc)
-// 	builtinCounters = append(builtinCounters, name)
-// }
-
 // Zero aims to zero the internal state of the miner. So it removes all
 // the loaded counters, reset some variables
-// [and read the config file](NOT ANYMORE).
 func Zero() error {
-	if !IsSniffing() {
-		AvailableDevices = GetAvailableDevices()
-
-		initChannels()
-
-		// sniff variables
-		sniffing = false
-
-		// time variables
-		SourceTime = time.Now()
-		// defaultTicker = make(chan time.Time)
-		sendTicks = false
-		last = SourceTime
-
-		// counter loader
-		// builtinCounterMap = make(map[int]string)
-		counterMap = make(map[int]counters.BaseCtrInterface)
-		counterID = 0 // 0 is never used
-
-		// everything is ok
-		minerLogger.Info().Msg("Miner package (re)loaded")
-		return nil
+	if IsSniffing() {
+		minerLogger.Error().Msg("Cannot reload, sniffing in progress")
+		return errors.New("Cannot reload, sniffing in progress")
 	}
-	minerLogger.Error().Msg("Cannot reload, sniffing in progress")
-	return errors.New("Cannot reload, sniffing in progress")
+
+	reset()
+	// everything is ok
+	minerLogger.Info().Msg("Miner package (re)loaded")
+	return nil
+
 }
+
+// GetSeriesName returns the name of the series according
+// to the device it sniffs
+func GetSeriesName() string {
+	if IsDeviceInterface() {
+		t := time.Now()
+		f := t.Format(time.StampMilli)
+		f = strings.Replace(f, " ", "-", -1)
+		return fmt.Sprintf("%s-%s", device, f)
+	}
+	p := path.Base(device)
+	ext := path.Ext(p)
+	return strings.Replace(p, ext, "", -1)
+}
+
+// Information function ===================================================== //
+// ========================================================================== //
+// ========================================================================== //
 
 // GetAvailableDevices returns the current available interfaces
 func GetAvailableDevices() []string {
 	dl, err := pcap.FindAllDevs()
-	devNames := make([]string, 0)
-	if err == nil {
-		for _, dev := range dl {
-			devNames = append(devNames, dev.Name)
-		}
-	} else {
-		fmt.Println(err.Error())
+	if err != nil {
+		minerLogger.Error().Msgf("Error while listing network interfaces: %v", err)
+		return nil
 	}
-	return devNames
+	devices := make([]string, 0)
+	for _, dev := range dl {
+		devices = append(devices, dev.Name)
+	}
+	return devices
 }
 
 // GetAvailableCounters returns the list of the implemented
@@ -198,35 +177,191 @@ func GetAvailableCounters() []string {
 	return names
 }
 
-//------------------------------------------------------------------------------
-// SIDES FUNCTIONS (UNEXPORTED)
-//------------------------------------------------------------------------------
-func idFromName(ctrname string) int {
-	for id, ctr := range counterMap {
-		if ctr.Name() == ctrname {
-			return id
-		}
-	}
-	return -1
+// IsSniffing returns the sniffing status
+func IsSniffing() bool {
+	return sniffing
 }
 
-func isAlreadyLoaded(ctrname string) bool {
-	for _, ctr := range counterMap {
-		if ctrname == ctr.Name() {
-			return true
-		}
-	}
-	return false
+// i/o function ============================================================= //
+// ========================================================================== //
+// ========================================================================== //
+
+// Load loads a counter given its name
+func Load(name string) error {
+	return dispatcher.load(name)
 }
 
-// func isBuiltin(ctrname string) bool {
-// 	for _, ctr := range builtinCounters {
-// 		if ctrname == ctr {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+// Unload unloads a counter given its name
+func Unload(name string) error {
+	return dispatcher.unload(name)
+}
+
+// UnloadAll removes all the counter from the miner
+func UnloadAll() {
+	// we just create a new dispatcher
+	dispatcher = NewDispatcher()
+}
+
+// GetLoadedCounters returns the list of counters
+// loaded by the miner
+func GetLoadedCounters() []string {
+	return dispatcher.loadedCounters()
+}
+
+// GetSourceTime returns the time given by the current packet source
+func GetSourceTime() int64 {
+	return SourceTime.UnixNano()
+}
+
+// Sniffing function ======================================================== //
+// ========================================================================== //
+// ========================================================================== //
+
+func release() {
+	close(externalDataChannel)
+	externalDataChannel = make(DataChannel, 1)
+	sniffing = false
+}
+
+// openDevice returns a handle on the packet source (interface of file)
+func openDevice() (*pcap.Handle, error) {
+
+	// Offline mode ----------------------------------------------------------
+	// -----------------------------------------------------------------------
+	if !IsDeviceInterface() {
+		return pcap.OpenOffline(device)
+	}
+
+	// Online mode -----------------------------------------------------------
+	// -----------------------------------------------------------------------
+	inactive, err := pcap.NewInactiveHandle(device)
+	if err != nil {
+		return nil, err
+	}
+	defer inactive.CleanUp()
+
+	// config ----------------------------------------------
+	if err := inactive.SetSnapLen(int(snapshotLen)); err != nil {
+		return nil, err
+	}
+
+	if timeout == 0 {
+		if err := inactive.SetImmediateMode(true); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := inactive.SetTimeout(timeout); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := inactive.SetPromisc(promiscuous); err != nil {
+		return nil, err
+	}
+
+	// Finally, create the actual handle by calling Activate:
+	return inactive.Activate() // after this, inactive is no longer valid
+}
+
+// sniff open the device and call either the offline sniffer or the
+// online one
+func sniff(period time.Duration) {
+	// data channel should be closed to send a 'nil' object
+	// to the analyzer. This is the way the analyzer understands
+	// that the miner has ended.
+	// defer close(data)
+
+	// Open the device
+	handle, err := openDevice()
+	if err != nil {
+		minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
+		internalEventChannel <- ERR
+		return
+	}
+	defer handle.Close()
+	minerLogger.Debug().Msgf("Device %s is open", device)
+
+	// TODO: BPF hook
+	// if err := handle.SetBPFFilter(bpf); err != nil {
+	// 	minerLogger.Error().Msgf("Fail to open the device '%s': %v", device, err)
+	// 	event <- ERR
+	// 	return err
+	// }
+
+	// Create the packet source
+	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	// set decoding options
+	packetSource.DecodeOptions.Lazy = true
+	packetSource.DecodeOptions.NoCopy = true
+	packetSource.Lazy = true
+	packetSource.NoCopy = true
+	// packet channel
+	packetChan := packetSource.Packets()
+	// Start all the counters (if they are not running)
+	dispatcher.init()
+	// run
+	if IsDeviceInterface() {
+		err = sniffOnline(packetChan, period)
+	} else {
+		err = sniffOffline(packetChan, period)
+	}
+
+	if err != nil {
+		minerLogger.Error().Msgf("Error while sniffing: %v", err)
+		internalEventChannel <- ERR
+	}
+}
+
+// Start starts the miner and demands it to send
+// counter values at given period. It returns the
+// channel where counters are sent
+func Start(period time.Duration) (DataChannel, error) {
+	if sniffing {
+		return nil, fmt.Errorf("Already sniffing")
+	}
+	if len(dispatcher.loadedCounters()) == 0 {
+		return nil, fmt.Errorf("No counters loaded")
+	}
+
+	minerLogger.Info().Msgf("Start sniffing %s", device)
+	minerLogger.Debug().Msgf("Loaded counters: %v", dispatcher.loadedCounters())
+	// sniff
+	go sniff(period)
+
+	// wait for sniffing
+	for !sniffing {
+		select {
+		case <-internalEventChannel: // error case
+			return externalDataChannel, fmt.Errorf("Something bad happened")
+		default:
+			// pass
+		}
+	}
+	return externalDataChannel, nil
+}
+
+// Stop stops to sniff the device
+// It waits until the miner is stopped
+// (returns always nil)
+func Stop() error {
+	if !sniffing {
+		minerLogger.Warn().Msg("The miner is already stopped")
+		return nil
+	}
+	minerLogger.Info().Msgf("Stopping counter...")
+	// send STOP msg to the sniff function
+	internalEventChannel <- STOP
+
+	minerLogger.Info().Msgf("Wait for stop sniffing...")
+	for sniffing {
+		// wait for stop sniffing
+	}
+	return nil
+}
+
+// Side functions =========================================================== //
+// ========================================================================== //
+// ========================================================================== //
 
 func contains(list []string, str string) bool {
 	for _, s := range list {
@@ -246,10 +381,8 @@ func fileExists(name string) bool {
 	return true
 }
 
-//------------------------------------------------------------------------------
-// MAIN
-//------------------------------------------------------------------------------
+// Main ===================================================================== //
+// ========================================================================== //
+// ========================================================================== //
 
-func main() {
-
-}
+func main() {}

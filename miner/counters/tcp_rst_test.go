@@ -8,7 +8,7 @@ import (
 
 func TestRSTCounter(t *testing.T) {
 	title("Testing RST counter")
-	ctr := &RST{TCPCtr: NewTCPCtr(), Counter: 0}
+	ctr := &RST{counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "RST" {
 		testERROR()

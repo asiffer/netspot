@@ -9,7 +9,7 @@ import (
 func TestRACK(t *testing.T) {
 	title("Testing R_ACK")
 
-	stat := &RAck{}
+	stat := &RACK{}
 	checkTitle("Checking name...")
 	if stat.Name() != "R_ACK" {
 		testERROR()

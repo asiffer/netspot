@@ -8,7 +8,7 @@ import (
 
 func TestACKCounter(t *testing.T) {
 	title("Testing ACK counter")
-	ctr := &ACK{TCPCtr: NewTCPCtr(), Counter: 0}
+	ctr := &ACK{Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "ACK" {
 		testERROR()

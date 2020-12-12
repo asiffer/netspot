@@ -8,7 +8,7 @@ import (
 
 func TestFINCounter(t *testing.T) {
 	title("Testing FIN counter")
-	ctr := &FIN{TCPCtr: NewTCPCtr(), Counter: 0}
+	ctr := &FIN{Counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "FIN" {
 		testERROR()

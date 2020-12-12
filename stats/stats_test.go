@@ -5,12 +5,10 @@ package stats
 import (
 	"fmt"
 	"math/rand"
+	"netspot/config"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/asiffer/gospot"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -33,7 +31,9 @@ func testERROR() {
 }
 
 func init() {
-	// zerolog.SetGlobalLevel(zerolog.NoLevel)
+	if err := config.LoadDefaults(); err != nil {
+		panic(err)
+	}
 }
 
 func title(s string) {
@@ -86,98 +86,19 @@ func isEqual(sl1 []string, sl2 []string) bool {
 	return true
 }
 
-func TestLoadDSpotConfig(t *testing.T) {
-	title("Checking loading DSpot config")
-	viper.SetConfigFile(configTestFile)
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Println(err.Error())
+func TestLoadDefaultDSpotConfig(t *testing.T) {
+	title(t.Name())
+
+	bs := &BaseStat{name: "test"}
+	if err := bs.Configure(); err != nil {
+		t.Fatal(err)
 	}
-
-	dsc := setCustomConfig("R_SYN")
-
-	checkTitle("Checking depth...")
-	if dsc.Depth != 60 {
-		testERROR()
-		t.Errorf("Expected 60, got %d", dsc.Depth)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking q...")
-	if dsc.Q != 1e-5 {
-		testERROR()
-		t.Errorf("Expected 1e-5, got %f", dsc.Q)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking n_init...")
-	if dsc.Ninit != 1200 {
-		testERROR()
-		t.Errorf("Expected 1200, got %d", dsc.Ninit)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking level...")
-	if dsc.Level != 0.999 {
-		testERROR()
-		t.Errorf("Expected 0.999, got %f", dsc.Level)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking up...")
-	if !dsc.Up {
-		testERROR()
-		t.Errorf("Expected true, got %v", dsc.Up)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking down...")
-	if !dsc.Down {
-		testERROR()
-		t.Errorf("Expected true, got %v", dsc.Down)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking alert...")
-	if dsc.Alert {
-		testERROR()
-		t.Errorf("Expected false, got %v", dsc.Alert)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking bounded...")
-	if !dsc.Bounded {
-		testERROR()
-		t.Errorf("Expected true, got %v", dsc.Bounded)
-	} else {
-		testOK()
-	}
-
-	checkTitle("Checking max_excess...")
-	if dsc.MaxExcess != 250 {
-		testERROR()
-		t.Errorf("Expected 250, got %d", dsc.MaxExcess)
-	} else {
-		testOK()
-	}
-}
-
-func TestLoadDSpotConfigUnknownStat(t *testing.T) {
-	title("Loading default DSpot config")
-
-	dsc := setCustomConfig("WTF")
+	dsc := bs.dspot.Config()
 
 	checkTitle("Checking depth...")
 	if dsc.Depth != 50 {
 		testERROR()
-		t.Errorf("Expected 50, got %d", dsc.Depth)
+		t.Errorf("Expected 60, got %d", dsc.Depth)
 	} else {
 		testOK()
 	}
@@ -247,12 +168,107 @@ func TestLoadDSpotConfigUnknownStat(t *testing.T) {
 	}
 }
 
+func TestLoadDSpotConfig(t *testing.T) {
+	title(t.Name())
+
+	config.LoadForTestRawToml([]byte(`
+[spot.TEST]
+depth = 50
+n_init = 2000
+q = 1e-5
+level = 0.998
+up = true
+down = false
+alert = true
+bounded = true
+max_excess = 250
+	`))
+	config.LoadDefaults()
+
+	bs := &BaseStat{name: "TEST"}
+	if err := bs.Configure(); err != nil {
+		t.Fatal(err)
+	}
+	dsc := bs.dspot.Config()
+	checkTitle("Checking depth...")
+	if dsc.Depth != 50 {
+		testERROR()
+		t.Errorf("Expected 50, got %d", dsc.Depth)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking q...")
+	if dsc.Q != 1e-5 {
+		testERROR()
+		t.Errorf("Expected 1e-5, got %f", dsc.Q)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking n_init...")
+	if dsc.Ninit != 2000 {
+		testERROR()
+		t.Errorf("Expected 2000, got %d", dsc.Ninit)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking level...")
+	if dsc.Level != 0.998 {
+		testERROR()
+		t.Errorf("Expected 0.998, got %f", dsc.Level)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking up...")
+	if !dsc.Up {
+		testERROR()
+		t.Errorf("Expected true, got %v", dsc.Up)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking down...")
+	if dsc.Down {
+		testERROR()
+		t.Errorf("Expected false, got %v", dsc.Down)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking alert...")
+	if !dsc.Alert {
+		testERROR()
+		t.Errorf("Expected true, got %v", dsc.Alert)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking bounded...")
+	if !dsc.Bounded {
+		testERROR()
+		t.Errorf("Expected true, got %v", dsc.Bounded)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking max_excess...")
+	if dsc.MaxExcess != 250 {
+		testERROR()
+		t.Errorf("Expected 250, got %d", dsc.MaxExcess)
+	} else {
+		testOK()
+	}
+}
+
 func TestBaseStat(t *testing.T) {
-	title("Testing base stat")
-	conf := setCustomConfig("R_SYN")
-	bs := &BaseStat{
-		name:  "Test",
-		dspot: gospot.NewDSpotFromConfig(&conf),
+	title(t.Name())
+
+	bs := &BaseStat{name: "Test"}
+	if err := bs.Configure(); err != nil {
+		t.Fatal(err)
 	}
 
 	checkTitle("Checking name...")
@@ -272,28 +288,10 @@ func TestBaseStat(t *testing.T) {
 		testOK()
 	}
 
-	checkTitle("Getting DSpot instance...")
-	if bs.DSpot().Config() != conf {
-		testERROR()
-		t.Errorf("Bad configuration")
-		fmt.Println(bs.DSpot().Config())
-	} else {
-		testOK()
-	}
-
-	checkTitle("Setting custom DSpot config...")
-	conf.Ninit = 1500
-	bs.SetDSpotConfig(conf)
-	if bs.DSpot().Config().Ninit != 1500 {
-		testERROR()
-		t.Errorf("Expected 1500, got %d", bs.DSpot().Config().Ninit)
-	} else {
-		testOK()
-	}
 }
 
 func TestGetStat(t *testing.T) {
-	title("Testing getting/registering stats")
+	title(t.Name())
 
 	checkTitle("Loading stat...")
 	rack, err := StatFromName("R_ACK")
@@ -314,9 +312,7 @@ func TestGetStat(t *testing.T) {
 	}
 
 	checkTitle("Double registering...")
-	err = Register(
-		"R_ACK",
-		func(bs BaseStat) StatInterface { return nil })
+	err = Register(&RACK{BaseStat: BaseStat{name: "R_ACK"}})
 	if err == nil {
 		testERROR()
 		t.Errorf("R_ACK must be already registered")
@@ -325,52 +321,52 @@ func TestGetStat(t *testing.T) {
 	}
 }
 
-func TestChangeDSpotConfig(t *testing.T) {
-	title("Testing DSpot attributes change")
-	Ninit := 2000
-	MaxExcess := 600
-	Up := false
-	Down := true
-	Alert := false
-	Bounded := false
-	Level := 0.9999
-	Q := 2.3e-8
+// func TestChangeDSpotConfig(t *testing.T) {
+// 	title("Testing DSpot attributes change")
+// 	Ninit := 2000
+// 	MaxExcess := 600
+// 	Up := false
+// 	Down := true
+// 	Alert := false
+// 	Bounded := false
+// 	Level := 0.9999
+// 	Q := 2.3e-8
 
-	extra := map[string]interface{}{
-		"q":          Q,
-		"n_init":     Ninit,
-		"level":      Level,
-		"Up":         Up,
-		"Down":       Down,
-		"Alert":      Alert,
-		"bounded":    Bounded,
-		"max_excess": MaxExcess,
-	}
-	rack, _ := StatFromNameWithCustomConfig("R_ACK", extra)
+// 	extra := map[string]interface{}{
+// 		"q":          Q,
+// 		"n_init":     Ninit,
+// 		"level":      Level,
+// 		"Up":         Up,
+// 		"Down":       Down,
+// 		"Alert":      Alert,
+// 		"bounded":    Bounded,
+// 		"max_excess": MaxExcess,
+// 	}
+// 	rack, _ := StatFromNameWithCustomConfig("R_ACK", extra)
 
-	conf := rack.DSpot().Config()
-	if conf.Ninit != Ninit {
-		t.Errorf("Expected Ninit equal to %d, got %d", Ninit, conf.Ninit)
-	}
-	if conf.MaxExcess != MaxExcess {
-		t.Errorf("Expected MaxExcess equal to %d, got %d", MaxExcess, conf.MaxExcess)
-	}
-	if conf.Level != Level {
-		t.Errorf("Expected Level equal to %f, got %f", Level, conf.Level)
-	}
-	if conf.Alert != Alert {
-		t.Errorf("Expected Alerts equal to %t, got %t", Alert, conf.Alert)
-	}
-	if conf.Up != Up {
-		t.Errorf("Expected Up equal to %t, got %t", Up, conf.Up)
-	}
-	if conf.Down != Down {
-		t.Errorf("Expected Down equal to %t, got %t", Down, conf.Down)
-	}
-	if conf.Bounded != Bounded {
-		t.Errorf("Expected Bounded equal to %t, got %t", Bounded, conf.Bounded)
-	}
-	if conf.Q != Q {
-		t.Errorf("Expected Q equal to %f, got %f", Q, conf.Q)
-	}
-}
+// 	conf := rack.DSpot().Config()
+// 	if conf.Ninit != Ninit {
+// 		t.Errorf("Expected Ninit equal to %d, got %d", Ninit, conf.Ninit)
+// 	}
+// 	if conf.MaxExcess != MaxExcess {
+// 		t.Errorf("Expected MaxExcess equal to %d, got %d", MaxExcess, conf.MaxExcess)
+// 	}
+// 	if conf.Level != Level {
+// 		t.Errorf("Expected Level equal to %f, got %f", Level, conf.Level)
+// 	}
+// 	if conf.Alert != Alert {
+// 		t.Errorf("Expected Alerts equal to %t, got %t", Alert, conf.Alert)
+// 	}
+// 	if conf.Up != Up {
+// 		t.Errorf("Expected Up equal to %t, got %t", Up, conf.Up)
+// 	}
+// 	if conf.Down != Down {
+// 		t.Errorf("Expected Down equal to %t, got %t", Down, conf.Down)
+// 	}
+// 	if conf.Bounded != Bounded {
+// 		t.Errorf("Expected Bounded equal to %t, got %t", Bounded, conf.Bounded)
+// 	}
+// 	if conf.Q != Q {
+// 		t.Errorf("Expected Q equal to %f, got %f", Q, conf.Q)
+// 	}
+// }

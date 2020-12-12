@@ -1,11 +1,10 @@
 name: netspot
-version: "1.3"
+version: "2.0a"
 summary: A simple IDS with statistical learning
 description: |
-  NetSpot is a basic network intrusion dection system
+  netspot is a basic network intrusion detection system
   which aims to detect abnormal behaviours from network
-  measures. It works as a server and can be managed by 
-  a client (netspotctl).
+  statistics.
 base: core18
 
 grade: devel
@@ -26,7 +25,4 @@ parts:
 
 apps:
   netspot:
-    daemon: simple
-    command: bin/netspot -c $SNAP_COMMON/netspot.toml -l 0
-  netspotctl:
-    command: bin/netspotctl
+    command: bin/netspot

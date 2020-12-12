@@ -8,7 +8,7 @@ import (
 
 func TestURGCounter(t *testing.T) {
 	title("Testing URG counter")
-	ctr := &URG{TCPCtr: NewTCPCtr(), Counter: 0}
+	ctr := &URG{counter: 0}
 	checkTitle("Check counter name...")
 	if ctr.Name() != "URG" {
 		testERROR()

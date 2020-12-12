@@ -4,154 +4,99 @@ package exporter
 
 import (
 	"fmt"
+	"netspot/config"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/rs/zerolog"
-	"github.com/spf13/viper"
 )
 
 const (
-	dataFileFormat      = "netspot_raw_%s.json"   // format to name the file where data are logged
-	alarmFileNameFormat = "netspot_alarm_%s.json" // format to name the file where anomalies are logged
+	dataFileFormat  = "netspot_data_%s.json"  // format to name the file where data are logged
+	alarmFileFormat = "netspot_alarm_%s.json" // format to name the file where anomalies are logged
 )
 
 // File is the file logger
 type File struct {
-	data        bool
-	alarm       bool
-	name        string
-	dataLogger  zerolog.Logger
-	alarmLogger zerolog.Logger
+	data             bool
+	alarm            bool
+	dataAddress      string
+	alarmAddress     string
+	seriesName       string
+	dataFileHandler  *os.File
+	alarmFileHandler *os.File
 }
 
 func init() {
-	// default config
-	viper.SetDefault("file.data", dataFileFormat)
-	viper.SetDefault("file.alarm", alarmFileNameFormat)
+	Register(&File{})
+	RegisterParameter("file.data", nil, "File to export data")
+	RegisterParameter("file.alarm", nil, "File to export the alarms")
 }
 
-func getSeriesName(opts ...interface{}) (string, error) {
-	if len(opts) == 0 {
-		return "", fmt.Errorf("Series name is not set")
-	}
-	name, ok := opts[0].(string)
-	if ok {
-		return name, nil
-	}
-	return "", fmt.Errorf("The series name is not valid (type assertion failed)")
-}
-
-func (f *File) initDataLogger() error {
-	var err error
-	var dataFilePath string
-
-	// get path
-	format := viper.GetString("file.data")
-	if strings.Contains(format, "%s") {
-		dataFilePath, err = filepath.Abs(fmt.Sprintf(format, f.name))
-	} else {
-		dataFilePath, err = filepath.Abs(format)
-	}
-	// check format
-	if err != nil {
-		return fmt.Errorf("Error while formatting file path for data (%w)", err)
-	}
-
-	// create file
-	dataFile, err := os.Create(dataFilePath)
-	if err != nil {
-		return fmt.Errorf("Error while creating data log file %s (%w)", dataFilePath, err)
-	}
-	defer dataFile.Close()
-
-	// init logger
-	f.dataLogger = zerolog.New(dataFile).With().Logger()
-	return nil
-}
-
-func (f *File) initAlarmLogger() error {
-	var err error
-	var alarmFilePath string
-
-	// get path
-	format := viper.GetString("file.alarm")
-	if strings.Contains(format, "%s") {
-		alarmFilePath, err = filepath.Abs(fmt.Sprintf(format, f.name))
-	} else {
-		alarmFilePath, err = filepath.Abs(format)
-	}
-	// check format
-	if err != nil {
-		return fmt.Errorf("Error while formatting file path for alarm (%w)", err)
-	}
-
-	// create file
-	alarmFile, err := os.Create(alarmFilePath)
-	if err != nil {
-		return fmt.Errorf("Error while creating alarm log file %s (%w)", alarmFilePath, err)
-	}
-	defer alarmFile.Close()
-
-	// init logger
-	f.alarmLogger = zerolog.New(alarmFile).With().Logger()
-	return nil
-}
+// Main functions =========================================================== //
+// ========================================================================== //
+// ========================================================================== //
 
 // Name returns the name of the exporter
 func (f *File) Name() string {
 	return "file"
 }
 
-// Init defines the options of the exporter
-// It supports a single option: the name of the series
-// which should be a string. The series name could be "".
-func (f *File) Init(options ...interface{}) error {
-	if !viper.IsSet("file") {
-		return fmt.Errorf("The section %s has not been found", "file")
+// Init reads the config of the modules
+func (f *File) Init() error {
+	var err error
+
+	f.data = config.HasNotNilKey("exporter.file.data")
+	f.alarm = config.HasNotNilKey("exporter.file.alarm")
+
+	if f.data {
+		f.dataAddress, err = config.GetPath("exporter.file.data")
+		if err != nil {
+			return err
+		}
 	}
 
-	// get series name
-	name, err := getSeriesName(options)
-	if err != nil {
-		return err
+	if f.alarm {
+		f.alarmAddress, err = config.GetPath("exporter.file.alarm")
+		if err != nil {
+			return err
+		}
 	}
-	f.name = name
 
-	// set everything to false
-	f.data, f.alarm = false, false
-	// update options
-	f.data = viper.IsSet("file.data")
-	f.alarm = viper.IsSet("file.alarm")
+	if f.data || f.alarm {
+		return Load(f.Name())
+	}
+	return nil
+}
 
-	// init loggers
-	//
+// Start generate the connection from the module to the endpoint
+func (f *File) Start(series string) error {
+	var err error
+	f.seriesName = series
+	f.updateFileFromSeriesName()
+
+	// init file handlers
 	// data logger
 	if f.data {
-		if err = f.initDataLogger(); err != nil {
+		if f.dataFileHandler, err = os.Create(f.dataAddress); err != nil {
 			return err
 		}
 	}
 	// alarm logger
 	if f.alarm {
-		if err = f.initAlarmLogger(); err != nil {
+		if f.alarmFileHandler, err = os.Create(f.alarmAddress); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
 // Write logs data
 func (f *File) Write(t time.Time, data map[string]float64) error {
+
 	if f.data {
-		dlog := f.dataLogger.Log().Time("time", t)
-		for key, value := range data {
-			dlog.Float64(key, value)
-		}
-		dlog.Send()
+		// hope there is no problem
+		f.dataFileHandler.WriteString(jsonifyWithTime(t, data))
+		f.dataFileHandler.Write([]byte{'\n'})
 	}
 	return nil
 }
@@ -159,17 +104,47 @@ func (f *File) Write(t time.Time, data map[string]float64) error {
 // Warn logs alarms
 func (f *File) Warn(t time.Time, s *SpotAlert) error {
 	if f.alarm {
-		wlog := f.alarmLogger.Log().Time("time", t)
-		wlog.Str("Status", s.Status).
-			Str("Stat", s.Stat).
-			Float64("Value", s.Value).
-			Int("Code", s.Code).
-			Float64("Probability", s.Probability).Send()
+		f.alarmFileHandler.WriteString(s.toJSONwithTime(t))
+		f.alarmFileHandler.Write([]byte{'\n'})
 	}
 	return nil
 }
 
 // Close does nothing here
 func (f *File) Close() error {
+	if f.alarmFileHandler != nil {
+		if err := f.alarmFileHandler.Close(); err != nil {
+			return fmt.Errorf("Error while closing '%s' module (%v)", f.Name(), err)
+		}
+	}
+	if f.dataFileHandler != nil {
+		if err := f.dataFileHandler.Close(); err != nil {
+			return fmt.Errorf("Error while closing '%s' module (%v)", f.Name(), err)
+		}
+	}
 	return nil
+}
+
+// LogsData tells whether the module logs data
+func (f *File) LogsData() bool {
+	return f.data
+}
+
+// LogsAlarm tells whether the module logs alarm
+func (f *File) LogsAlarm() bool {
+	return f.alarm
+}
+
+// // Side functions =========================================================== //
+// // ========================================================================== //
+// // ========================================================================== //
+
+func (f *File) updateFileFromSeriesName() {
+	if strings.Contains(f.dataAddress, "%s") {
+		f.dataAddress = fmt.Sprintf(f.dataAddress, f.seriesName)
+	}
+
+	if strings.Contains(f.alarmAddress, "%s") {
+		f.alarmAddress = fmt.Sprintf(f.alarmAddress, f.seriesName)
+	}
 }

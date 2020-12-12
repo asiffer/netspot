@@ -9,7 +9,7 @@ import (
 func TestRSYN(t *testing.T) {
 	title("Testing R_SYN")
 
-	stat := &RSyn{}
+	stat := &RSYN{}
 	checkTitle("Checking name...")
 	if stat.Name() != "R_SYN" {
 		testERROR()

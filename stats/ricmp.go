@@ -6,8 +6,7 @@ package stats
 import "math"
 
 func init() {
-	Register("R_ICMP",
-		func(bs BaseStat) StatInterface { return &RIcmp{bs} })
+	Register(&RIcmp{BaseStat{name: "R_ICMP"}})
 }
 
 // RIcmp computes the ratio of ICMP packets
