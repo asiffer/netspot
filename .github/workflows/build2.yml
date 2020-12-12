@@ -26,7 +26,10 @@ jobs:
 
       - name: Get libpcap sources
         run: |
+          pwd
           ls -alh
+          ls -alh dev
+          ls -alh dev/*/*
           chmod +x ./dev/image/get_libpcap_sources.sh
           ./dev/image/get_libpcap_sources.sh
       
