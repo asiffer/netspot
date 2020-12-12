@@ -30,8 +30,8 @@ jobs:
           ls -alh
           ls -alh dev
           ls -alh dev/*/*
-          chmod +x ./dev/image/get_libpcap_sources.sh
-          ./dev/image/get_libpcap_sources.sh
+          #chmod +x ./dev/image/get_libpcap_sources.sh
+          "${GITHUB_WORKSPACE}/dev/image/get_libpcap_sources.sh"
       
       - name: Install toolchain
         run: dev/image/install_toolchain.sh
