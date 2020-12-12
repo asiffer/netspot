@@ -1,4 +1,7 @@
 name: Build
+defaults:
+  run:
+    shell: bash
 on:
   workflow_dispatch:
 jobs:
