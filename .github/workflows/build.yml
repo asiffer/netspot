@@ -12,9 +12,9 @@ jobs:
         LIBPCAP_DIR: /libpcap
         # SYSTEM
         PACKAGES: nano bash linux-headers git flex bison wget make bluez-dev bluez
-        CGO_ENABLED: 1
-        CGO_LDFLAGS: -L${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}
-        CGO_CFLAGS: -O2 -I${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}
+        # CGO_ENABLED: 1
+        # CGO_LDFLAGS: -L${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}
+        # CGO_CFLAGS: -O2 -I${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}
         # CROSS COMPILATION OPTIONS
         # see https://github.com/just-containers/musl-cross-make/releases/
         GCC_VERSION: 9.2.0
@@ -26,6 +26,12 @@ jobs:
 
       - name: Symbolic link to GOPATH
         run: ln -s $GITHUB_WORKSPACE $GOPATH/src/netspot
+
+      - name: Setup CGO env variables
+        run: |
+          export CGO_ENABLED=1
+          export CGO_LDFLAGS=-L$LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION
+          export CGO_CFLAGS=-O2 -I$LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION
 
       - name: Get packages
         run: apk update; apk add $PACKAGES

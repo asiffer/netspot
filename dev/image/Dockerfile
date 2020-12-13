@@ -14,7 +14,7 @@ ENV CGO_CFLAGS "-O2 -I${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}"
 # see https://github.com/just-containers/musl-cross-make/releases/
 ENV GCC_VERSION 9.2.0
 ENV MUSL_CROSS_MAKE_VERSION v15
-ENV TARGET_ARCH "x86_64-linux-musl arm-linux-musleabihf aarch64-linux-musl"
+ENV TARGET_ARCH "x86_64-linux arm-linux aarch64-linux"
 
 # SYSTEM
 RUN apk update; apk add $PACKAGES
