@@ -30,13 +30,7 @@ jobs:
         run: apk update; apk add $PACKAGES
 
       - name: Get libpcap sources
-        run: |
-          pwd
-          ls -alh
-          ls -alh dev
-          ls -alh dev/*/*
-          chmod +x "${GITHUB_WORKSPACE}/dev/image/get_libpcap_sources.sh"
-          "${GITHUB_WORKSPACE}/dev/image/get_libpcap_sources.sh"
+        run: "${GITHUB_WORKSPACE}/dev/image/get_libpcap_sources.sh"
       
       - name: Install toolchain
         run: "${GITHUB_WORKSPACE}/dev/image/install_toolchain.sh"
