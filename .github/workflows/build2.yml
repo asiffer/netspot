@@ -21,7 +21,7 @@ jobs:
         # see https://github.com/just-containers/musl-cross-make/releases/
         GCC_VERSION: 9.2.0
         MUSL_CROSS_MAKE_VERSION: v15
-        TARGET_ARCH: x86_64-linux-musl arm-linux-musleabihf aarch64-linux-musl
+        TARGET_ARCH: x86_64-linux arm-linux aarch64-linux
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
