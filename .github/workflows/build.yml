@@ -32,6 +32,7 @@ jobs:
           echo CGO_ENABLED=1 >> $GITHUB_ENV
           echo CGO_LDFLAGS="-L${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}" >> $GITHUB_ENV
           echo CGO_CFLAGS="-O2 -I${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}" >> $GITHUB_ENV
+          env
 
       - name: Get packages
         run: apk update; apk add $PACKAGES
@@ -43,18 +44,16 @@ jobs:
         run: "${GITHUB_WORKSPACE}/dev/image/install_toolchain.sh"
 
       - name: Build netspot (x86_64)
-        run: |
-          env
-          $GITHUB_WORKSPACE/dev/build/builder.sh x86_64-linux
+        run: $GITHUB_WORKSPACE/dev/build/builder.sh x86_64-linux
 
       - name: Build netspot (arm)
-        run: $GITHUB_WORKSPACE}dev/build/builder.sh arm-linux
+        run: $GITHUB_WORKSPACE/dev/build/builder.sh arm-linux
 
       - name: Build netspot (aarch64)
-        run: $GITHUB_WORKSPACE}/dev/build/builder.sh aarch64-linux
+        run: $GITHUB_WORKSPACE/dev/build/builder.sh aarch64-linux
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: netspot
           path: bin/
