@@ -41,8 +41,14 @@ jobs:
       - name: Install toolchain
         run: "${GITHUB_WORKSPACE}/dev/image/install_toolchain.sh"
 
-      - name: Build
-        run: make
+      - name: Build netspot (x86_64)
+        run: "${GITHUB_WORKSPACE}/dev/build/builder.sh" x86_64-linux
+
+      - name: Build netspot (arm)
+        run: "${GITHUB_WORKSPACE}/dev/build/builder.sh" arm-linux
+      
+      - name: Build netspot (aarch64)
+        run: "${GITHUB_WORKSPACE}/dev/build/builder.sh" aarch64-linux
 
       - name: Upload binaries
         uses: actions/upload-artifact@v1
