@@ -1,9 +1,8 @@
 name: Build
-defaults:
-  run:
-    shell: bash
+
 on:
   workflow_dispatch:
+
 jobs:
   build:
     name: Build (all architectures)
@@ -27,6 +26,9 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
+      - name: Get packages
+        run: apk add "${PACKAGES}"
+
       - name: Get libpcap sources
         run: |
           pwd
@@ -37,7 +39,7 @@ jobs:
           "${GITHUB_WORKSPACE}/dev/image/get_libpcap_sources.sh"
       
       - name: Install toolchain
-        run: dev/image/install_toolchain.sh
+        run: "${GITHUB_WORKSPACE}/dev/image/install_toolchain.sh"
 
       - name: Build
         run: make
