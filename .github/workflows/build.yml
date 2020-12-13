@@ -29,9 +29,9 @@ jobs:
 
       - name: Setup CGO env variables
         run: |
-          export CGO_ENABLED=1
-          export CGO_LDFLAGS="-L${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}"
-          export CGO_CFLAGS="-O2 -I${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}"
+          echo CGO_ENABLED=1 >> $GITHUB_ENV
+          echo CGO_LDFLAGS="-L${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}" >> $GITHUB_ENV
+          echo CGO_CFLAGS="-O2 -I${LIBPCAP_DIR}/libpcap-${LIBPCAP_VERSION}" >> $GITHUB_ENV
 
       - name: Get packages
         run: apk update; apk add $PACKAGES
