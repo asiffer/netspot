@@ -1,6 +1,8 @@
 name: Build
+
 on:
   workflow_dispatch:
+
 jobs:
   build:
     name: Build (all architectures)
@@ -19,19 +21,28 @@ jobs:
         # see https://github.com/just-containers/musl-cross-make/releases/
         GCC_VERSION: 9.2.0
         MUSL_CROSS_MAKE_VERSION: v15
-        TARGET_ARCH: x86_64-linux-musl arm-linux-musleabihf aarch64-linux-musl
+        TARGET_ARCH: x86_64-linux arm-linux aarch64-linux
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
+      - name: Get packages
+        run: apk update; apk add $PACKAGES
+
       - name: Get libpcap sources
-        run: dev/image/get_libpcap_sources.sh
+        run: "${GITHUB_WORKSPACE}/dev/image/get_libpcap_sources.sh"
       
       - name: Install toolchain
-        run: dev/image/install_toolchain.sh
+        run: "${GITHUB_WORKSPACE}/dev/image/install_toolchain.sh"
 
-      - name: Build
-        run: make
+      - name: Build netspot (x86_64)
+        run: "${GITHUB_WORKSPACE}/dev/build/builder.sh" x86_64-linux
+
+      - name: Build netspot (arm)
+        run: "${GITHUB_WORKSPACE}/dev/build/builder.sh" arm-linux
+      
+      - name: Build netspot (aarch64)
+        run: "${GITHUB_WORKSPACE}/dev/build/builder.sh" aarch64-linux
 
       - name: Upload binaries
         uses: actions/upload-artifact@v1
