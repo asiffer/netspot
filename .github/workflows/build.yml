@@ -43,7 +43,11 @@ jobs:
         run: "${GITHUB_WORKSPACE}/dev/image/install_toolchain.sh"
 
       - name: Build netspot (x86_64)
-        run: $GITHUB_WORKSPACE/dev/build/builder.sh x86_64-linux
+        run: |
+          echo $CGO_ENABLED
+          echo $CGO_LDFLAGS
+          echo $CGO_CFLAGS
+          $GITHUB_WORKSPACE/dev/build/builder.sh x86_64-linux
 
       - name: Build netspot (arm)
         run: $GITHUB_WORKSPACE}dev/build/builder.sh arm-linux

@@ -1,4 +1,4 @@
-FROM golang:1.15.3-alpine
+FROM golang:1.15.6-alpine
 
 # LIBPCAP
 ENV LIBPCAP_VERSION 1.9.1
