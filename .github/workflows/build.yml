@@ -44,9 +44,7 @@ jobs:
 
       - name: Build netspot (x86_64)
         run: |
-          echo $CGO_ENABLED
-          echo $CGO_LDFLAGS
-          echo $CGO_CFLAGS
+          env
           $GITHUB_WORKSPACE/dev/build/builder.sh x86_64-linux
 
       - name: Build netspot (arm)
