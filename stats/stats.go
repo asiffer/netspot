@@ -123,7 +123,7 @@ func (m *BaseStat) Configure() error {
 	if sc.Ninit, err = config.GetStrictlyPositiveInt(keys["n_init"]); err != nil {
 		return err
 	}
-	if sc.Depth, err = config.GetStrictlyPositiveInt(keys["depth"]); err != nil {
+	if sc.Depth, err = config.GetInt(keys["depth"]); err != nil {
 		return err
 	}
 	if sc.MaxExcess, err = config.GetStrictlyPositiveInt(keys["max_excess"]); err != nil {

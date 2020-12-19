@@ -1,8 +1,12 @@
+![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg)
 
 # netspot
 
 A simple IDS with statistical learning
 
+---
+
+**NOTE: this current version (v2.0) is still under development**
 
 ## Overview
 
@@ -25,14 +29,17 @@ The latest compiled binaries can be found on the released tag.
 
 ### Building from sources
 
-
-To build **netspot** from sources, you mainly need a `Go` compiler and `libpcap-dev`.
+To build **netspot** from sources, you mainly need a `Go` compiler and `libpcap-dev`. Through the basic `make` command, **netspot** is dynamically
+linked to `libpcap` and your `libc` (generally GNU `libc`).
 
 ```sh
 git clone -b v2.0 https://github.com/asiffer/netspot.git
 cd netspot
 make
 ```
+
+To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
+presents how **netspot** is (cross-)built based on the `golang:alpine` docker image.
 
 ## Get started
 
@@ -89,7 +96,7 @@ netspot serve
 
 By default it listens at `tcp://localhost:11000` but it can be changed with the `-e` flag. For instance, if you want to monitor the loopback
 interface, the API trafic must not pollute what **netspot** monitors,
-so you ca consider a unix socket.
+so you can consider a unix socket.
 
 ```sh
 netspot serve -e unix:///tmp/netspot.sock
@@ -130,6 +137,7 @@ these information modules that binds to different backends
 ## Notes
 
 ### Version 2.0a
+
 This is the second big refactoring. Many things have changed, making the way to use **netspot** more *modern*.
 
 - Single and statically-compiled binary. Forget about the server, just run the binary on what you want (a server mode still exists but it is rather minimal)
