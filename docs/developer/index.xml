@@ -2,47 +2,47 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Developer on netspot</title>
-    <link>asiffer.github.io/netspot/developer/</link>
+    <link>/developer/</link>
     <description>Recent content in Developer on netspot</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-	<atom:link href="asiffer.github.io/netspot/developer/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/developer/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Counters</title>
-      <link>asiffer.github.io/netspot/developer/counter/</link>
+      <link>/developer/counter/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>asiffer.github.io/netspot/developer/counter/</guid>
+      <guid>/developer/counter/</guid>
       <description>The counter is the more atomic object within netspot.</description>
     </item>
     
     <item>
       <title>Statistics</title>
-      <link>asiffer.github.io/netspot/developer/stat/</link>
+      <link>/developer/stat/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>asiffer.github.io/netspot/developer/stat/</guid>
+      <guid>/developer/stat/</guid>
       <description>Based on available counters, you can implement your own statistics</description>
     </item>
     
     <item>
       <title>Exporting module</title>
-      <link>asiffer.github.io/netspot/developer/exporter/</link>
+      <link>/developer/exporter/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>asiffer.github.io/netspot/developer/exporter/</guid>
+      <guid>/developer/exporter/</guid>
       <description>Depending on your data/logs storage, &lt;code&gt;netspot&lt;/code&gt; can be adapted to your needs.</description>
     </item>
     
     <item>
       <title>Developer toolchain</title>
-      <link>asiffer.github.io/netspot/developer/toolchain/</link>
+      <link>/developer/toolchain/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>asiffer.github.io/netspot/developer/toolchain/</guid>
+      <guid>/developer/toolchain/</guid>
       <description>How to develop new components to netspot</description>
     </item>
     
