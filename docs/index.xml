@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>netspot</title>
+    <link>asiffer.github.io/netspot/</link>
+    <description>Recent content on netspot</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="asiffer.github.io/netspot/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Counters</title>
+      <link>asiffer.github.io/netspot/developer/counter/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/developer/counter/</guid>
+      <description>The counter is the more atomic object within netspot.</description>
+    </item>
+    
+    <item>
+      <title>Statistics</title>
+      <link>asiffer.github.io/netspot/developer/stat/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/developer/stat/</guid>
+      <description>Based on available counters, you can implement your own statistics</description>
+    </item>
+    
+    <item>
+      <title>Exporting module</title>
+      <link>asiffer.github.io/netspot/developer/exporter/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/developer/exporter/</guid>
+      <description>Depending on your data/logs storage, &lt;code&gt;netspot&lt;/code&gt; can be adapted to your needs.</description>
+    </item>
+    
+    <item>
+      <title>Developer toolchain</title>
+      <link>asiffer.github.io/netspot/developer/toolchain/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/developer/toolchain/</guid>
+      <description>How to develop new components to netspot</description>
+    </item>
+    
+    <item>
+      <title>Installation</title>
+      <link>asiffer.github.io/netspot/get-started/install/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/get-started/install/</guid>
+      <description>From sources You can download the netspot sources.
+Debian package You can install netspot through a debian package.</description>
+    </item>
+    
+    <item>
+      <title>Basic usage</title>
+      <link>asiffer.github.io/netspot/get-started/basic/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/get-started/basic/</guid>
+      <description>Run &lt;code&gt;netspot&lt;/code&gt; for the first time!</description>
+    </item>
+    
+    <item>
+      <title>Service</title>
+      <link>asiffer.github.io/netspot/advanced/service/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/advanced/service/</guid>
+      <description>Running netspot as a service</description>
+    </item>
+    
+    <item>
+      <title>Configuration</title>
+      <link>asiffer.github.io/netspot/get-started/configuration/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/get-started/configuration/</guid>
+      <description>All the stuff you can tune</description>
+    </item>
+    
+    <item>
+      <title>Architecture</title>
+      <link>asiffer.github.io/netspot/get-started/architecture/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/get-started/architecture/</guid>
+      <description>netspot is also simple by its design</description>
+    </item>
+    
+    <item>
+      <title>Spot Algorithm</title>
+      <link>asiffer.github.io/netspot/advanced/spot/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>asiffer.github.io/netspot/advanced/spot/</guid>
+      <description>Statistical learning algorithm behind netspot</description>
+    </item>
+    
+  </channel>
+</rss>

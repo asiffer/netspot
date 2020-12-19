@@ -4,7 +4,7 @@
 
 A simple IDS with statistical learning
 
----
+
 
 **NOTE: this current version (v2.0) is still under development**
 
@@ -12,12 +12,13 @@ A simple IDS with statistical learning
 
 **netspot** is a simple anomaly-based network IDS written in `Go` (based on [GoPacket](https://github.com/google/gopacket))
 
-The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic.
-
-![SPOT algorithm](assets/netspot4.png)
+The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic (see the
+picture below).
 
 **netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
 
+
+![SPOT algorithm](assets/netspot4.png)
 
 
 
@@ -25,7 +26,11 @@ The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a stat
 
 ### Binaries
 
-The latest compiled binaries can be found on the released tag. 
+The latest compiled binaries can be found below.
+
+[![amd64](https://img.shields.io/badge/v2.0a-amd64-5e81ac?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-amd64-linux-static)
+[![arm](https://img.shields.io/badge/v2.0a-arm-81a1c1?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-arm-linux-static)
+[![arm64](https://img.shields.io/badge/v2.0a-arm64-88c0d0?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-arm64-linux-static)
 
 ### Building from sources
 
@@ -33,7 +38,7 @@ To build **netspot** from sources, you mainly need a `Go` compiler and `libpcap
 linked to `libpcap` and your `libc` (generally GNU `libc`).
 
 ```sh
-git clone -b v2.0 https://github.com/asiffer/netspot.git
+git clone https://github.com/asiffer/netspot.git
 cd netspot
 make
 ```
@@ -106,7 +111,7 @@ netspot serve -e unix:///tmp/netspot.sock
 |--------|----------------|-------------|
 | `GET`  | `/api/config`  | Get the current config (JSON output) |
 | `POST` | `/api/config`  | Change the config (JSON expected) |
-| `POST`  | `/api/run`  | Manage the status of netspot (start/stop) |
+| `POST` | `/api/run`     | Manage the status of netspot (start/stop) |
 
 
 

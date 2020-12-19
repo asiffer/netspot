@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Basic usage - netspot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="icon" href="asiffer.github.io/netspot/favicon.png">
+
+  
+  
+  <link rel="stylesheet" href="/asiffer.github.io/netspot/css/style.min.d9cb88bb3276ece334de9ab3a804351d8d03e86b3f62f4afb1f0717e04d85fe1.css">
+  
+
+  
+  
+</head>
+
+<body class='page page-default-single'>
+  <div id="main-menu-mobile" class="main-menu-mobile">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="asiffer.github.io/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="asiffer.github.io/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="asiffer.github.io/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="asiffer.github.io/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="asiffer.github.io/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+  <div class="wrapper">
+    <div class='header'>
+  <div class="container">
+    <div class="logo">
+      <a href="asiffer.github.io/netspot">
+        
+      </a>
+    </div>
+    <div class="logo-mobile">
+      <a href="asiffer.github.io/netspot">
+        
+      </a>
+    </div>
+    <div id="main-menu" class="main-menu">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="asiffer.github.io/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="asiffer.github.io/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="asiffer.github.io/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="asiffer.github.io/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="asiffer.github.io/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
+  <span class="hamburger-box">
+    <span class="hamburger-inner"></span>
+  </span>
+</button>
+  </div>
+</div>
+
+    
+
+    
+
+    
+    <div class="container pt-2 pt-md-6 pb-3 pb-md-6">
+      <div class="row">
+        <div class="col-12 col-md-3 mb-3">
+          <div class="sidebar">
+            
+<div class="docs-menu">
+  <h4>Get started</h4>
+  <ul>
+    
+    <li class="">
+      <a href="asiffer.github.io/netspot/get-started/install/">Installation</a>
+    </li>
+    
+    <li class="active ">
+      <a href="asiffer.github.io/netspot/get-started/basic/">Basic usage</a>
+    </li>
+    
+    <li class="">
+      <a href="asiffer.github.io/netspot/get-started/configuration/">Configuration</a>
+    </li>
+    
+    <li class="">
+      <a href="asiffer.github.io/netspot/get-started/architecture/">Architecture</a>
+    </li>
+    
+  </ul>
+</div>
+
+          </div>
+        </div>
+        <div class="col-12 col-md-9">
+          
+<h1 class="title">Basic usage</h1>
+<div class="content ">
+  <p>Basically, you can run <code>netspot</code> on a network interface. In the example below,
+<code>netspot</code> monitors the <code>PERF</code> statistics (packet processing rate) on the <code>eth0</code> interface.
+The computation period is <code>1s</code> and the values are printed to the console (<code>-v</code>).</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run -d eth0 -s PERF -p 1s -v
+</code></pre></div><p>You can also analyze a capture file.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
+</code></pre></div><p>All these command-line options can be set in a config file (see the <a href="/get-started/configuration/">configuration</a> section for more options):</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># netspot.toml</span>
+
+<span class="p">[</span><span class="nx">miner</span><span class="p">]</span>
+<span class="nx">device</span> <span class="p">=</span> <span class="s2">&#34;~/file.pcap&#34;</span>
+
+<span class="p">[</span><span class="nx">analyzer</span><span class="p">]</span>
+<span class="nx">period</span> <span class="p">=</span> <span class="s2">&#34;500ms&#34;</span>
+<span class="nx">stats</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;PERF&#34;</span><span class="p">,</span> <span class="s2">&#34;R_SYN&#34;</span><span class="p">]</span>
+
+<span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">console</span><span class="p">]</span>
+<span class="nx">data</span> <span class="p">=</span> <span class="kc">true</span>
+</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run --config netspot.toml
+</code></pre></div><div class="info">
+    All the config file parameters can be passed through CLI flags with
+the same syntax: <code>module[.submodule].parameter</code>. For instance, you can set the device with <code>netspot run --miner.device file.pcap</code>.
+</div>
+<h3 id="data-output">Data output</h3>
+<p><code>netspot</code> outputs two things:</p>
+<ul>
+<li>the network statistics (namely the <em>data</em>, at every <code>period</code>)</li>
+<li>the alarms (when a computed stat is abnormal)</li>
+</ul>
+<p>A <strong>stat record</strong> is a simple map <code>STAT: value</code> with a timestamp. When <code>netspot</code> learns,
+it also gathers the decision thresholds <code>STAT_UP: upper_threshold</code> and <code>STAT_DOWN: lower_threshold</code>.</p>
+<p>An <strong>alarm</strong> is generated once a statistics is beyond a threshold. It contains the value of
+the statistics and its probability to occur (the lower, the more abnormal).</p>
+<p><code>netspot</code> can dispatch these two streams to different exporting modules. In the previous example, data (not the alarms) are sent to the console (<code>-v</code> flag), but actually you can
+also send it to a file (see below), a socket or an influxdb database.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># storing data to a file</span>
+netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -f /tmp/data.json
+</code></pre></div><p>There is not a short CLI flag for every module. In the general case, you
+have to use the <code>module.submodule.option</code> scheme (like in the config file):</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms --exporter.file.data /tmp/data.json
+</code></pre></div><p>Or you can set it in the config file:</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># netspot.toml</span>
+<span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">file</span><span class="p">]</span>
+<span class="c"># Path to the file which will store the data.</span>
+<span class="c"># The value can contain a &#39;%s&#39; which will be replaced by </span>
+<span class="c"># the series name. </span>
+<span class="nx">data</span> <span class="p">=</span> <span class="s2">&#34;/tmp/netspot_%s_data.json&#34;</span>
+<span class="c"># Same as the data but for the alarms</span>
+<span class="c">#alarm = &#34;/tmp/netspot_%s_alarm.json&#34;</span>
+</code></pre></div>
+</div>
+</div>
+
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  
+
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/asiffer.github.io/netspot/js/scripts.min.1237ff71925bb8625c97a9af8db4c54525258bedfd7c47493daaff723bea755e.js"></script>
+  
+
+  
+  
+  
+    
+  
+
+
+</body>
+
+</html>

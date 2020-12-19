@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Configuration - netspot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="icon" href="asiffer.github.io/netspot/favicon.png">
+
+  
+  
+  <link rel="stylesheet" href="/asiffer.github.io/netspot/css/style.min.d9cb88bb3276ece334de9ab3a804351d8d03e86b3f62f4afb1f0717e04d85fe1.css">
+  
+
+  
+  
+</head>
+
+<body class='page page-default-single'>
+  <div id="main-menu-mobile" class="main-menu-mobile">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="asiffer.github.io/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="asiffer.github.io/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="asiffer.github.io/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="asiffer.github.io/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="asiffer.github.io/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+  <div class="wrapper">
+    <div class='header'>
+  <div class="container">
+    <div class="logo">
+      <a href="asiffer.github.io/netspot">
+        
+      </a>
+    </div>
+    <div class="logo-mobile">
+      <a href="asiffer.github.io/netspot">
+        
+      </a>
+    </div>
+    <div id="main-menu" class="main-menu">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="asiffer.github.io/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="asiffer.github.io/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="asiffer.github.io/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="asiffer.github.io/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="asiffer.github.io/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
+  <span class="hamburger-box">
+    <span class="hamburger-inner"></span>
+  </span>
+</button>
+  </div>
+</div>
+
+    
+
+    
+
+    
+    <div class="container pt-2 pt-md-6 pb-3 pb-md-6">
+      <div class="row">
+        <div class="col-12 col-md-3 mb-3">
+          <div class="sidebar">
+            
+<div class="docs-menu">
+  <h4>Get started</h4>
+  <ul>
+    
+    <li class="">
+      <a href="asiffer.github.io/netspot/get-started/install/">Installation</a>
+    </li>
+    
+    <li class="">
+      <a href="asiffer.github.io/netspot/get-started/basic/">Basic usage</a>
+    </li>
+    
+    <li class="active ">
+      <a href="asiffer.github.io/netspot/get-started/configuration/">Configuration</a>
+    </li>
+    
+    <li class="">
+      <a href="asiffer.github.io/netspot/get-started/architecture/">Architecture</a>
+    </li>
+    
+  </ul>
+</div>
+
+          </div>
+        </div>
+        <div class="col-12 col-md-9">
+          
+<h1 class="title">Configuration</h1>
+<div class="content ">
+  <p>The configuration of netspot follows its architecture.
+There are three main sections: <code>miner</code>,
+<code>analyzer</code> and <code>exporter</code>. In addition, there is the
+<code>spot</code> section to configure the Spot algorithm.</p>
+<h2 id="miner">Miner</h2>
+<p>The miner is responsible of packet parsing. So you give it
+all the necessary options to sniff either a network interface or
+a pcap file.</p>
+<p>The main parameter is <code>device</code> that defines the packets source .
+By default, it is set to <code>&quot;any&quot;</code>, meaning that it sniffs all the
+network interfaces.
+In addition you will fins all the classical options you may pass
+to <code>libpcap</code>.</p>
+<div class="alert">
+    You must take care of the <code>timeout</code> parameter. By default, it is set to <code>0s</code>, meaning that packets are directly sent to netspot. If this value is changed, you are likely to have a time lag in the statistics computation.
+</div>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># the Miner module manages the packets parsing</span>
+<span class="c"># and the counters</span>
+<span class="p">[</span><span class="nx">miner</span><span class="p">]</span>
+<span class="c"># name of the interface to listen or dump/pcap file path</span>
+<span class="c">#device = &#34;any&#34;</span>
+<span class="nx">device</span> <span class="p">=</span> <span class="s2">&#34;eth0&#34;</span>
+<span class="c">#device = &#34;/tmp/file.pcap&#34;</span>
+<span class="c"># interface only</span>
+<span class="nx">promiscuous</span> <span class="p">=</span> <span class="kc">true</span>
+<span class="nx">snapshot_len</span> <span class="p">=</span> <span class="mi">65535</span>
+<span class="c"># instant mode</span>
+<span class="nx">timeout</span> <span class="p">=</span> <span class="s2">&#34;0s&#34;</span>
+</code></pre></div><h2 id="analyzer">Analyzer</h2>
+<p>The analyzer computes the statistics. So we only need to
+set a list of statistics to monitor (parameter <code>stats</code>) and
+to define the computation <code>period</code>.
+The <code>period</code> is relative to the <code>device</code> netspot sniffs. If the <code>device</code> is a pcap file, the source of time is the
+capture timestamps while it is the real time in the network interface case.</p>
+<div class="info">
+    You should set the <code>period</code> according to your device so as to make the stats computation relevant. For example, it is useless to set
+a very low value like <code>1ms</code> if you have few packets a second.
+In practice, you should tune
+this parameter to ensure a rather <strong>low variance</strong> of the computed statistics (i.e. stable values).
+</div>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># The Analyzer module manages the statistics</span>
+<span class="c"># and send data to the exporter</span>
+<span class="p">[</span><span class="nx">analyzer</span><span class="p">]</span>
+<span class="c"># time between two statistics computations</span>
+<span class="nx">period</span> <span class="p">=</span> <span class="s2">&#34;1s&#34;</span>
+<span class="c"># stats to load at startup</span>
+<span class="c">#stats = [&#34;AVG_PKT_SIZE&#34;]</span>
+<span class="nx">stats</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;PERF&#34;</span><span class="p">,</span> <span class="s2">&#34;R_SYN&#34;</span><span class="p">,</span> <span class="s2">&#34;R_ACK&#34;</span><span class="p">]</span>
+<span class="c">#stats = [</span>
+<span class="c">#    &#34;PERF&#34;, </span>
+<span class="c">#    &#34;R_ACK&#34;, </span>
+<span class="c">#    &#34;R_ARP&#34;, </span>
+<span class="c">#    &#34;R_DST_SRC&#34;,</span>
+<span class="c">#    &#34;R_DST_SRC_PORT&#34;, </span>
+<span class="c">#    &#34;R_ICMP&#34;, </span>
+<span class="c">#    &#34;R_IP&#34;, </span>
+<span class="c">#    &#34;R_SYN&#34;, </span>
+<span class="c">#    &#34;TRAFFIC&#34;</span>
+<span class="c">#]</span>
+</code></pre></div><h2 id="exporter">Exporter</h2>
+<p>The exporter dispatches statistics and alarms to
+the desired backend.
+The exporter gathers several basic modules like
+the <code>console</code>, the <code>file</code> or the <code>socket</code>. In addition, netspot has also a module to send data
+to <code>influxdb</code>.</p>
+<p>For all the modules, you may notice that there are always two streams: data and alarms. You can
+activate them independently.</p>
+<h3 id="console">Console</h3>
+<p>The configuration of this module could not be easier.</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># The exporter print or send data according</span>
+<span class="c"># to the loaded modules (and their options)</span>
+<span class="c"># [exporter]</span>
+<span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">console</span><span class="p">]</span>
+<span class="c"># print data to the console</span>
+<span class="nx">data</span> <span class="p">=</span> <span class="kc">true</span>
+<span class="c"># print alarms to the console</span>
+<span class="nx">alarm</span> <span class="p">=</span> <span class="kc">true</span>
+</code></pre></div><h3 id="file">File</h3>
+<p>The <code>file</code> module has a basic template. You can
+add <code>%s</code> in the output file: this will be replaced by the name of the running series.
+Data (and alarms) are stored as <code>json</code> records.</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">file</span><span class="p">]</span>
+<span class="c"># Path to the file which will store the data.</span>
+<span class="c"># The value can contain a &#39;%s&#39; which will be</span>
+<span class="c"># replaced by the series name. </span>
+<span class="nx">data</span> <span class="p">=</span> <span class="s2">&#34;/tmp/netspot_%s_data.json&#34;</span>
+<span class="c"># Same as the data but for the alarms</span>
+<span class="c">#alarm = &#34;/tmp/netspot_%s_alarm.json&#34;</span>
+</code></pre></div><h3 id="socket">Socket</h3>
+<p>The <code>socket</code> allows to send data in a &ldquo;generic way&rdquo;, meaning without setting the protocol upon.</p>
+<p>In comparison to the above modules, you can add a <code>tag</code> into the sent data and change their format.
+Currently three formats are supported: <code>csv</code>, <code>json</code> and <code>gob</code> (golang binary format).</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">socket</span><span class="p">]</span>
+<span class="c"># Path to the socket which will receive the data</span>
+<span class="c"># The format is the following: &lt;proto&gt;://&lt;address&gt;</span>
+<span class="nx">data</span> <span class="p">=</span> <span class="s2">&#34;unix:///tmp/netspot_data.socket&#34;</span>
+<span class="c"># Path to the socket which will receive the alarms</span>
+<span class="c"># The format is the following: &lt;proto&gt;://&lt;address&gt;</span>
+<span class="nx">alarm</span> <span class="p">=</span> <span class="s2">&#34;unix:///tmp/netspot_alarm.socket&#34;</span>
+<span class="c"># Additional tag when data are sent</span>
+<span class="nx">tag</span> <span class="p">=</span> <span class="s2">&#34;netspot&#34;</span>
+<span class="c"># Format of the data (accept csv, json or gob)</span>
+<span class="nx">format</span> <span class="p">=</span> <span class="s2">&#34;json&#34;</span>
+</code></pre></div><h3 id="influxdb">InfluxDB</h3>
+<p>Finally, you can send netspot data to an <a href="https://www.influxdata.com/">InfluxDB</a> database (version <code>v1.x</code>).
+Classically, you need to define the endpoint, some credentials and the name of the database.
+Furthermore, for performance reasons, you can tune the <code>batch_size</code> (number of records to cache before sending).
+Like in the <code>socket</code> module, you can define an <code>agent_name</code> which is a kind of tag
+(it can be very convenient for InfluxDB).</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">influxdb1</span><span class="p">]</span>
+<span class="c">#data = true</span>
+<span class="c">#alarm = true</span>
+<span class="c">#address = &#34;http://127.0.0.1:8086&#34;</span>
+<span class="c">#database = &#34;netspot&#34;</span>
+<span class="c">#username = &#34;netspot&#34;</span>
+<span class="c">#password = &#34;netspot&#34;</span>
+<span class="c">#batch_size = 5</span>
+<span class="c">#agent_name = &#34;local&#34;</span>
+</code></pre></div><h2 id="spot">Spot</h2>
+<p>The Spot section is specific to the configuration of the detection algorithm.
+To well understand the parameters, we advise to look at the <a href="/advanced/spot/">Spot details</a>.
+The parameters given in the <code>[spot]</code> section
+are the default parameter of the Spot instances monitoring the network statistics.</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># spot section manages the default spot parameters</span>
+<span class="p">[</span><span class="nx">spot</span><span class="p">]</span>
+<span class="c"># depth = 50</span>
+<span class="c"># q = 1e-4</span>
+<span class="c"># n_init = 1000</span>
+<span class="c"># level = 0.98</span>
+<span class="c"># up = true</span>
+<span class="c"># down = false</span>
+<span class="c"># alert = true</span>
+<span class="c"># bounded = true</span>
+<span class="c"># max_excess = 200</span>
+</code></pre></div><p>However, you can define another Spot configuration
+for some statistics. You only need to create a
+section <code>[spot.STAT_NAME]</code> and overwrite some parameters.</p>
+<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># you can add a specific section for a statistic</span>
+<span class="c"># it overrides the default values</span>
+<span class="p">[</span><span class="nx">spot</span><span class="p">.</span><span class="nx">R_SYN</span><span class="p">]</span>
+<span class="nx">q</span> <span class="p">=</span> <span class="mi">1</span><span class="nx">e</span><span class="mi">-5</span>
+</code></pre></div>
+</div>
+</div>
+
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  
+
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/asiffer.github.io/netspot/js/scripts.min.1237ff71925bb8625c97a9af8db4c54525258bedfd7c47493daaff723bea755e.js"></script>
+  
+
+  
+  
+  
+    
+  
+
+
+</body>
+
+</html>
