@@ -2,48 +2,48 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Get started on netspot</title>
-    <link>/get-started/</link>
+    <link>/netspot/get-started/</link>
     <description>Recent content in Get started on netspot</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-	<atom:link href="/get-started/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/netspot/get-started/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Installation</title>
-      <link>/get-started/install/</link>
+      <link>/netspot/get-started/install/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/get-started/install/</guid>
+      <guid>/netspot/get-started/install/</guid>
       <description>From sources You can download the netspot sources.
 Debian package You can install netspot through a debian package.</description>
     </item>
     
     <item>
       <title>Basic usage</title>
-      <link>/get-started/basic/</link>
+      <link>/netspot/get-started/basic/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/get-started/basic/</guid>
+      <guid>/netspot/get-started/basic/</guid>
       <description>Run &lt;code&gt;netspot&lt;/code&gt; for the first time!</description>
     </item>
     
     <item>
       <title>Configuration</title>
-      <link>/get-started/configuration/</link>
+      <link>/netspot/get-started/configuration/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/get-started/configuration/</guid>
+      <guid>/netspot/get-started/configuration/</guid>
       <description>All the stuff you can tune</description>
     </item>
     
     <item>
       <title>Architecture</title>
-      <link>/get-started/architecture/</link>
+      <link>/netspot/get-started/architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/get-started/architecture/</guid>
+      <guid>/netspot/get-started/architecture/</guid>
       <description>netspot is also simple by its design</description>
     </item>
     
