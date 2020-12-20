@@ -1,72 +1,266 @@
-<!doctype html><html lang=en><head><script src="/livereload.js?port=1313&mindelay=10&v=2" data-no-instant defer></script><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Statistics - netspot</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=//localhost:1313/netspot/favicon.png><link rel=stylesheet href=/netspot/css/style.min.d248d35f20c43b5b584063d689c2673dca4e2f3f89df5025951ffcdda705001e.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=/netspot/><span>Home</span></a></li><li class="menu-item-get started"><a href=/netspot/get-started/><span>Get started</span></a></li><li class=menu-item-download><a href=/netspot/download/><span>Download</span></a></li><li class=menu-item-advanced><a href=/netspot/advanced/><span>Advanced</span></a></li><li class=menu-item-developer><a href=/netspot/developer/><span>Developer</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=//localhost:1313///netspot/></a></div><div class=logo-mobile><a href=//localhost:1313///netspot/></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=/netspot/><span>Home</span></a></li><li class="menu-item-get started"><a href=/netspot/get-started/><span>Get started</span></a></li><li class=menu-item-download><a href=/netspot/download/><span>Download</span></a></li><li class=menu-item-advanced><a href=/netspot/advanced/><span>Advanced</span></a></li><li class=menu-item-developer><a href=/netspot/developer/><span>Developer</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
-<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4>Developer</h4><ul><li><a href=//localhost:1313///netspot/developer/counter/>Counters</a></li><li class=active><a href=//localhost:1313///netspot/developer/stat/>Statistics</a></li><li><a href=//localhost:1313///netspot/developer/exporter/>Exporting module</a></li><li><a href=//localhost:1313///netspot/developer/toolchain/>Developer toolchain</a></li></ul></div></div></div><div class="col-12 col-md-9"><h1 class=title>Statistics</h1><div class=content><p>The statistics are the real values <code>netspot</code> monitors. In the same manner as the counters, you can implement your
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Statistics - netspot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="icon" href="/netspot/favicon.png">
+
+  
+  
+  <link rel="stylesheet" href="/netspot/css/style.min.d9cb88bb3276ece334de9ab3a804351d8d03e86b3f62f4afb1f0717e04d85fe1.css">
+  
+
+  
+  
+</head>
+
+<body class='page page-default-single'>
+  <div id="main-menu-mobile" class="main-menu-mobile">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+  <div class="wrapper">
+    <div class='header'>
+  <div class="container">
+    <div class="logo">
+      <a href="/netspot/">
+        
+      </a>
+    </div>
+    <div class="logo-mobile">
+      <a href="/netspot/">
+        
+      </a>
+    </div>
+    <div id="main-menu" class="main-menu">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
+  <span class="hamburger-box">
+    <span class="hamburger-inner"></span>
+  </span>
+</button>
+  </div>
+</div>
+
+    
+
+    
+
+    
+    <div class="container pt-2 pt-md-6 pb-3 pb-md-6">
+      <div class="row">
+        <div class="col-12 col-md-3 mb-3">
+          <div class="sidebar">
+            
+<div class="docs-menu">
+  <h4>Developer</h4>
+  <ul>
+    
+    <li class="">
+      <a href="/netspot/developer/counter/">Counters</a>
+    </li>
+    
+    <li class="active ">
+      <a href="/netspot/developer/stat/">Statistics</a>
+    </li>
+    
+    <li class="">
+      <a href="/netspot/developer/exporter/">Exporting module</a>
+    </li>
+    
+    <li class="">
+      <a href="/netspot/developer/toolchain/">Developer toolchain</a>
+    </li>
+    
+  </ul>
+</div>
+
+          </div>
+        </div>
+        <div class="col-12 col-md-9">
+          
+<h1 class="title">Statistics</h1>
+<div class="content ">
+  <p>The statistics are the real values <code>netspot</code> monitors. In the same manner as the counters, you can implement your
 own statistic according to your needs. In particular, they must be located
-in the <code>netspot/stats</code> subpackage.</p><div class=info>The analyzer is in charge of managing statistics. When you implement a
-new statistic you don&rsquo;t have to take care of neither load/unload operations nor Spot algorithm configuration.</div><p>Statistics are built on top of the counters. They use some counters to
+in the <code>netspot/stats</code> subpackage.</p>
+<div class="info">
+    The analyzer is in charge of managing statistics. When you implement a
+new statistic you don&rsquo;t have to take care of neither load/unload operations nor Spot algorithm configuration.
+</div>
+<p>Statistics are built on top of the counters. They use some counters to
 compute their own value. For example, the statistic <code>R_SYN</code> is computed
 as the ratio <code>SYN</code>/<code>IP</code> where <code>SYN</code> counts the number of SYN packets and
-<code>IP</code> counts the number of IP packets.</p><p>The general interface of a statistic (<code>StatInterface</code>) is quite rich but
-only few functions must be implemented.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// StatInterface gathers the common behavior of the statistics
-</span><span class=c1></span><span class=kd>type</span> <span class=nx>StatInterface</span> <span class=kd>interface</span> <span class=p>{</span>
-	<span class=nf>Name</span><span class=p>()</span> <span class=kt>string</span> 
-	<span class=nf>Configure</span><span class=p>()</span> <span class=kt>error</span>
-	<span class=nf>Requirement</span><span class=p>()</span> <span class=p>[]</span><span class=kt>string</span>             
-	<span class=nf>Compute</span><span class=p>(</span><span class=nx>ctrvalues</span> <span class=p>[]</span><span class=kt>uint64</span><span class=p>)</span> <span class=kt>float64</span> 
-	<span class=nf>Update</span><span class=p>(</span><span class=nx>val</span> <span class=kt>float64</span><span class=p>)</span> <span class=kt>int</span>             
-	<span class=nf>UpProbability</span><span class=p>(</span><span class=nx>quantile</span> <span class=kt>float64</span><span class=p>)</span> <span class=kt>float64</span>
-	<span class=nf>DownProbability</span><span class=p>(</span><span class=nx>quantile</span> <span class=kt>float64</span><span class=p>)</span> <span class=kt>float64</span>
-	<span class=nf>GetThresholds</span><span class=p>()</span> <span class=p>(</span><span class=kt>float64</span><span class=p>,</span> <span class=kt>float64</span><span class=p>)</span>
-	<span class=nf>Status</span><span class=p>()</span> <span class=nx>gospot</span><span class=p>.</span><span class=nx>DSpotStatus</span>
-<span class=p>}</span>
+<code>IP</code> counts the number of IP packets.</p>
+<p>The general interface of a statistic (<code>StatInterface</code>) is quite rich but
+only few functions must be implemented.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// StatInterface gathers the common behavior of the statistics
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StatInterface</span> <span class="kd">interface</span> <span class="p">{</span>
+	<span class="nf">Name</span><span class="p">()</span> <span class="kt">string</span> 
+	<span class="nf">Configure</span><span class="p">()</span> <span class="kt">error</span>
+	<span class="nf">Requirement</span><span class="p">()</span> <span class="p">[]</span><span class="kt">string</span>             
+	<span class="nf">Compute</span><span class="p">(</span><span class="nx">ctrvalues</span> <span class="p">[]</span><span class="kt">uint64</span><span class="p">)</span> <span class="kt">float64</span> 
+	<span class="nf">Update</span><span class="p">(</span><span class="nx">val</span> <span class="kt">float64</span><span class="p">)</span> <span class="kt">int</span>             
+	<span class="nf">UpProbability</span><span class="p">(</span><span class="nx">quantile</span> <span class="kt">float64</span><span class="p">)</span> <span class="kt">float64</span>
+	<span class="nf">DownProbability</span><span class="p">(</span><span class="nx">quantile</span> <span class="kt">float64</span><span class="p">)</span> <span class="kt">float64</span>
+	<span class="nf">GetThresholds</span><span class="p">()</span> <span class="p">(</span><span class="kt">float64</span><span class="p">,</span> <span class="kt">float64</span><span class="p">)</span>
+	<span class="nf">Status</span><span class="p">()</span> <span class="nx">gospot</span><span class="p">.</span><span class="nx">DSpotStatus</span>
+<span class="p">}</span>
 </code></pre></div><p>Actually, statistics must inherit from the the <code>BaseStat</code> object which
 already implements some functions of the <code>StatInterface</code> (especially
-all related to the Spot algorithm).</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// BaseStat is the basic structure which defines a statistic. It
-</span><span class=c1>// embeds a string (its unique name) and a DSpot instance which monitors
-</span><span class=c1>// itself.
-</span><span class=c1></span><span class=kd>type</span> <span class=nx>BaseStat</span> <span class=kd>struct</span> <span class=p>{</span>
-	<span class=nx>name</span>  <span class=kt>string</span>
-	<span class=nx>dspot</span> <span class=o>*</span><span class=nx>gospot</span><span class=p>.</span><span class=nx>DSpot</span> <span class=c1>// the spot instance
-</span><span class=c1></span><span class=p>}</span>
+all related to the Spot algorithm).</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// BaseStat is the basic structure which defines a statistic. It
+</span><span class="c1">// embeds a string (its unique name) and a DSpot instance which monitors
+</span><span class="c1">// itself.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">BaseStat</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">name</span>  <span class="kt">string</span>
+	<span class="nx">dspot</span> <span class="o">*</span><span class="nx">gospot</span><span class="p">.</span><span class="nx">DSpot</span> <span class="c1">// the spot instance
+</span><span class="c1"></span><span class="p">}</span>
 </code></pre></div><p>To define a new statistic you only need to inehrit from the previous
-structure and code the following 3 functions:</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=kd>type</span> <span class=nx>StatInterface</span> <span class=kd>interface</span> <span class=p>{</span>
-    <span class=c1>// ...
-</span><span class=c1></span>    <span class=nf>Name</span><span class=p>()</span> <span class=kt>string</span> 
-    <span class=nf>Requirement</span><span class=p>()</span> <span class=p>[]</span><span class=kt>string</span>             
-    <span class=nf>Compute</span><span class=p>(</span><span class=nx>ctrvalues</span> <span class=p>[]</span><span class=kt>uint64</span><span class=p>)</span> <span class=kt>float64</span> 
-    <span class=c1>// ...
-</span><span class=c1></span><span class=p>}</span>
-</code></pre></div><div class=alert>You have to register your statistic by calling the
+structure and code the following 3 functions:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StatInterface</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="nf">Name</span><span class="p">()</span> <span class="kt">string</span> 
+    <span class="nf">Requirement</span><span class="p">()</span> <span class="p">[]</span><span class="kt">string</span>             
+    <span class="nf">Compute</span><span class="p">(</span><span class="nx">ctrvalues</span> <span class="p">[]</span><span class="kt">uint64</span><span class="p">)</span> <span class="kt">float64</span> 
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div><div class="alert">
+    You have to register your statistic by calling the
 <code>Register(stat StatInterface)</code> in the <code>init()</code>
-function.</div><p>Finally, your new statistic should be defined in a single
-file and may look like below.</p><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=c1>// my_stat.go
-</span><span class=c1></span>
-<span class=kn>package</span> <span class=nx>stats</span>
+function.
+</div>
+<p>Finally, your new statistic should be defined in a single
+file and may look like below.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// my_stat.go
+</span><span class="c1"></span>
+<span class="kn">package</span> <span class="nx">stats</span>
 
-<span class=kd>func</span> <span class=nf>init</span><span class=p>()</span> <span class=p>{</span>
-    <span class=c1>// The statistic is registered at compile time
-</span><span class=c1></span>    <span class=nf>Register</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>STAT</span><span class=p>{</span><span class=nx>BaseStat</span><span class=p>{</span><span class=nx>name</span><span class=p>:</span> <span class=s>&#34;...&#34;</span><span class=p>}})</span>
-<span class=p>}</span>
+<span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// The statistic is registered at compile time
+</span><span class="c1"></span>    <span class="nf">Register</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">STAT</span><span class="p">{</span><span class="nx">BaseStat</span><span class="p">{</span><span class="nx">name</span><span class="p">:</span> <span class="s">&#34;...&#34;</span><span class="p">}})</span>
+<span class="p">}</span>
 
-<span class=c1>// STAT computes something to define
-</span><span class=c1></span><span class=kd>type</span> <span class=nx>STAT</span> <span class=kd>struct</span> <span class=p>{</span>
-    <span class=nx>BaseStat</span> <span class=c1>// compose with BaseStat
-</span><span class=c1></span>    <span class=c1>// you can add some other attributes
-</span><span class=c1></span><span class=p>}</span>
+<span class="c1">// STAT computes something to define
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">STAT</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">BaseStat</span> <span class="c1">// compose with BaseStat
+</span><span class="c1"></span>    <span class="c1">// you can add some other attributes
+</span><span class="c1"></span><span class="p">}</span>
 
-<span class=c1>// Name returns the unique name of the stat
-</span><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>stat</span> <span class=o>*</span><span class=nx>STAT</span><span class=p>)</span> <span class=nf>Name</span><span class=p>()</span> <span class=kt>string</span> <span class=p>{</span>
-    <span class=k>return</span> <span class=s>&#34;...&#34;</span>
-<span class=p>}</span>
+<span class="c1">// Name returns the unique name of the stat
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">stat</span> <span class="o">*</span><span class="nx">STAT</span><span class="p">)</span> <span class="nf">Name</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s">&#34;...&#34;</span>
+<span class="p">}</span>
 
-<span class=c1>// Requirement returns the requested counters to compute the stat.
-</span><span class=c1>// The order is important for the Compute() function
-</span><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>stat</span> <span class=o>*</span><span class=nx>STAT</span><span class=p>)</span> <span class=nf>Requirement</span><span class=p>()</span> <span class=p>[]</span><span class=kt>string</span> <span class=p>{</span>
+<span class="c1">// Requirement returns the requested counters to compute the stat.
+</span><span class="c1">// The order is important for the Compute() function
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">stat</span> <span class="o">*</span><span class="nx">STAT</span><span class="p">)</span> <span class="nf">Requirement</span><span class="p">()</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span>
 
-<span class=p>}</span>
+<span class="p">}</span>
 
-<span class=c1>// Compute implements the way to compute the stat from the counters.
-</span><span class=c1>// Counters are given in the same order as the Requirement() function
-</span><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>stat</span> <span class=o>*</span><span class=nx>STAT</span><span class=p>)</span> <span class=nf>Compute</span><span class=p>(</span><span class=nx>ctrvalues</span> <span class=p>[]</span><span class=kt>uint64</span><span class=p>)</span> <span class=kt>float64</span> <span class=p>{</span>
+<span class="c1">// Compute implements the way to compute the stat from the counters.
+</span><span class="c1">// Counters are given in the same order as the Requirement() function
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">stat</span> <span class="o">*</span><span class="nx">STAT</span><span class="p">)</span> <span class="nf">Compute</span><span class="p">(</span><span class="nx">ctrvalues</span> <span class="p">[]</span><span class="kt">uint64</span><span class="p">)</span> <span class="kt">float64</span> <span class="p">{</span>
 
-<span class=p>}</span>
-</code></pre></div></div></div></div></div></div></div><script type=text/javascript src=/netspot/js/scripts.js></script></body></html>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  
+
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/netspot/js/scripts.min.1237ff71925bb8625c97a9af8db4c54525258bedfd7c47493daaff723bea755e.js"></script>
+  
+
+  
+  
+  
+    
+  
+
+
+</body>
+
+</html>

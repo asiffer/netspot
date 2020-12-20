@@ -1,9 +1,207 @@
-<!doctype html><html lang=en><head><meta name=generator content="Hugo 0.74.3"><script src="/livereload.js?port=1313&mindelay=10&v=2" data-no-instant defer></script><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>netspot</title><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content><meta property="og:title" content><meta property="og:type" content><meta property="og:url" content><meta property="og:image" content><meta property="og:description" content><meta name=twitter:card content><meta name=twitter:site content><meta name=twitter:creator content><link rel=icon href=//localhost:1313/netspot/favicon.png><link rel=stylesheet href=/netspot/css/style.min.d248d35f20c43b5b584063d689c2673dca4e2f3f89df5025951ffcdda705001e.css></head><body class="page page-home"><div id=main-menu-mobile class=main-menu-mobile><ul><li class="menu-item-home active"><a href=/netspot/><span>Home</span></a></li><li class="menu-item-get started"><a href=/netspot/get-started/><span>Get started</span></a></li><li class=menu-item-download><a href=/netspot/download/><span>Download</span></a></li><li class=menu-item-advanced><a href=/netspot/advanced/><span>Advanced</span></a></li><li class=menu-item-developer><a href=/netspot/developer/><span>Developer</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=//localhost:1313///netspot/></a></div><div class=logo-mobile><a href=//localhost:1313///netspot/></a></div><div id=main-menu class=main-menu><ul><li class="menu-item-home active"><a href=/netspot/><span>Home</span></a></li><li class="menu-item-get started"><a href=/netspot/get-started/><span>Get started</span></a></li><li class=menu-item-download><a href=/netspot/download/><span>Download</span></a></li><li class=menu-item-advanced><a href=/netspot/advanced/><span>Advanced</span></a></li><li class=menu-item-developer><a href=/netspot/developer/><span>Developer</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
-<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="snap-scroll-container-main container"><div class=snap-scroll-container-div style=scroll-snap-align:center;margin-top:-2em><h1 class=title>netspot</h1><p style=text-align:center>A simple IDS with statistical learning</p><a class="button button-primary mb-2" href=#overview>Overview</a>
-<a class="button button-primary mb-2" href=/netspot/get-started/>Get started</a></div><div id=overview class="container-fluid snap-scroll-container-div w-100"><div class=row><div class=col><i class="fas fa-brain fa-4x frost2" aria-hidden=true style=margin-bottom:.25em></i><h2 class=frost2>Smart</h2><p class="text-justify font-weight-light w-100">Netspot finds <b>abnormal behaviors</b> in network statistics.
-Based on the SPOT algorithm, it automatically builds and updates a
-threshold aimed to flag extreme events (peaks).</p></div><div class="col mr-5 ml-5"><i class="fas fa-shipping-fast fa-4x frost2" aria-hidden=true style=margin-bottom:.25em></i><h2 class=frost2>Fast</h2><p class="text-justify font-weight-light w-100">Netspot is basically able to treat <b>1M packets/s</b>
-on the guy next door computer. Even on embedded device like a Raspberry Pi (3B+),
-netspot can process about <b>100k packets/s</b>.</p></div><div class=col><i class="fas fa-layer-group fa-4x frost2" aria-hidden=true style=margin-bottom:.25em></i><h2 class=frost2>Modular</h2><p class="text-justify font-weight-light w-100">Netspot get used to your needs. Developers can easily implement
-<b>new statistics</b> and <b>new connectors</b> to send netspot
-data where they want.</p></div></div></div></div></div><script type=text/javascript src=/netspot/js/scripts.js></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta name="generator" content="Hugo 0.74.3" />
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>netspot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+<meta name="description" content="" />
+<meta property="og:title" content="" />
+<meta property="og:type" content="" />
+<meta property="og:url" content="" />
+<meta property="og:image" content="" />
+<meta property="og:description" content="" />
+<meta name="twitter:card" content="" />
+<meta name="twitter:site" content="" />
+<meta name="twitter:creator" content="" />
+
+  <link rel="icon" href="/netspot/favicon.png">
+
+  
+  
+  <link rel="stylesheet" href="/netspot/css/style.min.d9cb88bb3276ece334de9ab3a804351d8d03e86b3f62f4afb1f0717e04d85fe1.css">
+  
+
+  
+  
+</head>
+
+<body class='page page-home'>
+  <div id="main-menu-mobile" class="main-menu-mobile">
+  <ul>
+    
+    
+    <li class="menu-item-home active">
+      <a href="/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+  <div class="wrapper">
+    <div class='header'>
+  <div class="container">
+    <div class="logo">
+      <a href="/netspot/">
+        
+      </a>
+    </div>
+    <div class="logo-mobile">
+      <a href="/netspot/">
+        
+      </a>
+    </div>
+    <div id="main-menu" class="main-menu">
+  <ul>
+    
+    
+    <li class="menu-item-home active">
+      <a href="/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer">
+      <a href="/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
+  <span class="hamburger-box">
+    <span class="hamburger-inner"></span>
+  </span>
+</button>
+  </div>
+</div>
+
+    
+
+    
+    
+    
+
+    
+    
+
+<div class="snap-scroll-container-main container">
+
+  <div class="snap-scroll-container-div" style="scroll-snap-align: center; margin-top: -2em;">
+    <h1 class="title">netspot</h1>
+    <p style="text-align: center;">A simple IDS with statistical learning</p>
+    <a class="button button-primary mb-2" href="#overview">
+      Overview
+    </a>
+    <a class="button button-primary mb-2" href="/netspot/get-started/">
+      Get started
+    </a>
+  </div>
+
+  <div id="overview" class="container-fluid snap-scroll-container-div w-100">
+    <div class="row">
+      <div class="col">
+        <i class="fas fa-brain fa-4x frost2" aria-hidden="true" style="margin-bottom: 0.25em;"></i>
+        <h2 class="frost2">Smart</h2>
+        <p class="text-justify font-weight-light w-100">
+          Netspot finds <b>abnormal behaviors</b> in network statistics.
+          Based on the SPOT algorithm, it automatically builds and updates a
+          threshold aimed to flag extreme events (peaks).
+        </p>
+      </div>
+      <div class="col mr-5 ml-5">
+        <i class="fas fa-shipping-fast fa-4x frost2" aria-hidden="true" style="margin-bottom: 0.25em;"></i>
+        <h2 class="frost2">Fast</h2>
+        <p class="text-justify font-weight-light w-100">
+          Netspot is basically able to treat <b>1M packets/s</b>
+          on the guy next door computer. Even on embedded device like a Raspberry Pi (3B+),
+          netspot can process about <b>100k packets/s</b>.
+        </p>
+      </div>
+      <div class="col">
+        <i class="fas fa-layer-group fa-4x frost2" aria-hidden="true" style="margin-bottom: 0.25em;"></i>
+        <h2 class="frost2">Modular</h2>
+        <p class="text-justify font-weight-light w-100">
+          Netspot get used to your needs. Developers can easily implement
+          <b>new statistics</b> and <b>new connectors</b> to send netspot
+          data where they want.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+    
+  </div>
+
+  
+
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/netspot/js/scripts.min.1237ff71925bb8625c97a9af8db4c54525258bedfd7c47493daaff723bea755e.js"></script>
+  
+
+  
+  
+  
+    
+  
+
+
+</body>
+
+</html>

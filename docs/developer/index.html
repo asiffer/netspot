@@ -1,2 +1,217 @@
-<!doctype html><html lang=en><head><script src="/livereload.js?port=1313&mindelay=10&v=2" data-no-instant defer></script><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Developer - netspot</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=//localhost:1313/netspot/favicon.png><link rel=stylesheet href=/netspot/css/style.min.d248d35f20c43b5b584063d689c2673dca4e2f3f89df5025951ffcdda705001e.css></head><body class="page page-default-list"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=/netspot/><span>Home</span></a></li><li class="menu-item-get started"><a href=/netspot/get-started/><span>Get started</span></a></li><li class=menu-item-download><a href=/netspot/download/><span>Download</span></a></li><li class=menu-item-advanced><a href=/netspot/advanced/><span>Advanced</span></a></li><li class="menu-item-developer active"><a href=/netspot/developer/><span>Developer</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=//localhost:1313///netspot/></a></div><div class=logo-mobile><a href=//localhost:1313///netspot/></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=/netspot/><span>Home</span></a></li><li class="menu-item-get started"><a href=/netspot/get-started/><span>Get started</span></a></li><li class=menu-item-download><a href=/netspot/download/><span>Download</span></a></li><li class=menu-item-advanced><a href=/netspot/advanced/><span>Advanced</span></a></li><li class="menu-item-developer active"><a href=/netspot/developer/><span>Developer</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
-<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4>Developer</h4><ul><li><a href=//localhost:1313///netspot/developer/counter/>Counters</a></li><li><a href=//localhost:1313///netspot/developer/stat/>Statistics</a></li><li><a href=//localhost:1313///netspot/developer/exporter/>Exporting module</a></li><li><a href=//localhost:1313///netspot/developer/toolchain/>Developer toolchain</a></li></ul></div></div></div><div class="col-12 col-md-9"><h1 class=title>Developer</h1><div class=content><p>Many things can be added to netspot.</p></div><div class="summary mb-2"><h2 class=title-summary><a href=//localhost:1313///netspot/developer/counter/>Counters</a></h2><p>The counter is the more atomic object within netspot.</p></div><div class="summary mb-2"><h2 class=title-summary><a href=//localhost:1313///netspot/developer/stat/>Statistics</a></h2><p>Based on available counters, you can implement your own statistics</p></div><div class="summary mb-2"><h2 class=title-summary><a href=//localhost:1313///netspot/developer/exporter/>Exporting module</a></h2><p>Depending on your data/logs storage, <code>netspot</code> can be adapted to your needs.</p></div><div class="summary mb-2"><h2 class=title-summary><a href=//localhost:1313///netspot/developer/toolchain/>Developer toolchain</a></h2><p>How to develop new components to netspot</p></div></div></div></div></div><script type=text/javascript src=/netspot/js/scripts.js></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Developer - netspot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="icon" href="/netspot/favicon.png">
+
+  
+  
+  <link rel="stylesheet" href="/netspot/css/style.min.d9cb88bb3276ece334de9ab3a804351d8d03e86b3f62f4afb1f0717e04d85fe1.css">
+  
+
+  
+  
+</head>
+
+<body class='page page-default-list'>
+  <div id="main-menu-mobile" class="main-menu-mobile">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer active">
+      <a href="/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+  <div class="wrapper">
+    <div class='header'>
+  <div class="container">
+    <div class="logo">
+      <a href="/netspot/">
+        
+      </a>
+    </div>
+    <div class="logo-mobile">
+      <a href="/netspot/">
+        
+      </a>
+    </div>
+    <div id="main-menu" class="main-menu">
+  <ul>
+    
+    
+    <li class="menu-item-home">
+      <a href="/netspot/">
+        <span>Home</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-get started">
+      <a href="/netspot/get-started/">
+        <span>Get started</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-download">
+      <a href="/netspot/download/">
+        <span>Download</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-advanced">
+      <a href="/netspot/advanced/">
+        <span>Advanced</span>
+      </a>
+    </li>
+    
+    <li class="menu-item-developer active">
+      <a href="/netspot/developer/">
+        <span>Developer</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
+  <span class="hamburger-box">
+    <span class="hamburger-inner"></span>
+  </span>
+</button>
+  </div>
+</div>
+
+    
+
+    
+
+    
+    <div class="container pt-2 pt-md-6 pb-3 pb-md-6">
+      <div class="row">
+        <div class="col-12 col-md-3 mb-3">
+          <div class="sidebar">
+            
+<div class="docs-menu">
+  <h4>Developer</h4>
+  <ul>
+    
+    <li class="">
+      <a href="/netspot/developer/counter/">Counters</a>
+    </li>
+    
+    <li class="">
+      <a href="/netspot/developer/stat/">Statistics</a>
+    </li>
+    
+    <li class="">
+      <a href="/netspot/developer/exporter/">Exporting module</a>
+    </li>
+    
+    <li class="">
+      <a href="/netspot/developer/toolchain/">Developer toolchain</a>
+    </li>
+    
+  </ul>
+</div>
+
+          </div>
+        </div>
+        <div class="col-12 col-md-9">
+          
+
+
+<h1 class="title">Developer</h1>
+<div class="content">
+  <p>Many things can be added to netspot.</p>
+
+</div>
+
+
+<div class="summary mb-2">
+  
+  <h2 class="title-summary"><a href="/netspot/developer/counter/">Counters</a></h2>
+  <p>The counter is the more atomic object within netspot.</p>
+</div>
+
+
+<div class="summary mb-2">
+  
+  <h2 class="title-summary"><a href="/netspot/developer/stat/">Statistics</a></h2>
+  <p>Based on available counters, you can implement your own statistics</p>
+</div>
+
+
+<div class="summary mb-2">
+  
+  <h2 class="title-summary"><a href="/netspot/developer/exporter/">Exporting module</a></h2>
+  <p>Depending on your data/logs storage, <code>netspot</code> can be adapted to your needs.</p>
+</div>
+
+
+<div class="summary mb-2">
+  
+  <h2 class="title-summary"><a href="/netspot/developer/toolchain/">Developer toolchain</a></h2>
+  <p>How to develop new components to netspot</p>
+</div>
+
+
+
+
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  
+
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/netspot/js/scripts.min.1237ff71925bb8625c97a9af8db4c54525258bedfd7c47493daaff723bea755e.js"></script>
+  
+
+  
+  
+  
+    
+  
+
+
+</body>
+
+</html>
