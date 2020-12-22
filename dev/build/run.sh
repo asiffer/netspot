@@ -39,7 +39,7 @@ if [[ $# -eq 1 ]]; then
     fi
 fi
 
-docker run --detach -it -v "/home/asr/go/src/netspot:/go/src/netspot" --name "${CONTAINER}" "${IMAGE}"
+docker run --detach -it -v "${GOPATH}/src/netspot:/go/src/netspot" --name "${CONTAINER}" "${IMAGE}"
 trap "docker rm -f ${CONTAINER}" EXIT
 
 for arch in ${ARCH}; do
