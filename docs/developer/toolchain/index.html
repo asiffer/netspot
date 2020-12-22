@@ -152,15 +152,16 @@
 <h1 class="title">Developer toolchain</h1>
 <div class="content ">
   <p><code>netspot</code> is distributed as statically-compiled binaries. The final executables
-embed the <code>libpcap</code> and <code>musl</code> libraries.
+notably embed the <code>libpcap</code> and <code>musl</code> libraries.
 Using a musl-based system (like <a href="https://alpinelinux.org/">alpine</a>)
 is then far easier to compile <code>netspot</code>.
 Obviously, you can dynamically link <code>netspot</code> to <code>libpcap</code> and the
 more common GNU libc, but the installation will require these
-dependencies on the target system.</p>
+dependencies on the target system. Here, we only detail the static
+build for different architectures.</p>
 <p>The <a href="https://github.com/asiffer/netspot/tree/master/dev">dev/</a> includes
 some utilities to build <code>netspot</code> statically.</p>
-<h3 id="alpine-linux-image">Alpine-linux image</h3>
+<h3 id="docker-image">Docker image</h3>
 <p>First of all, you have to prepare the docker image to build netspot.
 A Dockerfile is provided in the <a href="https://github.com/asiffer/netspot/tree/master/dev/image">dev/image/</a>
 subfolder.</p>
@@ -217,8 +218,7 @@ The <a href="https://github.com/asiffer/netspot/tree/master/dev/build">dev/build
 folder gathers scripts for this purpose.</p>
 <p>The <code>builder.sh</code> script is the main file you have to run to compile
 <code>netspot</code> for a specific architecture</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">
-builder.sh &lt;ARCH&gt;
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">builder.sh &lt;ARCH&gt;
 </code></pre></div><div class="alert">
     <p>The available ARCH depend on the previous image
 by default you can choose between</p>
