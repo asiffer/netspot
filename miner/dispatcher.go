@@ -137,6 +137,8 @@ func (d *Dispatcher) load(name string) error {
 	if !exists {
 		return fmt.Errorf("The counter %s does not exists", name)
 	}
+	// ensure the counter is zero
+	ctr.Reset()
 	d.counters[name] = ctr
 	return nil
 }
