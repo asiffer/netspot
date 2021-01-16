@@ -24,7 +24,8 @@ func init() {
 
 func TestInitStartCloseFile(t *testing.T) {
 	title("Testing File exporter")
-	Clear()
+	Zero()
+	// Clear()
 	if err := setFullConfig(); err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +59,7 @@ func TestInitStartCloseFile(t *testing.T) {
 	}
 }
 func TestStartFile(t *testing.T) {
-	defer Unload("file")
+	Zero()
 	title("Testing start of File exporter")
 
 	if err := setFullConfig(); err != nil {
@@ -110,7 +111,7 @@ func TestStartFile(t *testing.T) {
 
 func TestFileWriteAndWarn(t *testing.T) {
 	title("Testing data writing (File exporter)")
-
+	Zero()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}
@@ -158,6 +159,7 @@ func TestFileWriteAndWarn(t *testing.T) {
 }
 
 func TestFileStatus(t *testing.T) {
+	Zero()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}
@@ -181,7 +183,7 @@ alarm = "/tmp/netspot.alarm"
 	}
 	defer Unload(f.Name())
 
-	t.Logf("%v+\n", f.Status())
+	// t.Logf("%v+\n", f.Status())
 
 	f.Start("noformat")
 	f.Close()

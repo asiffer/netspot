@@ -109,18 +109,3 @@ func TestConsoleWriteAndWarn(t *testing.T) {
 	}
 
 }
-
-func TestConsoleStatus(t *testing.T) {
-	title(t.Name())
-	if err := setFullConfig(); err != nil {
-		t.Error(err)
-	}
-
-	c := Console{}
-	if err := c.Init(); err != nil {
-		t.Fatal(err)
-	}
-	defer Unload(c.Name())
-
-	t.Logf("%v+\n", c.Status())
-}

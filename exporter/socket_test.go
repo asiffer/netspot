@@ -161,7 +161,7 @@ func TestInitStartCloseSocket(t *testing.T) {
 
 func TestStartSocket(t *testing.T) {
 	title(t.Name())
-	Clear()
+	// Clear()
 	// init config
 	if err := setFullConfig(); err != nil {
 		t.Fatal(err)
@@ -271,7 +271,7 @@ func TestCSVEncoder(t *testing.T) {
 	// receiver
 	buffer := make([]byte, 2048)
 
-	t.Logf("%v+\n", s.Status())
+	// t.Logf("%v+\n", s.Status())
 	// send data
 	if err := s.Write(now, data); err != nil {
 		t.Error(err)
@@ -461,6 +461,7 @@ func TestGobEncoder(t *testing.T) {
 
 func TestSocketWarn(t *testing.T) {
 	title(t.Name())
+	Zero()
 	config.Clean()
 	config.InitConfig()
 
@@ -541,6 +542,7 @@ func TestSocketWarn(t *testing.T) {
 }
 
 func TestSocketStatus(t *testing.T) {
+	Zero()
 	title(t.Name())
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
@@ -552,5 +554,5 @@ func TestSocketStatus(t *testing.T) {
 	}
 	defer Unload(s.Name())
 
-	t.Logf("%v+\n", s.Status())
+	// t.Logf("%v+\n", s.Status())
 }

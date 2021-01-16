@@ -176,7 +176,7 @@ func TestLoadAll(t *testing.T) {
 
 func TestBasics(t *testing.T) {
 	title(t.Name())
-	defer Clear()
+	// defer Clear()
 	setNullConfig()
 	InitLogger()
 
@@ -252,7 +252,7 @@ func TestBasics(t *testing.T) {
 
 func TestLoading(t *testing.T) {
 	title(t.Name())
-	defer Clear()
+	// defer Clear()
 	setFullConfig()
 	// zerolog.SetGlobalLevel(zerolog.Disabled)
 
@@ -293,10 +293,10 @@ func TestLoading(t *testing.T) {
 
 func TestInit(t *testing.T) {
 	title(t.Name())
-	defer Clear()
+	// defer Clear()
 	InitLogger()
 	InitConfig()
-	t.Logf("%+v\n", GenericStatus())
+	// t.Logf("%+v\n", GenericStatus())
 }
 
 func TestBasicStart(t *testing.T) {
@@ -379,7 +379,7 @@ alarm = true
 
 func TestStartCloseAll(t *testing.T) {
 	title("Testing start/close function")
-	defer Clear()
+	// defer Clear()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}
