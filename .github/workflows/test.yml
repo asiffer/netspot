@@ -1,0 +1,35 @@
+name: Test
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    container: 
+      image: golang:1.15.7-alpine
+      env:
+        # SYSTEM
+        PACKAGES: nano bash linux-headers git flex bison wget make bluez-dev bluez libpcap libpcap-dev
+    services:
+      influxdb:
+        image: influxdb:1.8
+        ports:
+        - 8086/tcp
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Symbolic link to GOPATH
+        run: ln -s $GITHUB_WORKSPACE $GOPATH/src/netspot
+
+      - name: Setup CGO env variables
+        run: |
+          echo CGO_ENABLED=1 >> $GITHUB_ENV
+
+      - name: Get packages
+        run: apk update; apk add $PACKAGES
+
+      - name: Run tests
+        run: go test -race -cover -v
+
