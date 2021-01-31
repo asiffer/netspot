@@ -1,4 +1,4 @@
-// analyezr_test.go
+// analyzer_test.go
 
 package analyzer
 
@@ -10,6 +10,8 @@ import (
 	"netspot/miner"
 	"os"
 	"path"
+	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -20,15 +22,33 @@ import (
 var (
 	HeaderWidth = 100
 	HeaderSym   = "-"
-	pcapFile1   = "/data/pcap/snort.log.1425823194.pcap"
-	pcapFile2   = "/data/pcap/202002071400.pcap"
-	pcapFile3   = "/data/kitsune/Mirai/Mirai_pcap.pcap"
+	pcapFile1   string
+	pcapFile2   string
+	pcapFile3   string
 )
 
 var (
 	testFiles []string
 	wd        string
 )
+
+var (
+	testDir string
+)
+
+func init() {
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+	setTestDir()
+	pcapFile1 = filepath.Join(testDir, "empire.pcapng")
+	pcapFile2 = filepath.Join(testDir, "snort.pcap")
+	pcapFile3 = filepath.Join(testDir, "mirai.pcap")
+}
+
+func setTestDir() {
+	wd, _ := os.Getwd()
+	testDir = filepath.Join(wd, "../test")
+	fmt.Println(testDir)
+}
 
 func title(s string) {
 	l := len(s)
@@ -68,6 +88,8 @@ func findTestFiles() error {
 	for i, f := range infos {
 		testFiles[i] = path.Join(testDir, f.Name())
 	}
+	sort.Strings(testFiles)
+	fmt.Println(testFiles)
 	return nil
 }
 
@@ -138,39 +160,64 @@ func TestLoadStat(t *testing.T) {
 
 func TestUnloadAll(t *testing.T) {
 	title(t.Name())
+	checkTitle("Loading 3 stats...")
 	LoadFromName("R_SYN")
 	LoadFromName("R_ICMP")
 	LoadFromName("R_DST_SRC")
-	fmt.Println("Loaded stats:", GetLoadedStats())
-	// fmt.Println("Loaded counters:", miner.GetLoadedCounters())
-	// fmt.Println("Removing all stats ...")
+	if len(GetLoadedStats()) != 3 {
+		t.Errorf("Error while loading stats: %v", GetLoadedStats())
+		testERROR()
+	} else {
+		testOK()
+	}
+
+	checkTitle("Unloading all the stats...")
 	UnloadAll()
 	if len(GetLoadedStats()) > 0 {
 		t.Error("Error while removing all stats")
+		testERROR()
+	} else {
+		testOK()
 	}
+
+	checkTitle("Checking loaded counters...")
 	if len(miner.GetLoadedCounters()) > 0 {
+		testERROR()
 		t.Error("Error while removing underlying counters")
+	} else {
+		testOK()
 	}
-	fmt.Println("Loaded stats:", GetLoadedStats())
-	fmt.Println("Loaded counters:", miner.GetLoadedCounters())
 }
 
 func TestUnloadSpecific(t *testing.T) {
 	title("Testing specific unloading")
+
+	checkTitle("Loading 2 stats...")
 	LoadFromName("R_SYN")
 	LoadFromName("R_ICMP")
-	fmt.Println("Loaded stats:", GetLoadedStats())
-	// fmt.Println("Loaded counters:", miner.GetLoadedCounters())
-	// fmt.Println("Removing R_SYN")
+	if len(GetLoadedStats()) != 2 {
+		t.Errorf("Error while loading stats: %v", GetLoadedStats())
+		testERROR()
+	} else {
+		testOK()
+	}
+
+	checkTitle("Unloading a single stat...")
 	UnloadFromName("R_SYN")
 	if find(GetLoadedStats(), "R_SYN") > 0 {
+		testERROR()
 		t.Error("Error while removing R_SYN")
+	} else {
+		testOK()
 	}
+
+	checkTitle("Checking loaded counters...")
 	if find(miner.GetLoadedCounters(), "SYN") > 0 {
+		testERROR()
 		t.Error("Error while removing SYN counter")
+	} else {
+		testOK()
 	}
-	fmt.Println("Loaded stats:", GetLoadedStats())
-	// fmt.Println("Loaded counters:", miner.GetLoadedCounters())
 }
 
 func TestZero(t *testing.T) {
@@ -183,22 +230,11 @@ func TestZero(t *testing.T) {
 	LoadFromName("R_DST_SRC")
 	LoadFromName("R_ICMP")
 
-	// small
-	// pcapFile1 : ~420min
-
 	if err := miner.SetDevice(testFiles[0]); err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("AFTER:", miner.GetDevice())
 	period = 5 * time.Minute
 
-	// huge
-	// pcapFile2 : 900s
-	// miner.SetDevice(pcapFile2)
-	// period = 200 * time.Millisecond
-
-	time.Sleep(1 * time.Second)
-	// miner.StartSniffing()
 	a := time.Now()
 	if err := StartAndWait(); err != nil {
 		t.Error(err)
@@ -209,97 +245,17 @@ func TestZero(t *testing.T) {
 	// miner.Zero()
 	Zero()
 }
-func TestLivePcapSmall(t *testing.T) {
-	// SetLogging(0)
-	// zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	config.Clean()
-	config.LoadDefaults()
-	exporter.Load("console")
-	title(t.Name())
-	// reset()
-	// miner.Zero()
-	UnloadAll()
-	LoadFromName("R_SYN")
-	LoadFromName("AVG_PKT_SIZE")
-	LoadFromName("R_ACK")
-	LoadFromName("R_DST_SRC")
-	LoadFromName("R_ICMP")
-
-	// small
-	// pcapFile1 : ~420min
-	// logDataToFile = true
-	miner.SetDevice(testFiles[1])
-	SetPeriod(5 * time.Minute)
-
-	// miner.SetTickPeriod(period)
-	// huge
-	// pcapFile2 : 900s
-	// miner.SetDevice(pcapFile2)
-	// period = 200 * time.Millisecond
-
-	// miner.StartSniffing()
-	// if !miner.IsSniffing() {
-	// 	t.Error("Error: no sniffing")
-	// }
-	time.Sleep(1 * time.Second)
-	// a := time.Now()
-	if err := StartAndWait(); err != nil {
-		t.Errorf("Error while running: %v", err)
-	}
-	// b := time.Since(a)
-	// log.Printf("Timing: %f", b.Seconds())
-}
-
-func TestLivePcapHuge(t *testing.T) {
-	// DisableLogging()
-	title(t.Name())
-	UnloadAll()
-	// LoadFromName("R_SYN")
-	// LoadFromName("AVG_PKT_SIZE")
-	LoadFromName("R_ACK")
-	// LoadFromName("R_DST_SRC")
-	// LoadFromName("R_ICMP")
-
-	extra := map[string]interface{}{
-		"spot.AVG_PKT_SIZE.n_init": 800,
-		"spot.AVG_PKT_SIZE.level":  0.99,
-		"spot.AVG_PKT_SIZE.q":      1e-3,
-	}
-	config.LoadForTest(extra)
-	// LoadFromNameWithCustomConfig("AVG_PKT_SIZE", extra)
-
-	// small
-	// pcapFile1 : ~420min
-	// logDataToFile = true
-	// miner.SetDevice(pcapFile1)
-	// period = 5 * time.Minute
-
-	// huge
-	// pcapFile2 : 900s
-	miner.SetDevice(pcapFile2)
-	period = 200 * time.Millisecond
-	SetPeriod(period)
-	// miner.SetTickPeriod(period)
-	// miner.StartSniffing()
-	// if !miner.IsSniffing() {
-	// 	t.Error("Error: no sniffing")
-	// }
-	if err := Start(); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(4 * time.Second)
-	if err := Stop(); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(1 * time.Second)
-}
 
 func TestLivePerfs(t *testing.T) {
 	title(t.Name())
 	// UnloadAll()
 	Zero()
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	exporter.Load("console")
+	// zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	miner.SetDevice(pcapFile1)
+	SetPeriod(5 * time.Second)
+	config.SetValue("exporter.console.data", true)
+	exporter.InitConfig()
+	// exporter.Load("console")
 	if err := exporter.Start("testAnalyzer"); err != nil {
 		t.Errorf("Error while starting exporter")
 	}
@@ -327,7 +283,7 @@ func TestLivePerfs(t *testing.T) {
 
 	// logDataToFile = true
 	// SetOutputDir("/home/asr/Documents/Work/go/src/netspot/analyzer/")
-	time.Sleep(10 * time.Millisecond)
+	// time.Sleep(10 * time.Millisecond)
 	// small
 	// pcapFile1 : ~420min
 	// logDataToFile = true
@@ -336,7 +292,7 @@ func TestLivePerfs(t *testing.T) {
 	// huge
 	// pcapFile2 : 900s
 	miner.SetDevice(pcapFile2)
-	SetPeriod(3 * time.Second)
+	SetPeriod(1 * time.Second)
 
 	Start()
 	time.Sleep(5 * time.Second)
@@ -385,30 +341,3 @@ func TestLivePerfs(t *testing.T) {
 // 	// fmt.Println("STOP")
 // 	// StopStats()
 // }
-
-func TestLive(t *testing.T) {
-	title(t.Name())
-	UnloadAll()
-	config.Clean()
-	config.LoadDefaults()
-	config.LoadForTest(map[string]interface{}{
-		"analyzer.stats": []string{"R_ARP", "R_ACK"},
-	})
-
-	if err := miner.InitConfig(); err != nil {
-		t.Error(err)
-	}
-	if err := InitConfig(); err != nil {
-		t.Error(err)
-	}
-
-	for _, f := range testFiles {
-		if err := miner.SetDevice(f); err != nil {
-			t.Error(err)
-		}
-		if err := StartAndWait(); err != nil {
-			t.Error(err)
-		}
-	}
-
-}

@@ -44,7 +44,7 @@ var (
 var (
 	defaultEventChannel = make(chan int)                // channel to send/receive events
 	defaultDataChannel  = make(chan map[string]float64) // channel to sen/receive data
-	running             = false                         // to check if the stat are computed
+	// running             = false                         // to check if the stat are computed
 )
 
 var (
@@ -102,7 +102,7 @@ func reset() {
 	defaultEventChannel = make(chan int)
 	defaultDataChannel = make(chan map[string]float64)
 	// running state
-	running = false
+	running.End()
 }
 
 // InitConfig load the stats according to
@@ -234,7 +234,7 @@ func unload(name string) error {
 
 // StatStatus returns the status of the dspot instance monitoring that stat
 func StatStatus(s string) (gospot.DSpotStatus, error) {
-	if !isLoaded(s) {
+	if isLoaded(s) {
 		return statMap[s].Status(), nil
 	}
 	return gospot.DSpotStatus{}, fmt.Errorf("Stat %s is not loaded", s)
@@ -257,7 +257,7 @@ func Zero() error {
 
 // SetPeriod sets the duration between two stat computations
 func SetPeriod(d time.Duration) {
-	if !running {
+	if !IsRunning() {
 		period = d
 		analyzerLogger.Debug().Msgf("Period set to %s", d)
 	} else {
@@ -324,12 +324,12 @@ func UnloadAll() {
 
 // IsRunning checks whether the statistics are currently computed
 func IsRunning() bool {
-	return running
+	return running.Status()
 }
 
 // Stop stops the analysis and check that it is well stopped
 func Stop() error {
-	if running {
+	if IsRunning() {
 		analyzerLogger.Debug().Msg("Sending STOP message")
 		// send the STOP msg
 		defaultEventChannel <- STOP
@@ -356,7 +356,7 @@ func Stop() error {
 
 // StatValues return a current snapshot of the stat values (and their thresholds)
 func StatValues() map[string]float64 {
-	if running {
+	if IsRunning() {
 		defaultEventChannel <- STAT
 		return <-defaultDataChannel
 	}
@@ -366,7 +366,7 @@ func StatValues() map[string]float64 {
 // Start starts the analysis
 // func Start() error {
 func Start() error {
-	if running {
+	if IsRunning() {
 		return fmt.Errorf("The analyzer is already running")
 	}
 	if len(GetLoadedStats()) == 0 {
@@ -391,7 +391,7 @@ func Start() error {
 // StartAndWait starts the analysis. It will stop only when no packets
 // have to be processed (ex: pcap file)
 func StartAndWait() error {
-	if running {
+	if IsRunning() {
 		return fmt.Errorf("The analyzer is already running")
 	}
 	if len(GetLoadedStats()) == 0 {
@@ -438,7 +438,7 @@ func checkSpotOutput(stat stats.StatInterface, val float64, res int, t time.Time
 }
 
 func analyze(m map[string]uint64) {
-	curtime := miner.SourceTime
+	curtime := miner.GetSourceTime()
 
 	// the locker is needed in case of a snapshot
 	// smux.Lock()
@@ -485,9 +485,9 @@ func run() error {
 	// display basic information
 	analyzerLogger.Info().Msg("Start running")
 	// set the running state
-	running = true
+	running.Begin()
 	// set running to false when exits
-	defer func() { running = false }()
+	defer running.End()
 
 	// get the name of the series based on the
 	// sniffed device

@@ -26,8 +26,6 @@ var (
 	available = make(map[string]ExportingModule)
 	// logger
 	exporterLogger zerolog.Logger
-	// state
-	started = false
 	// additional cli flags
 	additionalFlags = make([]cli.Flag, 0)
 )
@@ -66,7 +64,7 @@ func reset() {
 	// loaded stores all the loaded ExportingModules
 	loaded = make([]ExportingModule, 0)
 	// state
-	started = false
+	started.End()
 }
 
 // Main functions =========================================================== //
@@ -134,7 +132,7 @@ func AvailableExportingModules() []string {
 
 // HasStarted returns the internal state of the exporter
 func HasStarted() bool {
-	return started
+	return started.Status()
 }
 
 // Load loads a new module (without initialization)
@@ -171,7 +169,7 @@ func Start(series string) error {
 			return err
 		}
 	}
-	started = true
+	started.Begin()
 	exporterLogger.Info().Msgf("Exporting modules are ready to receive data")
 	return nil
 }
@@ -206,7 +204,7 @@ func Close() error {
 			return err
 		}
 	}
-	started = false
+	started.End()
 	return nil
 }
 

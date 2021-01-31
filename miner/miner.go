@@ -207,7 +207,13 @@ func GetLoadedCounters() []string {
 }
 
 // GetSourceTime returns the time given by the current packet source
-func GetSourceTime() int64 {
+func GetSourceTime() time.Time {
+	return sourceTime.Get()
+}
+
+// GetSourceTimeNano returns the time given by the
+// current packet source (nanoseconds)
+func GetSourceTimeNano() int64 {
 	return sourceTime.GetNano()
 }
 
