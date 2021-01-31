@@ -281,16 +281,6 @@ func TestLivePerfs(t *testing.T) {
 	LoadFromName("R_ICMP")
 	LoadFromName("PERF")
 
-	// logDataToFile = true
-	// SetOutputDir("/home/asr/Documents/Work/go/src/netspot/analyzer/")
-	// time.Sleep(10 * time.Millisecond)
-	// small
-	// pcapFile1 : ~420min
-	// logDataToFile = true
-	// miner.SetDevice(pcapFile1)
-	// period = 5 * time.Minute
-	// huge
-	// pcapFile2 : 900s
 	miner.SetDevice(pcapFile2)
 	SetPeriod(1 * time.Second)
 
