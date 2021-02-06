@@ -222,7 +222,8 @@ func TestUnloadSpecific(t *testing.T) {
 
 func TestZero(t *testing.T) {
 	title(t.Name())
-	// SetLogging(1)
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	defer zerolog.SetGlobalLevel(zerolog.Disabled)
 	UnloadAll()
 	LoadFromName("R_SYN")
 	LoadFromName("AVG_PKT_SIZE")
