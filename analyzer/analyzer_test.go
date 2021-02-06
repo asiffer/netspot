@@ -231,7 +231,7 @@ func TestZero(t *testing.T) {
 	LoadFromName("R_DST_SRC")
 	LoadFromName("R_ICMP")
 
-	if err := miner.SetDevice(testFiles[0]); err != nil {
+	if err := miner.SetDevice(testFiles[1]); err != nil {
 		t.Fatal(err)
 	}
 	period = 5 * time.Minute
@@ -282,7 +282,8 @@ func TestLivePerfs(t *testing.T) {
 	LoadFromName("R_ICMP")
 	LoadFromName("PERF")
 
-	miner.SetDevice(pcapFile2)
+	// miner.SetDevice(pcapFile2)
+	miner.SetDevice(testFiles[1])
 	SetPeriod(1 * time.Second)
 
 	Start()
