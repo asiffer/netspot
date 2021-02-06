@@ -101,6 +101,11 @@ snap:
 	mkdir -p $(SNAP_DIR)
 	mv *.snap $(SNAP_DIR)
 
+docs:
+	@echo -e "\033[93m[Building docs]\033[0m"
+	@cd hugo
+	@hugo
+
 clean:
 	@echo -en "Removing netspot binary   "
 	@rm -f $(BIN_DIR)/netspot
