@@ -35,5 +35,5 @@ jobs:
         run: apk update; apk add $PACKAGES
 
       - name: Run tests
-        run: go test -race -cover -v
+        run: go test -race -cover -v ./...
 
