@@ -9,7 +9,7 @@ jobs:
     container: 
       image: golang:1.15.7-alpine
       env:
-        LIBPCAP_VERSION: 1.9.1
+        LIBPCAP_VERSION: 1.10.0
         LIBPCAP_DIR: /libpcap
         # SYSTEM
         PACKAGES: nano bash linux-headers git flex bison wget make bluez-dev bluez
