@@ -23,7 +23,7 @@ func InitConfig() error {
 	key := "miner.device"
 	s, err := config.GetString(key)
 	if err != nil {
-		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		minerLogger.Error().Msgf("Error while retrieving key %s: %v", key, err)
 		return err
 	}
 	if err := SetDevice(s); err != nil {
@@ -31,34 +31,28 @@ func InitConfig() error {
 	}
 
 	key = "miner.snapshot_len"
-	l, err := config.GetInt(key)
+	l, err := config.GetStrictlyPositiveInt(key)
 	if err != nil {
-		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		minerLogger.Error().Msgf("Error while retrieving key %s: %v", key, err)
 		return err
 	}
-	if err := SetSnapshotLen(int32(l)); err != nil {
-		return err
-	}
+	SetSnapshotLen(int32(l))
 
 	key = "miner.promiscuous"
 	p, err := config.GetBool(key)
 	if err != nil {
-		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		minerLogger.Error().Msgf("Error while retrieving key %s: %v", key, err)
 		return err
 	}
-	if err := SetPromiscuous(p); err != nil {
-		return err
-	}
+	SetPromiscuous(p)
 
 	key = "miner.timeout"
 	t, err := config.GetDuration(key)
 	if err != nil {
-		minerLogger.Fatal().Msgf("Error while retrieving key %s: %v", key, err)
+		minerLogger.Error().Msgf("Error while retrieving key %s: %v", key, err)
 		return err
 	}
-	if err := SetTimeout(t); err != nil {
-		return err
-	}
+	SetTimeout(t)
 
 	// log
 	minerLogger.Debug().Msg(fmt.Sprint("Available counters: ", counters.GetAvailableCounters()))
@@ -92,6 +86,9 @@ func SetPromiscuous(b bool) error {
 
 // SetSnapshotLen sets the maximum size of packets which are captured
 func SetSnapshotLen(sl int32) error {
+	if sl <= 0 {
+		return fmt.Errorf("Snapshot length must be strictly positive")
+	}
 	snapshotLen = sl
 	minerLogger.Debug().Msgf("Snapshot length set to %d", sl)
 	return nil

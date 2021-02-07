@@ -3,71 +3,75 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/netspot/developer/counter/</loc>
+    <loc>/developer/counter/</loc>
   </url>
   
   <url>
-    <loc>/netspot/developer/stat/</loc>
+    <loc>/developer/stat/</loc>
   </url>
   
   <url>
-    <loc>/netspot/developer/exporter/</loc>
+    <loc>/developer/exporter/</loc>
   </url>
   
   <url>
-    <loc>/netspot/developer/toolchain/</loc>
+    <loc>/developer/toolchain/</loc>
   </url>
   
   <url>
-    <loc>/netspot/get-started/install/</loc>
+    <loc>/get-started/basic/</loc>
   </url>
   
   <url>
-    <loc>/netspot/get-started/basic/</loc>
+    <loc>/download/sources/</loc>
   </url>
   
   <url>
-    <loc>/netspot/get-started/</loc>
+    <loc>/get-started/</loc>
   </url>
   
   <url>
-    <loc>/netspot/advanced/service/</loc>
+    <loc>/advanced/service/</loc>
   </url>
   
   <url>
-    <loc>/netspot/download/</loc>
+    <loc>/download/service/</loc>
   </url>
   
   <url>
-    <loc>/netspot/advanced/</loc>
+    <loc>/download/</loc>
   </url>
   
   <url>
-    <loc>/netspot/get-started/configuration/</loc>
+    <loc>/advanced/</loc>
   </url>
   
   <url>
-    <loc>/netspot/get-started/architecture/</loc>
+    <loc>/get-started/configuration/</loc>
   </url>
   
   <url>
-    <loc>/netspot/advanced/spot/</loc>
+    <loc>/get-started/architecture/</loc>
   </url>
   
   <url>
-    <loc>/netspot/categories/</loc>
+    <loc>/advanced/spot/</loc>
   </url>
   
   <url>
-    <loc>/netspot/developer/</loc>
+    <loc>/categories/</loc>
   </url>
   
   <url>
-    <loc>/netspot/</loc>
+    <loc>/developer/</loc>
   </url>
   
   <url>
-    <loc>/netspot/tags/</loc>
+    <loc>/</loc>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
   </url>
   
 </urlset>

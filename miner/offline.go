@@ -8,10 +8,12 @@ import (
 
 // sniffOffline opens an interface and starts to sniff.
 // It sends counters snapshot at given period
-func sniffOffline(packetChan chan gopacket.Packet, period time.Duration) error {
+func sniffOffline(packetChan chan gopacket.Packet,
+	period time.Duration,
+	data DataChannel) error {
 	// now we are sniffing!
-	minerLogger.Debug().Msgf("Sniffing...")
-	sniffing = true
+	minerLogger.Debug().Msgf("Sniffing file...")
+	sniffing.Begin()
 	// set running to false when exits
 	defer release()
 
@@ -51,11 +53,13 @@ func sniffOffline(packetChan chan gopacket.Packet, period time.Duration) error {
 			dispatcher.dispatch(packet)
 
 			// update the timestamp
-			SourceTime = packet.Metadata().Timestamp
+			sourceTime.Set(packet.Metadata().Timestamp)
+
 			// send data at given period
-			if SourceTime.Sub(lastTick) > period {
-				lastTick = SourceTime
-				externalDataChannel <- dispatcher.terminateAndFlushAll()
+			st := sourceTime.Get()
+			if st.Sub(lastTick) > period {
+				lastTick = st
+				data <- dispatcher.terminateAndFlushAll()
 			}
 		}
 

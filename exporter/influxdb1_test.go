@@ -9,7 +9,7 @@ import (
 
 func TestInitInflux(t *testing.T) {
 	title(t.Name())
-
+	Zero()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}
@@ -59,7 +59,7 @@ func TestInitInflux(t *testing.T) {
 
 func TestInfluxWriteAndWarn(t *testing.T) {
 	title(t.Name())
-
+	Zero()
 	err := setFullConfig()
 	if err != nil {
 		t.Error(err)
@@ -125,6 +125,7 @@ func TestInfluxWriteAndWarn(t *testing.T) {
 
 func TestInfluxStatus(t *testing.T) {
 	title(t.Name())
+	Zero()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}
@@ -134,6 +135,4 @@ func TestInfluxStatus(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer Unload(inf.Name())
-
-	t.Logf("%v+\n", inf.Status())
 }

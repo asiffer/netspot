@@ -2,102 +2,110 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>netspot</title>
-    <link>/netspot/</link>
+    <link>/</link>
     <description>Recent content on netspot</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-	<atom:link href="/netspot/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Counters</title>
-      <link>/netspot/developer/counter/</link>
+      <link>/developer/counter/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/developer/counter/</guid>
+      <guid>/developer/counter/</guid>
       <description>The counter is the more atomic object within netspot.</description>
     </item>
     
     <item>
       <title>Statistics</title>
-      <link>/netspot/developer/stat/</link>
+      <link>/developer/stat/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/developer/stat/</guid>
+      <guid>/developer/stat/</guid>
       <description>Based on available counters, you can implement your own statistics</description>
     </item>
     
     <item>
       <title>Exporting module</title>
-      <link>/netspot/developer/exporter/</link>
+      <link>/developer/exporter/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/developer/exporter/</guid>
+      <guid>/developer/exporter/</guid>
       <description>Depending on your data/logs storage, &lt;code&gt;netspot&lt;/code&gt; can be adapted to your needs.</description>
     </item>
     
     <item>
       <title>Developer toolchain</title>
-      <link>/netspot/developer/toolchain/</link>
+      <link>/developer/toolchain/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/developer/toolchain/</guid>
+      <guid>/developer/toolchain/</guid>
       <description>How to build netspot</description>
     </item>
     
     <item>
-      <title>Installation</title>
-      <link>/netspot/get-started/install/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/netspot/get-started/install/</guid>
-      <description>From sources You can download the netspot sources.
-Debian package You can install netspot through a debian package.</description>
-    </item>
-    
-    <item>
       <title>Basic usage</title>
-      <link>/netspot/get-started/basic/</link>
+      <link>/get-started/basic/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/get-started/basic/</guid>
+      <guid>/get-started/basic/</guid>
       <description>Run &lt;code&gt;netspot&lt;/code&gt; for the first time!</description>
     </item>
     
     <item>
-      <title>Service</title>
-      <link>/netspot/advanced/service/</link>
+      <title>From sources</title>
+      <link>/download/sources/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/advanced/service/</guid>
+      <guid>/download/sources/</guid>
+      <description>Build &lt;code&gt;netspot&lt;/code&gt; by yourself</description>
+    </item>
+    
+    <item>
+      <title>Service</title>
+      <link>/advanced/service/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/advanced/service/</guid>
       <description>Running netspot as a service</description>
     </item>
     
     <item>
-      <title>Configuration</title>
-      <link>/netspot/get-started/configuration/</link>
+      <title>Systemd service</title>
+      <link>/download/service/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/get-started/configuration/</guid>
+      <guid>/download/service/</guid>
+      <description>Install &lt;code&gt;netspot&lt;/code&gt; as a service</description>
+    </item>
+    
+    <item>
+      <title>Configuration</title>
+      <link>/get-started/configuration/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/get-started/configuration/</guid>
       <description>All the stuff you can tune</description>
     </item>
     
     <item>
       <title>Architecture</title>
-      <link>/netspot/get-started/architecture/</link>
+      <link>/get-started/architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/get-started/architecture/</guid>
+      <guid>/get-started/architecture/</guid>
       <description>netspot is also simple by its design</description>
     </item>
     
     <item>
       <title>Spot Algorithm</title>
-      <link>/netspot/advanced/spot/</link>
+      <link>/advanced/spot/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/netspot/advanced/spot/</guid>
+      <guid>/advanced/spot/</guid>
       <description>Statistical learning algorithm behind netspot</description>
     </item>
     

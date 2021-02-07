@@ -1,180 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Basic usage - netspot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <link rel="icon" href="/netspot/%20favicon.png">
-
-  
-  
-  <link rel="stylesheet" href="/netspot/css/style.min.d248d35f20c43b5b584063d689c2673dca4e2f3f89df5025951ffcdda705001e.css">
-  
-
-  
-  
-</head>
-
-<body class='page page-default-single'>
-  <div id="main-menu-mobile" class="main-menu-mobile">
-  <ul>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    
-    <li class="menu-item-home">
-      <a href="/netspot/">
-        <span>Home</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-get started">
-      <a href="/netspot/get-started/">
-        <span>Get started</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-download">
-      <a href="/netspot/download/">
-        <span>Download</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-advanced">
-      <a href="/netspot/advanced/">
-        <span>Advanced</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-developer">
-      <a href="/netspot/developer/">
-        <span>Developer</span>
-      </a>
-    </li>
-    
-  </ul>
-</div>
-  <div class="wrapper">
-    <div class='header'>
-  <div class="container">
-    <div class="logo">
-      <a href="/netspot/">
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
         
-      </a>
-    </div>
-    <div class="logo-mobile">
-      <a href="/netspot/">
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
         
-      </a>
-    </div>
-    <div id="main-menu" class="main-menu">
-  <ul>
-    
-    
-    <li class="menu-item-home">
-      <a href="/netspot/">
-        <span>Home</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-get started">
-      <a href="/netspot/get-started/">
-        <span>Get started</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-download">
-      <a href="/netspot/download/">
-        <span>Download</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-advanced">
-      <a href="/netspot/advanced/">
-        <span>Advanced</span>
-      </a>
-    </li>
-    
-    <li class="menu-item-developer">
-      <a href="/netspot/developer/">
-        <span>Developer</span>
-      </a>
-    </li>
-    
-  </ul>
-</div>
-    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
-  <span class="hamburger-box">
-    <span class="hamburger-inner"></span>
-  </span>
-</button>
-  </div>
-</div>
-
-    
-
-    
-
-    
-    <div class="container pt-2 pt-md-6 pb-3 pb-md-6">
-      <div class="row">
-        <div class="col-12 col-md-3 mb-3">
-          <div class="sidebar">
-            
-<div class="docs-menu">
-  <h4>Get started</h4>
-  <ul>
-    
-    <li class="">
-      <a href="/netspot/get-started/install/">Installation</a>
-    </li>
-    
-    <li class="active ">
-      <a href="/netspot/get-started/basic/">Basic usage</a>
-    </li>
-    
-    <li class="">
-      <a href="/netspot/get-started/configuration/">Configuration</a>
-    </li>
-    
-    <li class="">
-      <a href="/netspot/get-started/architecture/">Architecture</a>
-    </li>
-    
-  </ul>
-</div>
-
-          </div>
-        </div>
-        <div class="col-12 col-md-9">
-          
-<h1 class="title">Basic usage</h1>
-<div class="content ">
-  <p>Basically, you can run <code>netspot</code> on a network interface. In the example below,
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="primary" href="/get-started/basic/"><span>Basic usage</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/get-started/configuration/"><span>Configuration</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/get-started/architecture/"><span>Architecture</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Basic usage</h2>
+            <p>Basically, you can run <code>netspot</code> on a network interface. In the example below,
 <code>netspot</code> monitors the <code>PERF</code> statistics (packet processing rate) on the <code>eth0</code> interface.
 The computation period is <code>1s</code> and the values are printed to the console (<code>-v</code>).</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run -d eth0 -s PERF -p 1s -v
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run -d eth0 -s PERF -p 1s -v
 </code></pre></div><p>You can also analyze a capture file.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
 </code></pre></div><p>All these command-line options can be set in a config file (see the <a href="/get-started/configuration/">configuration</a> section for more options):</p>
-<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># netspot.toml</span>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># netspot.toml</span>
 
-<span class="p">[</span><span class="nx">miner</span><span class="p">]</span>
-<span class="nx">device</span> <span class="p">=</span> <span class="s2">&#34;~/file.pcap&#34;</span>
+[miner]
+device = <span style="color:#b84">&#34;~/file.pcap&#34;</span>
 
-<span class="p">[</span><span class="nx">analyzer</span><span class="p">]</span>
-<span class="nx">period</span> <span class="p">=</span> <span class="s2">&#34;500ms&#34;</span>
-<span class="nx">stats</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;PERF&#34;</span><span class="p">,</span> <span class="s2">&#34;R_SYN&#34;</span><span class="p">]</span>
+[analyzer]
+period = <span style="color:#b84">&#34;500ms&#34;</span>
+stats = [<span style="color:#b84">&#34;PERF&#34;</span>, <span style="color:#b84">&#34;R_SYN&#34;</span>]
 
-<span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">console</span><span class="p">]</span>
-<span class="nx">data</span> <span class="p">=</span> <span class="kc">true</span>
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run --config netspot.toml
-</code></pre></div><div class="info">
-    All the config file parameters can be passed through CLI flags with
-the same syntax: <code>module[.submodule].parameter</code>. For instance, you can set the device with <code>netspot run --miner.device file.pcap</code>.
-</div>
-<h3 id="data-output">Data output</h3>
+[exporter.console]
+data = <span style="font-weight:bold">true</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run --config netspot.toml
+</code></pre></div><h3 id="data-output">Data output</h3>
 <p><code>netspot</code> outputs two things:</p>
 <ul>
 <li>the network statistics (namely the <em>data</em>, at every <code>period</code>)</li>
@@ -186,48 +81,24 @@ it also gathers the decision thresholds <code>STAT_UP: upper_threshold</code> an
 the statistics and its probability to occur (the lower, the more abnormal).</p>
 <p><code>netspot</code> can dispatch these two streams to different exporting modules. In the previous example, data (not the alarms) are sent to the console (<code>-v</code> flag), but actually you can
 also send it to a file (see below), a socket or an influxdb database.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># storing data to a file</span>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#998;font-style:italic"># storing data to a file</span>
 netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -f /tmp/data.json
 </code></pre></div><p>There is not a short CLI flag for every module. In the general case, you
 have to use the <code>module.submodule.option</code> scheme (like in the config file):</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms --exporter.file.data /tmp/data.json
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms --exporter.file.data /tmp/data.json
 </code></pre></div><p>Or you can set it in the config file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c"># netspot.toml</span>
-<span class="p">[</span><span class="nx">exporter</span><span class="p">.</span><span class="nx">file</span><span class="p">]</span>
-<span class="c"># Path to the file which will store the data.</span>
-<span class="c"># The value can contain a &#39;%s&#39; which will be replaced by </span>
-<span class="c"># the series name. </span>
-<span class="nx">data</span> <span class="p">=</span> <span class="s2">&#34;/tmp/netspot_%s_data.json&#34;</span>
-<span class="c"># Same as the data but for the alarms</span>
-<span class="c">#alarm = &#34;/tmp/netspot_%s_alarm.json&#34;</span>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># netspot.toml</span>
+[exporter.file]
+<span style="color:#998;font-style:italic"># Path to the file which will store the data.</span>
+<span style="color:#998;font-style:italic"># The value can contain a &#39;%s&#39; which will be replaced by </span>
+<span style="color:#998;font-style:italic"># the series name. </span>
+data = <span style="color:#b84">&#34;/tmp/netspot_%s_data.json&#34;</span>
+<span style="color:#998;font-style:italic"># Same as the data but for the alarms</span>
+<span style="color:#998;font-style:italic">#alarm = &#34;/tmp/netspot_%s_alarm.json&#34;</span>
 </code></pre></div>
-</div>
-</div>
-
-        </div>
-      </div>
-    </div>
-    
-  </div>
-
-  
-
-  
-
-  
-  
-
-  
-  <script type="text/javascript" src="/netspot/js/scripts.min.1237ff71925bb8625c97a9af8db4c54525258bedfd7c47493daaff723bea755e.js"></script>
-  
-
-  
-  
-  
-    
-  
-
-
-</body>
-
+            </div>
+            
+        </main>
+       
+    </body>
 </html>

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"netspot/config"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -121,10 +122,24 @@ func testERROR() {
 	fmt.Println("[\033[31mERROR\033[0m]")
 }
 
+func isRunningInDockerContainer() bool {
+	// docker creates a .dockerenv file at the root
+	// of the directory tree inside the container.
+	// if this file exists then the viewer is running
+	// from inside a container so return true
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+	return false
+}
+
 func setFullConfig() error {
 	viper.SetConfigType("toml")
 	if err := viper.ReadConfig(bytes.NewBuffer(fullConfig)); err != nil {
 		return err
+	}
+	if isRunningInDockerContainer() {
+		viper.Set("exporter.influxdb.address", "http://influxdb:8086")
 	}
 	return config.LoadForTest(viper.AllSettings())
 }
@@ -176,7 +191,7 @@ func TestLoadAll(t *testing.T) {
 
 func TestBasics(t *testing.T) {
 	title(t.Name())
-	defer Clear()
+	// defer Clear()
 	setNullConfig()
 	InitLogger()
 
@@ -252,7 +267,7 @@ func TestBasics(t *testing.T) {
 
 func TestLoading(t *testing.T) {
 	title(t.Name())
-	defer Clear()
+	// defer Clear()
 	setFullConfig()
 	// zerolog.SetGlobalLevel(zerolog.Disabled)
 
@@ -293,10 +308,10 @@ func TestLoading(t *testing.T) {
 
 func TestInit(t *testing.T) {
 	title(t.Name())
-	defer Clear()
+	// defer Clear()
 	InitLogger()
 	InitConfig()
-	t.Logf("%+v\n", GenericStatus())
+	// t.Logf("%+v\n", GenericStatus())
 }
 
 func TestBasicStart(t *testing.T) {
@@ -379,7 +394,7 @@ alarm = true
 
 func TestStartCloseAll(t *testing.T) {
 	title("Testing start/close function")
-	defer Clear()
+	// defer Clear()
 	if err := setFullConfig(); err != nil {
 		t.Error(err)
 	}

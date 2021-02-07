@@ -6,6 +6,7 @@ package stats
 import (
 	"fmt"
 	"netspot/config"
+	"sync"
 
 	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"
@@ -39,6 +40,7 @@ func Register(s StatInterface) error {
 type BaseStat struct {
 	name  string
 	dspot *gospot.DSpot // the spot instance
+	mutex sync.Mutex    // mutex for thread safety
 }
 
 // StatInterface gathers the common behavior of the statistics
@@ -58,29 +60,39 @@ type StatInterface interface {
 // with a new incoming value. It returns a return code
 // according to normality/abnormality of the event.
 func (m *BaseStat) Update(val float64) int {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.dspot.Step(val)
 }
 
 // UpProbability computes the probability to get
 // a value higher than the given threshold
 func (m *BaseStat) UpProbability(q float64) float64 {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.dspot.UpProbability(q)
 }
 
 // DownProbability computes the probability to get
 // a value lower than the given threshold
 func (m *BaseStat) DownProbability(q float64) float64 {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.dspot.DownProbability(q)
 }
 
 // Status returns the status of the DSpot instance
 // embedded in the stat
 func (m *BaseStat) Status() gospot.DSpotStatus {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.dspot.Status()
 }
 
 // GetThresholds returns upper and lower decision thresholds
 func (m *BaseStat) GetThresholds() (float64, float64) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.dspot.GetLowerThreshold(), m.dspot.GetUpperThreshold()
 }
 
@@ -88,6 +100,9 @@ func (m *BaseStat) GetThresholds() (float64, float64) {
 // from the config file. It is common for
 // all the statistics
 func (m *BaseStat) Configure() error {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
 	var err error
 	sc := gospot.DSpotConfig{}
 	prefix := "spot." + m.name

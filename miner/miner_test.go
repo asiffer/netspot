@@ -13,12 +13,15 @@ import (
 var (
 	headerWidth = 80
 	testDir     string
-	hugePcap    = "/data/pcap/202002071400.pcap"
+	hugePcap    string
+	smallPcap   string
+	// hugePcap    = "/data/pcap/202002071400.pcap"
 )
 
 func init() {
 	setTestDir()
 	hugePcap = filepath.Join(testDir, "snort.pcap")
+	smallPcap = filepath.Join(testDir, "empire.pcap")
 }
 
 func setTestDir() {
@@ -115,6 +118,7 @@ func TestLoading(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	title(t.Name())
+	Zero()
 	if err := SetDevice(hugePcap); err != nil {
 		t.Error(err)
 	}
@@ -134,7 +138,7 @@ func TestRun(t *testing.T) {
 
 	GetSourceTime()
 	// Maybe it has finished
-	if !sniffing {
+	if !IsSniffing() {
 		return
 	}
 
@@ -145,7 +149,12 @@ func TestRun(t *testing.T) {
 
 func TestRunWithPeriod(t *testing.T) {
 	title(t.Name())
+	Zero()
 	if err := SetDevice(hugePcap); err != nil {
+		t.Error(err)
+	}
+
+	if err := SetTimeout(0); err != nil {
 		t.Error(err)
 	}
 
@@ -163,10 +172,13 @@ func TestRunWithPeriod(t *testing.T) {
 	}
 
 	to := time.After(2 * time.Second)
+	i := 0
 	for {
 		select {
 		case <-data:
 			// pass
+			i++
+			fmt.Println(i)
 		case <-to:
 			if err := Stop(); err != nil {
 				t.Error(err)
@@ -174,7 +186,7 @@ func TestRunWithPeriod(t *testing.T) {
 			return
 		default:
 			// Maybe it has finished
-			if !sniffing {
+			if !IsSniffing() {
 				return
 			}
 			// pass
@@ -183,9 +195,84 @@ func TestRunWithPeriod(t *testing.T) {
 
 }
 
+func TestRunSmallPcap(t *testing.T) {
+	title(t.Name())
+	Zero()
+	if err := SetDevice(smallPcap); err != nil {
+		t.Error(err)
+	}
+	t.Log(GetSeriesName())
+
+	if err := SetTimeout(0 * time.Second); err != nil {
+		t.Error(err)
+	}
+
+	for _, c := range []string{"IP", "SYN", "ACK", "ICMP"} {
+		if err := Load(c); err != nil {
+			t.Error(err)
+		}
+	}
+
+	_, err := Start(1500 * time.Second)
+	if err != nil {
+		t.Error(err)
+	}
+	if !IsSniffing() {
+		t.Errorf("Should sniff but it does not")
+	}
+
+	// tro to start again
+	if _, err := Start(0); err == nil {
+		t.Error("An error must occur: cannot start again")
+	}
+
+	// try zero but it must fail
+	if err := Zero(); err == nil {
+		t.Error("An error must occur: cannot reset while sniffing")
+	}
+
+	to := time.After(2 * time.Second)
+	for {
+		select {
+		// case <-data:
+		// 	// pass
+		case <-to:
+			if err := Stop(); err != nil {
+				t.Error(err)
+			}
+			return
+		default:
+			// Maybe it has finished
+			if !IsSniffing() {
+				// verify
+				all := dispatcher.getAll()
+				// truth values for empire.pcapng
+				truth := map[string]uint64{
+					"ACK":  14233,
+					"ICMP": 0,
+					"IP":   15377,
+					"SYN":  671}
+				for k, v := range all {
+					if v != truth[k] {
+						t.Errorf("Bad value of %s, expect %d, got %d",
+							k, truth[k], v)
+					}
+				}
+			}
+			// pass
+		}
+	}
+}
+
 func TestRunInterface(t *testing.T) {
 	title(t.Name())
+	Zero()
 	if err := SetDevice("lo"); err != nil {
+		t.Error(err)
+	}
+	t.Log(GetSeriesName())
+
+	if err := SetTimeout(0); err != nil {
 		t.Error(err)
 	}
 
@@ -220,12 +307,4 @@ func TestRunInterface(t *testing.T) {
 			// pass
 		}
 	}
-	// time.Sleep(2 * time.Second)
-	// <-data
-	// fmt.Println("Stopping")
-	// if err := Stop(); err != nil {
-	// 	t.Error(err)
-	// }
-
-	// close(data)
 }

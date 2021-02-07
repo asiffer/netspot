@@ -64,14 +64,16 @@ import (
 
 // sniffOnline opens an interface and starts to sniff.
 // It sends counters snapshot at given period
-func sniffOnline(packetChan chan gopacket.Packet, period time.Duration) error {
+func sniffOnline(packetChan chan gopacket.Packet,
+	period time.Duration,
+	data DataChannel) error {
 
 	// set the flush tick
-	timeSource := time.Tick(period)
+	tick := time.Tick(period)
 
 	// now we are sniffing!
-	minerLogger.Debug().Msgf("Sniffing...")
-	sniffing = true
+	minerLogger.Debug().Msgf("Sniffing interface...")
+	sniffing.Begin()
 	// set running to false when exits
 	defer release()
 
@@ -79,9 +81,10 @@ func sniffOnline(packetChan chan gopacket.Packet, period time.Duration) error {
 	for {
 		select {
 		// periodic flush
-		case SourceTime = <-timeSource:
+		case st := <-tick:
+			sourceTime.Set(st)
 			dispatcher.terminate()
-			externalDataChannel <- dispatcher.flushAll()
+			data <- dispatcher.flushAll()
 		// manage events
 		case e, _ := <-internalEventChannel:
 			switch e {
