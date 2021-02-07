@@ -1,12 +1,13 @@
 ![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg)
+![Test](https://github.com/asiffer/netspot/workflows/Test/badge.svg)
 
 # netspot
 
+![netspot](assets/netspot6.png)
+
 A simple IDS with statistical learning
 
-
-
-**NOTE: this current version (v2.0) is still under development**
+Visit the project page: **https://asiffer.github.io/netspot/**
 
 ## Overview
 
@@ -17,9 +18,7 @@ picture below).
 
 **netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
 
-
-![SPOT algorithm](assets/netspot4.png)
-
+<!-- ![SPOT algorithm](assets/netspot4.png) -->
 
 
 ## Installation
@@ -107,11 +106,11 @@ so you can consider a unix socket.
 netspot serve -e unix:///tmp/netspot.sock
 ```
 
-| Method | Path           | Description |
-|--------|----------------|-------------|
-| `GET`  | `/api/config`  | Get the current config (JSON output) |
-| `POST` | `/api/config`  | Change the config (JSON expected) |
-| `POST` | `/api/run`     | Manage the status of netspot (start/stop) |
+| Method | Path          | Description                               |
+| ------ | ------------- | ----------------------------------------- |
+| `GET`  | `/api/config` | Get the current config (JSON output)      |
+| `POST` | `/api/config` | Change the config (JSON expected)         |
+| `POST` | `/api/run`    | Manage the status of netspot (start/stop) |
 
 
 

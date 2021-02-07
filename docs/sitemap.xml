@@ -23,15 +23,19 @@
   </url>
   
   <url>
+    <loc>/download/sources/</loc>
+  </url>
+  
+  <url>
     <loc>/get-started/</loc>
   </url>
   
   <url>
-    <loc>/download/service/</loc>
+    <loc>/advanced/service/</loc>
   </url>
   
   <url>
-    <loc>/advanced/service/</loc>
+    <loc>/download/service/</loc>
   </url>
   
   <url>
@@ -48,10 +52,6 @@
   
   <url>
     <loc>/get-started/architecture/</loc>
-  </url>
-  
-  <url>
-    <loc>/download/sources/</loc>
   </url>
   
   <url>

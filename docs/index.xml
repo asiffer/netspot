@@ -56,12 +56,30 @@
     </item>
     
     <item>
+      <title>From sources</title>
+      <link>/download/sources/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/download/sources/</guid>
+      <description>Build &lt;code&gt;netspot&lt;/code&gt; by yourself</description>
+    </item>
+    
+    <item>
       <title>Service</title>
       <link>/advanced/service/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/advanced/service/</guid>
       <description>Running netspot as a service</description>
+    </item>
+    
+    <item>
+      <title>Systemd service</title>
+      <link>/download/service/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/download/service/</guid>
+      <description>Install &lt;code&gt;netspot&lt;/code&gt; as a service</description>
     </item>
     
     <item>

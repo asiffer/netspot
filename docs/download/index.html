@@ -30,9 +30,9 @@
                     <nav>
                         <ul>
                         
-                        <li><a class="secondary" href="/download/service/"><span>Pre-built binaries</span></a></li>
+                        <li><a class="secondary" href="/download/sources/"><span>From sources</span></a></li>
                         
-                        <li><a class="secondary" href="/download/sources/"><span>Sources</span></a></li>
+                        <li><a class="secondary" href="/download/service/"><span>Systemd service</span></a></li>
                         
                         </ul>
                     </nav>
@@ -41,27 +41,19 @@
             <div class="content">
                 <h2>Download</h2>
                 <p><code>netspot</code> is available on Linux platforms with different architectures: <code>amd64</code>, <code>arm</code> and <code>aarch64</code>. The <code>Go</code> ecosystem would allow to easily build <code>netspot</code> for Mac and Windows however
-it has not been tested, and that is probably not very relevant.</p>
-<p>So the easiest way to get <code>netspot</code> is to download the <a href="https://github.com/asiffer/netspot/releases/tag/v2.0a">latest pre-built binary</a> corresponding to your architecture.</p>
+it has not been tested, and that is probably not very relevant.
+You can download the latest binaries with the links below.</p>
+<p><a href='https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-amd64-linux-static' role="button" class='secondary'><small>netspot-2.0a-amd64-linux-static</small></a>
+<a href='https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-arm-linux-static' role="button" class='outline secondary'><small>netspot-2.0a-arm-linux-static</small></a>
+<a href='https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-arm64-linux-static' role="button" class='outline secondary'><small>netspot-2.0a-arm64-linux-static</small></a></p>
+<p>If you don&rsquo;t like to click, you can draw your inspiration from the following command.</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl -Lo netspot <span style="color:#b84">&#39;https://github.com/asiffer/netspot/releases/download/v2.0a/netspot-2.0a-amd64-linux-static&#39;</span>
 chmod +x netspot
 </code></pre></div><p>Let us recall that you need some privilege to run <code>netspot</code> on network interfaces. So either
 you can run it as root (not recommended) or you can add the sniffing capability.</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo setcap cap_net_admin,cap_net_raw<span style="font-weight:bold">=</span>eip ./netspot
 </code></pre></div>
-                <div class="grid">
-                    
-                    <article>
-                        <header><strong>Pre-built binaries</strong></header>
-                        <main></main>
-                    </article>
-                    
-                    <article>
-                        <header><strong>Sources</strong></header>
-                        <main></main>
-                    </article>
-                    
-                </div>
+                
             </div>
         </main>
        

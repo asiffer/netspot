@@ -54,8 +54,9 @@
             </div>
             <div class="content">
             <h2>Counters</h2>
-            <p>Counters are elements of the <code>miner</code>. In the Go ecosystem, they must be located in the <code>miner/counter</code> sub-package.</p>
-<p>Every counter is related to a network layer (or directly to a packet). The following layers are currently available:</p>
+            <p>Counters are elements of the <code>miner</code>. In the Go project layout, they must be located in the <code>miner/counter</code> sub-package.</p>
+<p>Every counter is related to a network layer (or directly to a packet). It means that it will access <em>only</em> on its layer specific field (we do not recommend to parse further layers in counters logic).
+The following layers are currently available:</p>
 <ul>
 <li>PKT (raw packet)</li>
 <li>ARP</li>

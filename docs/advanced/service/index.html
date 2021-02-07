@@ -46,17 +46,17 @@
             </div>
             <div class="content">
             <h2>Service</h2>
-            <p>Even if it is not the main way to use <strong>netspot</strong>, it can run as a service, exposing a minimal REST API.</p>
+            <p>Even if it is not the main way to use <code>netspot</code>, it can run as a service, exposing a minimal REST API.</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot serve
 </code></pre></div><p>By default it listens at <code>tcp://localhost:11000</code> but it can be changed with the <code>-e</code> flag. For instance, if you want to monitor the loopback
-interface, the API trafic must not pollute what <strong>netspot</strong> monitors,
+interface, the API trafic must not pollute what <code>netspot</code> monitors,
 so you can consider a unix socket.</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot serve -e unix:///tmp/netspot.sock
 </code></pre></div><table>
 <thead>
 <tr>
-<th> Method</th>
-<th> Path</th>
+<th>Method</th>
+<th>Path</th>
 <th>Description</th>
 </tr>
 </thead>

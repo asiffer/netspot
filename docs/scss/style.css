@@ -6451,18 +6451,27 @@ article {
 h2, h3, h4 {
   margin-bottom: 0.5em; }
 
-code {
-  padding: 0.2em 0.5em; }
-
 .highlight {
+  margin: 1em auto;
+  padding: 0; }
+
+.highlight > pre {
+  padding: 0; }
+
+.highlight pre code {
   border: #edf0f3 solid 1px;
   border-radius: 8px;
-  margin-top: 0.5em;
-  margin-bottom: 1em; }
+  padding: 1em; }
 
-.highlight pre {
-  padding: 0.75em;
-  margin: 0.25em 0 0.25em 0; }
+.highlight pre code.language-bash {
+  border: none;
+  background: #2c3d49;
+  color: #FFF; }
+
+.highlight pre code.language-sh {
+  border: none;
+  background: #2c3d49;
+  color: #FFF; }
 
 ul li {
   list-style-type: '■  '; }
@@ -6485,7 +6494,7 @@ main .content {
   text-align: justify; }
   .content p {
     text-align: justify;
-    margin-bottom: 0.5em; }
+    margin-bottom: 1em; }
 
 nav ul {
   font-size: smaller; }
@@ -6512,8 +6521,24 @@ nav ul:first-of-type {
   .banner a:hover {
     color: #bbc6ce; }
 
+.info {
+  display: block;
+  padding: 1em;
+  width: 100%;
+  background-color: #edf0f3;
+  border-left: 5px solid #1095c1; }
+
 @media (max-width: 768px) {
   .toc {
     display: none; }
   .content {
     width: 100%; } }
+
+@media (prefers-color-scheme: dark) {
+  .banner {
+    background-color: white;
+    color: #2c3d49; }
+    .banner li, .banner a {
+      color: #2c3d49; }
+    .banner a:hover {
+      color: #bbc6ce; } }
