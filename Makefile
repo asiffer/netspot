@@ -60,7 +60,7 @@ $(info VERSION="$(VERSION)")
 $(info $(SEP))
 
 # PHONY actions
-.PHONY: build snap
+.PHONY: build snap docs
 
 # main actions
 default: build
@@ -103,8 +103,7 @@ snap:
 
 docs:
 	@echo -e "\033[93m[Building docs]\033[0m"
-	@cd hugo
-	@hugo
+	@cd hugo; hugo
 
 clean:
 	@echo -en "Removing netspot binary   "

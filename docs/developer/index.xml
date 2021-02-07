@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Developer on netspot</title>
+    <link>/developer/</link>
+    <description>Recent content in Developer on netspot</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/developer/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Counters</title>
+      <link>/developer/counter/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/developer/counter/</guid>
+      <description>The counter is the more atomic object within netspot.</description>
+    </item>
+    
+    <item>
+      <title>Statistics</title>
+      <link>/developer/stat/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/developer/stat/</guid>
+      <description>Based on available counters, you can implement your own statistics</description>
+    </item>
+    
+    <item>
+      <title>Exporting module</title>
+      <link>/developer/exporter/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/developer/exporter/</guid>
+      <description>Depending on your data/logs storage, &lt;code&gt;netspot&lt;/code&gt; can be adapted to your needs.</description>
+    </item>
+    
+    <item>
+      <title>Developer toolchain</title>
+      <link>/developer/toolchain/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/developer/toolchain/</guid>
+      <description>How to build netspot</description>
+    </item>
+    
+  </channel>
+</rss>

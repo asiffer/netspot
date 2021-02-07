@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
+        
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
+        
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="secondary" href="/developer/counter/"><span>Counters</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/stat/"><span>Statistics</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/exporter/"><span>Exporting module</span></a></li>
+                            
+                        
+                            
+                                <li><a class="primary" href="/developer/toolchain/"><span>Developer toolchain</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Developer toolchain</h2>
+            <p><code>netspot</code> is distributed as statically-compiled binaries. The final executables
+notably embed the <code>libpcap</code> and <code>musl</code> libraries.
+Using a musl-based system (like <a href="https://alpinelinux.org/">alpine</a>)
+is then far easier to compile <code>netspot</code>.
+Obviously, you can dynamically link <code>netspot</code> to <code>libpcap</code> and the
+more common GNU libc, but the installation will require these
+dependencies on the target system. Here, we only detail the static
+build for different architectures.</p>
+<p>The <a href="https://github.com/asiffer/netspot/tree/master/dev">dev/</a> includes
+some utilities to build <code>netspot</code> statically.</p>
+<h3 id="docker-image">Docker image</h3>
+<p>First of all, you have to prepare the docker image to build netspot.
+A Dockerfile is provided in the <a href="https://github.com/asiffer/netspot/tree/master/dev/image">dev/image/</a>
+subfolder.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-docker" data-lang="docker"><span style="font-weight:bold">FROM</span><span style="color:#b84"> golang:1.15.6-alpine</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># LIBPCAP</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> LIBPCAP_VERSION 1.9.1<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> LIBPCAP_DIR /libpcap<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># SYSTEM</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> PACKAGES <span style="color:#b84">&#34;nano bash linux-headers git flex bison wget make bluez-dev bluez&#34;</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> CGO_ENABLED <span style="color:#099">1</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> CGO_LDFLAGS <span style="color:#b84">&#34;-L</span><span style="color:#b84">${</span><span style="color:#008080">LIBPCAP_DIR</span><span style="color:#b84">}</span><span style="color:#b84">/libpcap-</span><span style="color:#b84">${</span><span style="color:#008080">LIBPCAP_VERSION</span><span style="color:#b84">}</span><span style="color:#b84">&#34;</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> CGO_CFLAGS <span style="color:#b84">&#34;-O2 -I</span><span style="color:#b84">${</span><span style="color:#008080">LIBPCAP_DIR</span><span style="color:#b84">}</span><span style="color:#b84">/libpcap-</span><span style="color:#b84">${</span><span style="color:#008080">LIBPCAP_VERSION</span><span style="color:#b84">}</span><span style="color:#b84">&#34;</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># CROSS COMPILATION OPTIONS</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># see https://github.com/just-containers/musl-cross-make/releases/</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> GCC_VERSION 9.2.0<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> MUSL_CROSS_MAKE_VERSION v15<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">ENV</span> TARGET_ARCH <span style="color:#b84">&#34;x86_64-linux arm-linux aarch64-linux&#34;</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># SYSTEM</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">RUN</span> apk update; apk add <span style="color:#008080">$PACKAGES</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># CROSS COMPILE TOOLCHAIN</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">COPY</span> install_toolchain.sh /install_toolchain.sh<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">RUN</span> /install_toolchain.sh<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="color:#998;font-style:italic"># LIBPCAP</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">COPY</span> get_libpcap_sources.sh /get_libpcap_sources.sh<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">RUN</span> /get_libpcap_sources.sh<span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2">
+</span><span style="color:#a61717;background-color:#e3d2d2"></span><span style="font-weight:bold">CMD</span> [<span style="color:#b84">&#34;/bin/bash&#34;</span>]<span style="color:#a61717;background-color:#e3d2d2">
+</span></code></pre></div><p>So you basically need to build this image (from the <code>dev/image/</code> folder)</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t alpine-crossbuild-libpcap:latest .
+</code></pre></div><p>By default, this image will produce binaries for three different architectures:
+<code>amd64</code>, <code>arm</code> and <code>arm64</code>, but you can only select those you want
+by setting the <code>TARGET_ARCH</code> environment variable.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build --build-arg <span style="color:#008080">TARGET_ARCH</span><span style="font-weight:bold">=</span><span style="color:#b84">&#34;x86_64-linux&#34;</span> -t alpine-crossbuild-libpcap:latest .
+</code></pre></div><div class="alert">
+    Some environment variables must be set before building and not
+when a container starts (see the bash scripts below).
+</div>
+<p>The Dockerfile includes two bash scripts:</p>
+<ul>
+<li><code>install_toolchain.sh</code>, to download the cross-compilers</li>
+<li><code>get_libpcap_sources.sh</code>, to download the sources of <code>libpcap</code></li>
+</ul>
+<p>You can inspect these files to check what environment variables
+they require.</p>
+<h3 id="compilation">Compilation</h3>
+<p>Now your image is ready, you just have to compile <code>netspot</code>.
+The <a href="https://github.com/asiffer/netspot/tree/master/dev/build">dev/build/</a>
+folder gathers scripts for this purpose.</p>
+<p>The <code>builder.sh</code> script is the main file you have to run to compile
+<code>netspot</code> for a specific architecture</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">builder.sh &lt;ARCH&gt;
+</code></pre></div><div class="alert">
+    <p>The available ARCH depend on the previous image.
+By default you can choose between</p>
+<ul>
+<li>x86_64-linux</li>
+<li>arm-linux</li>
+<li>aarch64-linux</li>
+</ul>
+
+</div>
+<p>This script must be executed within an instance of the previous image
+(container). So first, you have to run a container (here we suppose that <code>netspot</code> code
+lives in <code>GOPATH/src/netspot</code> but it is likely to be different accodint to your
+dev workflow):</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run --detach -it -v <span style="color:#b84">&#34;</span><span style="color:#b84">${</span><span style="color:#008080">GOPATH</span><span style="color:#b84">}</span><span style="color:#b84">/src/netspot:/go/src/netspot&#34;</span> --name netspot-build alpine-crossbuild-libpcap:latest
+</code></pre></div><p>Then you can run the compilation for a specific architecture:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker <span style="color:#999">exec</span> netspot-build /go/src/netspot/dev/build/builder.sh &lt;ARCH&gt;
+</code></pre></div><div class="info">
+    The final binaries are located in the <code>bin/</code> folder.
+</div>
+<p>The second script (<code>run.sh</code>) is an example that combine both steps.
+You can adapt it to your workflow.</p>
+
+            </div>
+            
+        </main>
+       
+    </body>
+</html>

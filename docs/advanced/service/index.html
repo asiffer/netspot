@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
+        
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
+        
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="primary" href="/advanced/service/"><span>Service</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/advanced/spot/"><span>Spot Algorithm</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Service</h2>
+            <p>Even if it is not the main way to use <strong>netspot</strong>, it can run as a service, exposing a minimal REST API.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot serve
+</code></pre></div><p>By default it listens at <code>tcp://localhost:11000</code> but it can be changed with the <code>-e</code> flag. For instance, if you want to monitor the loopback
+interface, the API trafic must not pollute what <strong>netspot</strong> monitors,
+so you can consider a unix socket.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot serve -e unix:///tmp/netspot.sock
+</code></pre></div><table>
+<thead>
+<tr>
+<th> Method</th>
+<th> Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/config</code></td>
+<td>Get the current config (JSON output)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/config</code></td>
+<td>Change the config (JSON expected)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/run</code></td>
+<td>Manage the status of netspot (start/stop)</td>
+</tr>
+</tbody>
+</table>
+
+            </div>
+            
+        </main>
+       
+    </body>
+</html>

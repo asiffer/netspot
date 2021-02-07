@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
+        
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
+        
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="primary" href="/get-started/basic/"><span>Basic usage</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/get-started/configuration/"><span>Configuration</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/get-started/architecture/"><span>Architecture</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Basic usage</h2>
+            <p>Basically, you can run <code>netspot</code> on a network interface. In the example below,
+<code>netspot</code> monitors the <code>PERF</code> statistics (packet processing rate) on the <code>eth0</code> interface.
+The computation period is <code>1s</code> and the values are printed to the console (<code>-v</code>).</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run -d eth0 -s PERF -p 1s -v
+</code></pre></div><p>You can also analyze a capture file.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
+</code></pre></div><p>All these command-line options can be set in a config file (see the <a href="/get-started/configuration/">configuration</a> section for more options):</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># netspot.toml</span>
+
+[miner]
+device = <span style="color:#b84">&#34;~/file.pcap&#34;</span>
+
+[analyzer]
+period = <span style="color:#b84">&#34;500ms&#34;</span>
+stats = [<span style="color:#b84">&#34;PERF&#34;</span>, <span style="color:#b84">&#34;R_SYN&#34;</span>]
+
+[exporter.console]
+data = <span style="font-weight:bold">true</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run --config netspot.toml
+</code></pre></div><div class="info">
+    All the config file parameters can be passed through CLI flags with
+the same syntax: <code>module[.submodule].parameter</code>. For instance, you can set the device with <code>netspot run --miner.device file.pcap</code>.
+</div>
+<h3 id="data-output">Data output</h3>
+<p><code>netspot</code> outputs two things:</p>
+<ul>
+<li>the network statistics (namely the <em>data</em>, at every <code>period</code>)</li>
+<li>the alarms (when a computed stat is abnormal)</li>
+</ul>
+<p>A <strong>stat record</strong> is a simple map <code>STAT: value</code> with a timestamp. When <code>netspot</code> learns,
+it also gathers the decision thresholds <code>STAT_UP: upper_threshold</code> and <code>STAT_DOWN: lower_threshold</code>.</p>
+<p>An <strong>alarm</strong> is generated once a statistics is beyond a threshold. It contains the value of
+the statistics and its probability to occur (the lower, the more abnormal).</p>
+<p><code>netspot</code> can dispatch these two streams to different exporting modules. In the previous example, data (not the alarms) are sent to the console (<code>-v</code> flag), but actually you can
+also send it to a file (see below), a socket or an influxdb database.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#998;font-style:italic"># storing data to a file</span>
+netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -f /tmp/data.json
+</code></pre></div><p>There is not a short CLI flag for every module. In the general case, you
+have to use the <code>module.submodule.option</code> scheme (like in the config file):</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot run -d file.pcap -s PERF -s R_SYN -p 500ms --exporter.file.data /tmp/data.json
+</code></pre></div><p>Or you can set it in the config file:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># netspot.toml</span>
+[exporter.file]
+<span style="color:#998;font-style:italic"># Path to the file which will store the data.</span>
+<span style="color:#998;font-style:italic"># The value can contain a &#39;%s&#39; which will be replaced by </span>
+<span style="color:#998;font-style:italic"># the series name. </span>
+data = <span style="color:#b84">&#34;/tmp/netspot_%s_data.json&#34;</span>
+<span style="color:#998;font-style:italic"># Same as the data but for the alarms</span>
+<span style="color:#998;font-style:italic">#alarm = &#34;/tmp/netspot_%s_alarm.json&#34;</span>
+</code></pre></div>
+            </div>
+            
+        </main>
+       
+    </body>
+</html>

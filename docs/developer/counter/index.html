@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
+        
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
+        
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="primary" href="/developer/counter/"><span>Counters</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/stat/"><span>Statistics</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/exporter/"><span>Exporting module</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/toolchain/"><span>Developer toolchain</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Counters</h2>
+            <p>Counters are elements of the <code>miner</code>. In the Go ecosystem, they must be located in the <code>miner/counter</code> sub-package.</p>
+<p>Every counter is related to a network layer (or directly to a packet). The following layers are currently available:</p>
+<ul>
+<li>PKT (raw packet)</li>
+<li>ARP</li>
+<li>IPv4</li>
+<li>ICMPv4</li>
+<li>TCP</li>
+<li>UDP</li>
+</ul>
+<p>A counter must implement 3 simple functions given by the interface below.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="font-weight:bold">type</span> BaseCtrInterface <span style="font-weight:bold">interface</span> {
+	<span style="color:#900;font-weight:bold">Name</span>() <span style="color:#458;font-weight:bold">string</span>  <span style="color:#998;font-style:italic">// the name of the counter
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#900;font-weight:bold">Value</span>() <span style="color:#458;font-weight:bold">uint64</span> <span style="color:#998;font-style:italic">// get back the value of the counter
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#900;font-weight:bold">Reset</span>()        <span style="color:#998;font-style:italic">// method to reset the counter
+</span><span style="color:#998;font-style:italic"></span>}
+</code></pre></div><p>In addition, it must implement a <code>Process</code> function related to
+the layers it depends on. For instance, an IPv4 counter must have
+a method with the following signature</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#900;font-weight:bold">Process</span>(ip <span style="font-weight:bold">*</span>layers.IPv4)
+</code></pre></div><p>You can have a look to the counters already implemented within netspot. As a general example, a counter is a simple file with the
+following content.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#998;font-style:italic">// &lt;layer&gt;_&lt;counter_name&gt;.go
+</span><span style="color:#998;font-style:italic"></span>
+<span style="font-weight:bold">package</span> counters
+
+<span style="font-weight:bold">import</span> (
+	<span style="color:#b84">&#34;github.com/google/gopacket/layers&#34;</span>
+)
+
+<span style="font-weight:bold">func</span> <span style="color:#900;font-weight:bold">init</span>() {
+	<span style="color:#998;font-style:italic">// The counter is registered at compile time
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#900;font-weight:bold">Register</span>(<span style="font-weight:bold">&amp;</span>COUNTER{Counter: <span style="color:#099">0</span>})
+}
+
+<span style="color:#998;font-style:italic">// COUNTER is a custom Counter I made
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">type</span> COUNTER <span style="font-weight:bold">struct</span> {
+	BaseCtr
+	Counter <span style="color:#458;font-weight:bold">uint64</span>
+}
+
+<span style="color:#998;font-style:italic">// Name returns the name of the counter
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (c <span style="font-weight:bold">*</span>COUNTER) <span style="color:#900;font-weight:bold">Name</span>() <span style="color:#458;font-weight:bold">string</span> {
+
+}
+
+<span style="color:#998;font-style:italic">// Value returns the current value of the counter
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (c <span style="font-weight:bold">*</span>COUNTER) <span style="color:#900;font-weight:bold">Value</span>() <span style="color:#458;font-weight:bold">uint64</span> {
+
+}
+
+<span style="color:#998;font-style:italic">// Reset resets the counter
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (c <span style="font-weight:bold">*</span>COUNTER) <span style="color:#900;font-weight:bold">Reset</span>() {
+
+}
+
+<span style="color:#998;font-style:italic">// Process update the counter according to data it receives
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (c <span style="font-weight:bold">*</span>COUNTER) <span style="color:#900;font-weight:bold">Process</span>(<span style="font-weight:bold">*</span>layers.IPv4) {
+
+}
+
+</code></pre></div><p>Obviously, you can create more complex counters with additonal structures but you should keep in mind that its operation
+should be rather atomic.</p>
+<div class="info">
+    We recall that several goroutines are likely to call the <code>Process</code> function. It means that the internal counter value access is under high concurrency. For this purpose,
+you may have a look to the <a href="https://golang.org/pkg/sync/atomic/"><code>atomic/sync</code></a> package. You can also have a look to <a href="https://gobyexample.com/atomic-counters">this example</a>.
+</div>
+
+            </div>
+            
+        </main>
+       
+    </body>
+</html>

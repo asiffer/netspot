@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
+        
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
+        
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="secondary" href="/developer/counter/"><span>Counters</span></a></li>
+                            
+                        
+                            
+                                <li><a class="primary" href="/developer/stat/"><span>Statistics</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/exporter/"><span>Exporting module</span></a></li>
+                            
+                        
+                            
+                                <li><a class="secondary" href="/developer/toolchain/"><span>Developer toolchain</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Statistics</h2>
+            <p>The statistics are the real values <code>netspot</code> monitors. In the same manner as the counters, you can implement your
+own statistic according to your needs. In particular, they must be located
+in the <code>netspot/stats</code> subpackage.</p>
+<div class="info">
+    The analyzer is in charge of managing statistics. When you implement a
+new statistic you don&rsquo;t have to take care of neither load/unload operations nor Spot algorithm configuration.
+</div>
+<p>Statistics are built on top of the counters. They use some counters to
+compute their own value. For example, the statistic <code>R_SYN</code> is computed
+as the ratio <code>SYN</code>/<code>IP</code> where <code>SYN</code> counts the number of SYN packets and
+<code>IP</code> counts the number of IP packets.</p>
+<p>The general interface of a statistic (<code>StatInterface</code>) is quite rich but
+only few functions must be implemented.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#998;font-style:italic">// StatInterface gathers the common behavior of the statistics
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">type</span> StatInterface <span style="font-weight:bold">interface</span> {
+	<span style="color:#900;font-weight:bold">Name</span>() <span style="color:#458;font-weight:bold">string</span> 
+	<span style="color:#900;font-weight:bold">Configure</span>() <span style="color:#458;font-weight:bold">error</span>
+	<span style="color:#900;font-weight:bold">Requirement</span>() []<span style="color:#458;font-weight:bold">string</span>             
+	<span style="color:#900;font-weight:bold">Compute</span>(ctrvalues []<span style="color:#458;font-weight:bold">uint64</span>) <span style="color:#458;font-weight:bold">float64</span> 
+	<span style="color:#900;font-weight:bold">Update</span>(val <span style="color:#458;font-weight:bold">float64</span>) <span style="color:#458;font-weight:bold">int</span>             
+	<span style="color:#900;font-weight:bold">UpProbability</span>(quantile <span style="color:#458;font-weight:bold">float64</span>) <span style="color:#458;font-weight:bold">float64</span>
+	<span style="color:#900;font-weight:bold">DownProbability</span>(quantile <span style="color:#458;font-weight:bold">float64</span>) <span style="color:#458;font-weight:bold">float64</span>
+	<span style="color:#900;font-weight:bold">GetThresholds</span>() (<span style="color:#458;font-weight:bold">float64</span>, <span style="color:#458;font-weight:bold">float64</span>)
+	<span style="color:#900;font-weight:bold">Status</span>() gospot.DSpotStatus
+}
+</code></pre></div><p>Actually, statistics must inherit from the the <code>BaseStat</code> object which
+already implements some functions of the <code>StatInterface</code> (especially
+all related to the Spot algorithm).</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#998;font-style:italic">// BaseStat is the basic structure which defines a statistic. It
+</span><span style="color:#998;font-style:italic">// embeds a string (its unique name) and a DSpot instance which monitors
+</span><span style="color:#998;font-style:italic">// itself.
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">type</span> BaseStat <span style="font-weight:bold">struct</span> {
+	name  <span style="color:#458;font-weight:bold">string</span>
+	dspot <span style="font-weight:bold">*</span>gospot.DSpot <span style="color:#998;font-style:italic">// the spot instance
+</span><span style="color:#998;font-style:italic"></span>}
+</code></pre></div><p>To define a new statistic you only need to inehrit from the previous
+structure and code the following 3 functions:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="font-weight:bold">type</span> StatInterface <span style="font-weight:bold">interface</span> {
+    <span style="color:#998;font-style:italic">// ...
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#900;font-weight:bold">Name</span>() <span style="color:#458;font-weight:bold">string</span> 
+    <span style="color:#900;font-weight:bold">Requirement</span>() []<span style="color:#458;font-weight:bold">string</span>             
+    <span style="color:#900;font-weight:bold">Compute</span>(ctrvalues []<span style="color:#458;font-weight:bold">uint64</span>) <span style="color:#458;font-weight:bold">float64</span> 
+    <span style="color:#998;font-style:italic">// ...
+</span><span style="color:#998;font-style:italic"></span>}
+</code></pre></div><div class="alert">
+    You have to register your statistic by calling the
+<code>Register(stat StatInterface)</code> in the <code>init()</code>
+function.
+</div>
+<p>Finally, your new statistic should be defined in a single
+file and may look like below.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#998;font-style:italic">// my_stat.go
+</span><span style="color:#998;font-style:italic"></span>
+<span style="font-weight:bold">package</span> stats
+
+<span style="font-weight:bold">func</span> <span style="color:#900;font-weight:bold">init</span>() {
+    <span style="color:#998;font-style:italic">// The statistic is registered at compile time
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#900;font-weight:bold">Register</span>(<span style="font-weight:bold">&amp;</span>STAT{BaseStat{name: <span style="color:#b84">&#34;...&#34;</span>}})
+}
+
+<span style="color:#998;font-style:italic">// STAT computes something to define
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">type</span> STAT <span style="font-weight:bold">struct</span> {
+    BaseStat <span style="color:#998;font-style:italic">// compose with BaseStat
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">// you can add some other attributes
+</span><span style="color:#998;font-style:italic"></span>}
+
+<span style="color:#998;font-style:italic">// Name returns the unique name of the stat
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (stat <span style="font-weight:bold">*</span>STAT) <span style="color:#900;font-weight:bold">Name</span>() <span style="color:#458;font-weight:bold">string</span> {
+    <span style="font-weight:bold">return</span> <span style="color:#b84">&#34;...&#34;</span>
+}
+
+<span style="color:#998;font-style:italic">// Requirement returns the requested counters to compute the stat.
+</span><span style="color:#998;font-style:italic">// The order is important for the Compute() function
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (stat <span style="font-weight:bold">*</span>STAT) <span style="color:#900;font-weight:bold">Requirement</span>() []<span style="color:#458;font-weight:bold">string</span> {
+
+}
+
+<span style="color:#998;font-style:italic">// Compute implements the way to compute the stat from the counters.
+</span><span style="color:#998;font-style:italic">// Counters are given in the same order as the Requirement() function
+</span><span style="color:#998;font-style:italic"></span><span style="font-weight:bold">func</span> (stat <span style="font-weight:bold">*</span>STAT) <span style="color:#900;font-weight:bold">Compute</span>(ctrvalues []<span style="color:#458;font-weight:bold">uint64</span>) <span style="color:#458;font-weight:bold">float64</span> {
+
+}
+</code></pre></div>
+            </div>
+            
+        </main>
+       
+    </body>
+</html>

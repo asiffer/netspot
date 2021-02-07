@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" href="/scss/style.css">
+</head><body><div class="container-fluid banner">
+  <nav class="container">
+      <ul>
+        
+        <li class="netspot-mini"><strong>§2n|1</strong></li>
+      </ul>
+      <ul>
+        
+        <li><a href="/"><span>Home</span></a></li>
+        
+        <li><a href="/get-started/"><span>Get started</span></a></li>
+        
+        <li><a href="/download/"><span>Download</span></a></li>
+        
+        <li><a href="/advanced/"><span>Advanced</span></a></li>
+        
+        <li><a href="/developer/"><span>Developer</span></a></li>
+        
+      </ul>
+  </nav>
+</div><main class="container">
+            <div class="toc">
+                <aside class="container">
+                    <nav>
+                        <ul>
+                        
+                        
+                        
+                            
+                                <li><a class="secondary" href="/advanced/service/"><span>Service</span></a></li>
+                            
+                        
+                            
+                                <li><a class="primary" href="/advanced/spot/"><span>Spot Algorithm</span></a></li>
+                            
+                        
+                        </ul>
+                    </nav>
+                </aside>
+            </div>
+            <div class="content">
+            <h2>Spot Algorithm</h2>
+            <p>SPOT is the core algorithm which monitors the
+network statistics.
+Its main strength is that it automatically provides a decision
+threshold based on the stream it monitors.</p>
+<p>The threshold provided by Spot has the nice following features:</p>
+<ul>
+<li>Unsupervised computation (automatic, no label required)</li>
+<li>Probabilistic meaning (quantile)</li>
+<li>Stream ready computation (dynamic update, high throughput)</li>
+</ul>
+<p>In particular this work has been <a href="https://hal.archives-ouvertes.fr/hal-01640325/file/siffer_kdd_17.pdf">published</a> in 2017 at KDD conference:</p>
+<blockquote>
+<p>Siffer, A., Fouque, P. A., Termier, A., &amp; Largouet, C. (2017, August). Anomaly detection in streams with extreme value theory. In Proceedings of the 23rd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (pp. 1067-1075). ACM</p>
+</blockquote>
+<p>In Netspot, you can modify the Spot parameters either at
+global scale (all statistics) or specifically (statistics-wise)</p>
+<h3 id="probabilistic-threshold">Probabilistic threshold</h3>
+<p>The parameter <code>q</code> is the main parameter of the Spot algorithm. It directly tunes the decision threshold</p>
+<p>$\mathbb{P}(X&gt;z_q) = q$</p>
+<h3 id="model-depth">Model depth</h3>
+<h3 id="calibration-parameters">Calibration parameters</h3>
+<h3 id="extra-parameters">Extra parameters</h3>
+
+            </div>
+            
+        </main>
+       
+    </body>
+</html>
