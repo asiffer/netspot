@@ -21,7 +21,7 @@ var (
 func init() {
 	setTestDir()
 	hugePcap = filepath.Join(testDir, "snort.pcap")
-	smallPcap = filepath.Join(testDir, "empire.pcapng")
+	smallPcap = filepath.Join(testDir, "empire.pcap")
 }
 
 func setTestDir() {
