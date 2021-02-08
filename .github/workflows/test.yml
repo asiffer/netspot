@@ -13,7 +13,7 @@ jobs:
       image: golang:1.15.7-alpine
       env:
         # SYSTEM
-        PACKAGES: bash linux-headers git git-lfs flex bison wget make bluez-dev bluez libpcap libpcap-dev gcc musl-dev
+        PACKAGES: bash curl linux-headers git git-lfs flex bison wget make bluez-dev bluez libpcap libpcap-dev gcc musl-dev
     services:
       influxdb:
         image: influxdb:1.8
