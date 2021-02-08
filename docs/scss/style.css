@@ -6429,8 +6429,9 @@ readers do not read off random characters that represent icons */
 
 article {
   /* haut | droit | bas | gauche */
-  padding-left: 2em;
-  padding-right: 2em; }
+  text-align: justify;
+  padding-left: calc(var(--spacing-block) * 0.5 * var(--spacing-factor-xl));
+  padding-right: calc(var(--spacing-block) * 0.5 * var(--spacing-factor-xl)); }
 
 .netspot {
   font-family: 'Datalegreya-Gradient';
@@ -6532,7 +6533,16 @@ nav ul:first-of-type {
   .toc {
     display: none; }
   .content {
-    width: 100%; } }
+    width: 100%; }
+  .netspot {
+    font-size: 6em; }
+  .banner {
+    margin: 0;
+    padding: 0; }
+    .banner nav.container {
+      padding: 0.5em; }
+  article {
+    padding: var(--spacing-block) var(--spacing-gutter); } }
 
 @media (prefers-color-scheme: dark) {
   .banner {
