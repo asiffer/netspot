@@ -33,11 +33,8 @@ jobs:
         run: |
           echo CGO_ENABLED=1 >> $GITHUB_ENV
 
-      - name: debug
-        run: |
-          pwd
-          ls -alh --color=auto
-          ls -alh test
       - name: Run tests
-        run: go test -race -cover -v ./...
+        run: |
+          go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
+          bash <(curl -s https://codecov.io/bash)
 
