@@ -11,9 +11,8 @@ import (
 )
 
 var (
-	headerWidth    = 80
-	pcapTestFile   = "test/test.pcap"
-	configTestFile = "test/miner.toml"
+	headerWidth  = 80
+	pcapTestFile = "../../test/wifi.pcap"
 )
 
 func init() {

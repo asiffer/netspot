@@ -27,7 +27,7 @@ func TestTimeCounter(t *testing.T) {
 
 	checkTitle("Check layer processing...")
 
-	handle, err := pcap.OpenOffline("test/small.pcap")
+	handle, err := pcap.OpenOffline(pcapTestFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,28 +35,26 @@ func TestTimeCounter(t *testing.T) {
 
 	// Loop through packets in file
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	ts := []uint64{1558195813635381000, 1558195813732127000, 1558195813732181000}
 
-	pkt0, err := packetSource.NextPacket()
-
-	ctr.Process(pkt0)
-	if ctr.Value() != 1445353834524710000 {
-		testERROR()
-		t.Errorf("Bad counter value (expected 1445353834524710000, got %d)", ctr.Value())
-	}
-	// testOK()
-
-	pkt1, err := packetSource.NextPacket()
-	ctr.Process(pkt1)
-	if ctr.Value() != 1445353834525737000 {
-		testERROR()
-		t.Errorf("Bad counter value (expected 1445353834525737000, got %d)", ctr.Value())
+	for i := 0; i < 3; i++ {
+		pkt, err := packetSource.NextPacket()
+		if err != nil {
+			testERROR()
+			t.Error(err)
+		}
+		ctr.Process(pkt)
+		if ctr.Value() != ts[i] {
+			testERROR()
+			t.Errorf("Bad counter value (expected %d, got %d)", ts[i], ctr.Value())
+		}
 	}
 	testOK()
 
 	checkTitle("Check counter reset...")
 	ctr.Reset()
 	// the reset of this counter is special: it does nothing
-	if ctr.Value() != 1445353834525737000 {
+	if ctr.Value() != ts[2] {
 		testERROR()
 		t.Errorf("Bad counter reset (expected 1445353834525737000, got %d)", ctr.Value())
 	}
