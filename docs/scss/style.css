@@ -1525,7 +1525,7 @@ details {
 /**
  * Card (<article>)
  */
-article {
+article, farticle {
   margin: var(--spacing-block) 0;
   padding: var(--spacing-block) var(--spacing-gutter);
   overflow: hidden;
@@ -1533,101 +1533,117 @@ article {
   background: var(--card-background);
   box-shadow: var(--card-shadow); }
   @media (min-width: 576px) {
-    article {
+    article, farticle {
       margin: calc(var(--spacing-block) * var(--spacing-factor-sm)) 0;
       padding: calc(var(--spacing-block) * var(--spacing-factor-sm)); } }
   @media (min-width: 768px) {
-    article {
+    article, farticle {
       margin: calc(var(--spacing-block) * var(--spacing-factor-md)) 0;
       padding: calc(var(--spacing-block) * var(--spacing-factor-md)); } }
   @media (min-width: 992px) {
-    article {
+    article, farticle {
       margin: calc(var(--spacing-block) * var(--spacing-factor-lg)) 0;
       padding: calc(var(--spacing-block) * var(--spacing-factor-lg)); } }
   @media (min-width: 1200px) {
-    article {
+    article, farticle {
       margin: calc(var(--spacing-block) * var(--spacing-factor-xl)) 0;
       padding: calc(var(--spacing-block) * var(--spacing-factor-xl)); } }
-  article > *:not(header):not(footer):not(pre):last-child {
+  article > *:not(header):not(footer):not(pre):last-child, farticle > *:not(header):not(footer):not(pre):last-child {
     margin-bottom: 0 !important; }
 
 /**
  * Card sectionning (<article> > header, footer, pre)
  */
-article > header,
-article > footer {
+article > header, farticle > header,
+article > footer,
+farticle > footer {
   background-color: var(--card-sections); }
 
-article > header,
+article > header, farticle > header,
 article > footer,
-article > pre {
+farticle > footer,
+article > pre,
+farticle > pre {
   margin: calc(var(--spacing-gutter) * -1);
   padding: var(--spacing-block) var(--spacing-gutter); }
   @media (min-width: 576px) {
-    article > header,
+    article > header, farticle > header,
     article > footer,
-    article > pre {
+    farticle > footer,
+    article > pre,
+    farticle > pre {
       margin: calc(var(--spacing-block) * var(--spacing-factor-sm) * -1);
       padding: var(--spacing-block) calc(var(--spacing-block) * var(--spacing-factor-sm)); } }
   @media (min-width: 768px) {
-    article > header,
+    article > header, farticle > header,
     article > footer,
-    article > pre {
+    farticle > footer,
+    article > pre,
+    farticle > pre {
       margin: calc(var(--spacing-block) * var(--spacing-factor-md) * -1);
       padding: var(--spacing-block) calc(var(--spacing-block) * var(--spacing-factor-md)); } }
   @media (min-width: 992px) {
-    article > header,
+    article > header, farticle > header,
     article > footer,
-    article > pre {
+    farticle > footer,
+    article > pre,
+    farticle > pre {
       margin: calc(var(--spacing-block) * var(--spacing-factor-lg) * -1);
       padding: var(--spacing-block) calc(var(--spacing-block) * var(--spacing-factor-lg)); } }
   @media (min-width: 1200px) {
-    article > header,
+    article > header, farticle > header,
     article > footer,
-    article > pre {
+    farticle > footer,
+    article > pre,
+    farticle > pre {
       margin: calc(var(--spacing-block) * var(--spacing-factor-xl) * -1);
       padding: var(--spacing-block) calc(var(--spacing-block) * var(--spacing-factor-xl)); } }
-article > header {
+article > header, farticle > header {
   margin-top: calc(var(--spacing-gutter) * -2);
   margin-bottom: var(--spacing-block); }
   @media (min-width: 576px) {
-    article > header {
+    article > header, farticle > header {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-sm) * -1);
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-sm)); } }
   @media (min-width: 768px) {
-    article > header {
+    article > header, farticle > header {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-md) * -1);
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-md)); } }
   @media (min-width: 992px) {
-    article > header {
+    article > header, farticle > header {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-lg) * -1);
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-lg)); } }
   @media (min-width: 1200px) {
-    article > header {
+    article > header, farticle > header {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-xl) * -1);
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-xl)); } }
-article > footer,
-article > pre {
+article > footer, farticle > footer,
+article > pre,
+farticle > pre {
   margin-top: var(--spacing-block);
   margin-bottom: calc(var(--spacing-gutter) * -2); }
   @media (min-width: 576px) {
-    article > footer,
-    article > pre {
+    article > footer, farticle > footer,
+    article > pre,
+    farticle > pre {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-sm));
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-sm) * -1); } }
   @media (min-width: 768px) {
-    article > footer,
-    article > pre {
+    article > footer, farticle > footer,
+    article > pre,
+    farticle > pre {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-md));
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-md) * -1); } }
   @media (min-width: 992px) {
-    article > footer,
-    article > pre {
+    article > footer, farticle > footer,
+    article > pre,
+    farticle > pre {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-lg));
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-lg) * -1); } }
   @media (min-width: 1200px) {
-    article > footer,
-    article > pre {
+    article > footer, farticle > footer,
+    article > pre,
+    farticle > pre {
       margin-top: calc(var(--spacing-block) * var(--spacing-factor-xl));
       margin-bottom: calc(var(--spacing-block) * var(--spacing-factor-xl) * -1); } }
 /**
@@ -6427,11 +6443,30 @@ readers do not read off random characters that represent icons */
   margin: 0 auto;
   text-align: center; }
 
-article {
+article, farticle {
   /* haut | droit | bas | gauche */
   text-align: justify;
   padding-left: calc(var(--spacing-block) * 0.5 * var(--spacing-factor-xl));
   padding-right: calc(var(--spacing-block) * 0.5 * var(--spacing-factor-xl)); }
+
+farticle {
+  transition: ease-in-out 0.25s;
+  padding-top: 0;
+  padding-bottom: 0; }
+  farticle a {
+    display: block;
+    width: 100%;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    font-weight: bolder;
+    text-align: center;
+    text-decoration: none; }
+
+farticle:hover {
+  background-color: #2c3d49; }
+  farticle:hover a {
+    color: white;
+    text-decoration: none; }
 
 .netspot {
   font-family: 'Datalegreya-Gradient';
@@ -6541,7 +6576,7 @@ nav ul:first-of-type {
     padding: 0; }
     .banner nav.container {
       padding: 0.5em; }
-  article {
+  article, farticle {
     padding: var(--spacing-block) var(--spacing-gutter); } }
 
 @media (prefers-color-scheme: dark) {
@@ -6551,4 +6586,6 @@ nav ul:first-of-type {
     .banner li, .banner a {
       color: #2c3d49; }
     .banner a:hover {
-      color: #bbc6ce; } }
+      color: #bbc6ce; }
+  .netspot {
+    color: white; } }
