@@ -36,5 +36,6 @@ jobs:
       - name: Run tests
         run: |
           go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
-          bash <(curl -s https://codecov.io/bash)
+          curl -s https://codecov.io/bash > codecov.sh
+          bash codecov.sh
 
