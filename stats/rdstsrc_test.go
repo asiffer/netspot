@@ -10,7 +10,7 @@ import (
 func TestR_DST_SRC(t *testing.T) {
 	title("Testing R_DST_SRC")
 
-	stat := &RDstSrc{}
+	stat := AvailableStats["R_DST_SRC"]
 	checkTitle("Checking name...")
 	if stat.Name() != "R_DST_SRC" {
 		testERROR()

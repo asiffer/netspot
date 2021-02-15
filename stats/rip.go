@@ -6,17 +6,12 @@ package stats
 import "math"
 
 func init() {
-	Register(&RIP{BaseStat{name: "R_IP"}})
+	Register(&RIP{BaseStat{name: "R_IP", description: "Ratio of IP packets (IP/ALL)"}})
 }
 
 // RIP computes the ratio of ICMP packets
 type RIP struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RIP) Name() string {
-	return "R_IP"
 }
 
 // Requirement returns the requested counters to compute the stat

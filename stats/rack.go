@@ -4,17 +4,14 @@
 package stats
 
 func init() {
-	Register(&RACK{BaseStat: BaseStat{name: "R_ACK"}})
+	Register(&RACK{BaseStat: BaseStat{
+		name:        "R_ACK",
+		description: "Ratio of ACK packets (ACK/IP)"}})
 }
 
 // RACK computes the ratio of packets with TCP + ACK flag
 type RACK struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RACK) Name() string {
-	return "R_ACK"
 }
 
 // Requirement returns teh requested counters to compute the stat

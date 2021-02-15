@@ -6,17 +6,14 @@ package stats
 import "math"
 
 func init() {
-	Register(&RDstSrc{BaseStat{name: "R_DST_SRC"}})
+	Register(&RDstSrc{BaseStat{
+		name:        "R_DST_SRC",
+		description: "Ratio of unique destination addresses to unique source addresses"}})
 }
 
 // RDstSrc computes the ratio 'number of unique destination addresses' / 'number of unique source addresses'
 type RDstSrc struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RDstSrc) Name() string {
-	return "R_DST_SRC"
 }
 
 // Requirement returns the requested counters to compute the stat

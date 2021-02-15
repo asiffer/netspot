@@ -10,7 +10,7 @@ import (
 func TestPERF(t *testing.T) {
 	title("Testing PERF")
 
-	stat := &Perf{}
+	stat := AvailableStats["PERF"]
 	checkTitle("Checking name...")
 	if stat.Name() != "PERF" {
 		testERROR()

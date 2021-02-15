@@ -266,15 +266,25 @@ max_excess = 250
 func TestBaseStat(t *testing.T) {
 	title(t.Name())
 
-	bs := &BaseStat{name: "Test"}
+	name := "Test"
+	description := "useful details to understand"
+	bs := &BaseStat{name: name, description: description}
 	if err := bs.Configure(); err != nil {
 		t.Fatal(err)
 	}
 
 	checkTitle("Checking name...")
-	if bs.name != "Test" {
+	if bs.Name() != name {
 		testERROR()
-		t.Errorf("Expected 'Test', got %s", bs.name)
+		t.Errorf("Expected '%s', got %s", name, bs.name)
+	} else {
+		testOK()
+	}
+
+	checkTitle("Checking description...")
+	if bs.Description() != description {
+		testERROR()
+		t.Errorf("Expected '%s', got %s", description, bs.description)
 	} else {
 		testOK()
 	}
