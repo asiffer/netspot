@@ -9,7 +9,9 @@ import (
 
 func init() {
 	Register(&Perf{
-		BaseStat: BaseStat{name: "PERF"},
+		BaseStat: BaseStat{
+			name:        "PERF",
+			description: "Packet processing rate (pkts/second)"},
 		init:     false,
 		lastTime: 0})
 }
@@ -20,11 +22,6 @@ type Perf struct {
 	init     bool
 	lastTime uint64
 	// lastPackets uint64
-}
-
-// Name returns the unique name of the stat
-func (stat *Perf) Name() string {
-	return "PERF"
 }
 
 // Requirement returns the requested counters to compute the stat

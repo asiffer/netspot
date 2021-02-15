@@ -10,7 +10,7 @@ import (
 func TestR_DST_SRC_PORT(t *testing.T) {
 	title("Testing R_DST_SRC_PORT")
 
-	stat := &RDstSrcPort{}
+	stat := AvailableStats["R_DST_SRC_PORT"]
 	checkTitle("Checking name...")
 	if stat.Name() != "R_DST_SRC_PORT" {
 		testERROR()

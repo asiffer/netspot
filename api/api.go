@@ -52,6 +52,7 @@ func InitConfig() error {
 	router.HandleFunc("/api/config", ConfigHandler).Methods("GET", "POST")
 	router.HandleFunc("/api/ping", PingHandler).Methods("GET")
 	router.HandleFunc("/api/devices", DevicesHandler).Methods("GET")
+	router.HandleFunc("/api/stats", StatsHandler).Methods("GET")
 	http.Handle("/", logRequestHandler(router))
 
 	// logs

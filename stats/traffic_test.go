@@ -11,7 +11,7 @@ import (
 func TestTRAFFIC(t *testing.T) {
 	title("Testing TRAFFIC")
 
-	stat := &Traffic{}
+	stat := AvailableStats["TRAFFIC"] //&Traffic{}
 	checkTitle("Checking name...")
 	if stat.Name() != "TRAFFIC" {
 		testERROR()

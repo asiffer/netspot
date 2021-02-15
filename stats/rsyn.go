@@ -4,17 +4,14 @@
 package stats
 
 func init() {
-	Register(&RSYN{BaseStat{name: "R_SYN"}})
+	Register(&RSYN{BaseStat{
+		name:        "R_SYN",
+		description: "Ratio of SYN packets (SYN/IP)"}})
 }
 
 // RSYN computes the ratio of packets with TCP + SYN flag
 type RSYN struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RSYN) Name() string {
-	return "R_SYN"
 }
 
 // Requirement returns teh requested counters to compute the stat

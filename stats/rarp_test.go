@@ -10,7 +10,7 @@ import (
 func TestRARP(t *testing.T) {
 	title("Testing R_ARP")
 
-	stat := &RARP{}
+	stat := AvailableStats["R_ARP"]
 	checkTitle("Checking name...")
 	if stat.Name() != "R_ARP" {
 		testERROR()

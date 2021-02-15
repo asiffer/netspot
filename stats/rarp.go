@@ -6,17 +6,14 @@ package stats
 import "math"
 
 func init() {
-	Register(&RARP{BaseStat{name: "R_ARP"}})
+	Register(&RARP{BaseStat{
+		name:        "R_ARP",
+		description: "Ratio of ARP packets (ARP/ALL)"}})
 }
 
 // RARP computes the ratio of ICMP packets
 type RARP struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RARP) Name() string {
-	return "R_ARP"
 }
 
 // Requirement returns the requested counters to compute the stat

@@ -10,7 +10,7 @@ import (
 func TestRICMP(t *testing.T) {
 	title("Testing R_ICMP")
 
-	stat := &RIcmp{}
+	stat := AvailableStats["R_ICMP"]
 	checkTitle("Checking name...")
 	if stat.Name() != "R_ICMP" {
 		testERROR()

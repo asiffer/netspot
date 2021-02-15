@@ -6,17 +6,14 @@ package stats
 import "math"
 
 func init() {
-	Register(&AvgPktSize{BaseStat{name: "AVG_PKT_SIZE"}})
+	Register(&AvgPktSize{BaseStat{
+		name:        "AVG_PKT_SIZE",
+		description: "Average size of the IP packets (in bytes)"}})
 }
 
 // AvgPktSize computes the average size of an IP packet
 type AvgPktSize struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *AvgPktSize) Name() string {
-	return "AVG_PKT_SIZE"
 }
 
 // Requirement returns teh requested counters to compute the stat

@@ -10,7 +10,7 @@ import (
 func TestRIP(t *testing.T) {
 	title("Testing R_IP")
 
-	stat := &RIP{}
+	stat := AvailableStats["R_IP"]
 	checkTitle("Checking name...")
 	if stat.Name() != "R_IP" {
 		testERROR()

@@ -7,7 +7,9 @@ import "math"
 
 func init() {
 	Register(&Traffic{
-		BaseStat: BaseStat{name: "TRAFFIC"},
+		BaseStat: BaseStat{
+			name:        "TRAFFIC",
+			description: "Packet source rate (pkts/second)"},
 		init:     false,
 		lastTime: 0},
 	)
@@ -18,11 +20,6 @@ type Traffic struct {
 	BaseStat
 	init     bool
 	lastTime uint64
-}
-
-// Name returns the unique name of the stat
-func (stat *Traffic) Name() string {
-	return "TRAFFIC"
 }
 
 // Requirement returns teh requested counters to compute the stat

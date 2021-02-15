@@ -12,18 +12,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// StatConstructor is the generic template for a stat constructor
-type StatConstructor func(bs BaseStat) StatInterface
-
 var (
 	logger zerolog.Logger // package logger
 	// AvailableStats is the map linking a stat name to its constructor
 	AvailableStats = make(map[string]StatInterface)
 )
-
-func init() {
-
-}
 
 // Register aims to add implemented stats to the slice AvailableStats
 func Register(s StatInterface) error {
@@ -38,14 +31,16 @@ func Register(s StatInterface) error {
 // embeds a string (its unique name) and a DSpot instance which monitors
 // itself.
 type BaseStat struct {
-	name  string
-	dspot *gospot.DSpot // the spot instance
-	mutex sync.Mutex    // mutex for thread safety
+	name        string        // name of the stat
+	description string        // details about the stat
+	dspot       *gospot.DSpot // the spot instance
+	mutex       sync.Mutex    // mutex for thread safety
 }
 
 // StatInterface gathers the common behavior of the statistics
 type StatInterface interface {
-	Name() string // the name of the statistics
+	Name() string        // the name of the statistics
+	Description() string // details about the stat
 	Configure() error
 	Requirement() []string              // the names of the requested counters
 	Compute(ctrvalues []uint64) float64 // only compute the statistics
@@ -54,6 +49,16 @@ type StatInterface interface {
 	DownProbability(quantile float64) float64
 	GetThresholds() (float64, float64)
 	Status() gospot.DSpotStatus
+}
+
+// Name returns the name of the statistic
+func (m *BaseStat) Name() string {
+	return m.name
+}
+
+// Description returns some details about the statistic
+func (m *BaseStat) Description() string {
+	return m.description
 }
 
 // Update feeds the DSpot instance embedded in the BaseStat

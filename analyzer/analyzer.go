@@ -294,6 +294,16 @@ func GetAvailableStats() []string {
 	return list
 }
 
+// GetAvailableStatsWithDesc return the available
+// statistics along with their description
+func GetAvailableStatsWithDesc() map[string]string {
+	m := make(map[string]string)
+	for name, stat := range stats.AvailableStats {
+		m[name] = stat.Description()
+	}
+	return m
+}
+
 // LoadFromName loads the statistics corresponding to the given name
 // and returns the id where it is internally stored. An error is returned
 // when the statistics is unknown.

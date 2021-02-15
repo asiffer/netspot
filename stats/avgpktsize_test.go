@@ -10,7 +10,7 @@ import (
 func TestAVGPKTSIZE(t *testing.T) {
 	title("Testing AVG_PKT_SIZE")
 
-	stat := &AvgPktSize{}
+	stat := AvailableStats["AVG_PKT_SIZE"]
 	checkTitle("Checking name...")
 	if stat.Name() != "AVG_PKT_SIZE" {
 		testERROR()

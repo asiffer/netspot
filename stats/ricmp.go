@@ -6,17 +6,14 @@ package stats
 import "math"
 
 func init() {
-	Register(&RIcmp{BaseStat{name: "R_ICMP"}})
+	Register(&RIcmp{BaseStat{
+		name:        "R_ICMP",
+		description: "Ratio of ICMP packets (ICMP/IP)"}})
 }
 
 // RIcmp computes the ratio of ICMP packets
 type RIcmp struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RIcmp) Name() string {
-	return "R_ICMP"
 }
 
 // Requirement returns the requested counters to compute the stat

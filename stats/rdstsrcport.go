@@ -7,7 +7,9 @@ package stats
 import "math"
 
 func init() {
-	Register(&RDstSrcPort{BaseStat{name: "R_DST_SRC_PORT"}})
+	Register(&RDstSrcPort{BaseStat{
+		name:        "R_DST_SRC_PORT",
+		description: "Ratio of unique destination ports to unique source ports"}})
 }
 
 // RDstSrcPort computes the ratio 'number of unique destination ports'
@@ -15,11 +17,6 @@ func init() {
 //
 type RDstSrcPort struct {
 	BaseStat
-}
-
-// Name returns the unique name of the stat
-func (stat *RDstSrcPort) Name() string {
-	return "R_DST_SRC_PORT"
 }
 
 // Requirement returns teh requested counters to compute the stat
