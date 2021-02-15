@@ -3,6 +3,7 @@ module netspot
 go 1.15
 
 require (
+	fyne.io/fyne/v2 v2.0.0 // indirect
 	github.com/asiffer/gospot v0.0.0-20210118081758-b7809e99d755
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/google/gopacket v1.1.19

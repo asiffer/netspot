@@ -50,6 +50,7 @@ func InitConfig() error {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/run", RunHandler).Methods("POST")
 	router.HandleFunc("/api/config", ConfigHandler).Methods("GET", "POST")
+	router.HandleFunc("/api/ping", PingHandler).Methods("GET")
 	http.Handle("/", logRequestHandler(router))
 
 	// logs
