@@ -39,7 +39,8 @@ type BaseStat struct {
 
 // StatInterface gathers the common behavior of the statistics
 type StatInterface interface {
-	Name() string // the name of the statistics
+	Name() string        // the name of the statistics
+	Description() string // details about the stat
 	Configure() error
 	Requirement() []string              // the names of the requested counters
 	Compute(ctrvalues []uint64) float64 // only compute the statistics

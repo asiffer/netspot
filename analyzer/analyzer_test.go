@@ -132,6 +132,17 @@ func TestLoadStat(t *testing.T) {
 		t.Errorf("Expected at least 5 stats, got %d", len(GetAvailableStats()))
 	}
 
+	checkTitle("Checking stats description...")
+	stats := GetAvailableStatsWithDesc()
+	available := GetAvailableStats()
+	for name, desc := range stats {
+		if find(available, name) < 0 || len(desc) == 0 {
+			testERROR()
+			t.Fatalf("Stats '%s' has no description", name)
+		}
+	}
+	testOK()
+
 	checkTitle("Loading R_SYN...")
 	if err := LoadFromName("R_SYN"); err != nil {
 		t.Errorf("Error while loading R_SYN: %v", err)
