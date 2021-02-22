@@ -185,6 +185,7 @@ func load(stat stats.StatInterface) error {
 			case *AlreadyLoadedError:
 				analyzerLogger.Debug().Msgf(err.Error())
 			default:
+				analyzerLogger.Debug().Msgf(err.Error())
 				return fmt.Errorf("Error while loading counters of stat %s: %v", stat.Name(), err)
 			}
 		}

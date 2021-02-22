@@ -324,7 +324,8 @@ func Start(period time.Duration) (DataChannel, error) {
 	if IsSniffing() {
 		return nil, fmt.Errorf("Already sniffing")
 	}
-	if len(dispatcher.loadedCounters()) == 0 {
+	ctr := dispatcher.loadedCounters()
+	if len(ctr) == 0 {
 		return nil, fmt.Errorf("No counters loaded")
 	}
 
