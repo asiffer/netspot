@@ -53,6 +53,11 @@ func InitConfig() error {
 	router.HandleFunc("/api/ping", PingHandler).Methods("GET")
 	router.HandleFunc("/api/devices", DevicesHandler).Methods("GET")
 	router.HandleFunc("/api/stats", StatsHandler).Methods("GET")
+	router.HandleFunc("/", DashboardHandler).Methods("GET")
+	// static files
+	// http.Handle("/css", http.Pre http.StripPrefix("/web/static/css", http.FileServer(http.FS(content))))
+	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
+	http.Handle("/static/", http.FileServer(http.FS(root)))
 	http.Handle("/", logRequestHandler(router))
 
 	// logs
@@ -137,11 +142,11 @@ func jsonOnly(header http.Header) error {
 }
 
 func initSubpackages() error {
-	if err := analyzer.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Analyzer: %v", err)
-	}
 	if err := miner.InitConfig(); err != nil {
 		return fmt.Errorf("Error while initializing the Miner: %v", err)
+	}
+	if err := analyzer.InitConfig(); err != nil {
+		return fmt.Errorf("Error while initializing the Analyzer: %v", err)
 	}
 	if err := exporter.InitConfig(); err != nil {
 		return fmt.Errorf("Error while initializing the Exporter: %v", err)
