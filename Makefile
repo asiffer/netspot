@@ -46,6 +46,17 @@ DESTDIR              :=
 INSTALL_BIN_DIR      := $(DESTDIR)/usr/bin
 INSTALL_CONF_DIR     := $(DESTDIR)/etc/netspot
 
+# test
+TEST_FLAGS                := -v -race -coverprofile=coverage.txt -covermode=atomic
+MODULES_TO_TEST           := $(shell $(GOEXEC) list ./... | grep -v 'netspot/api/client')
+START_DOCKER_FOR_INFLUXDB := true
+
+ifeq ($(START_DOCKER_FOR_INFLUXDB), true)
+    conditional_test:=test-with-docker
+else
+    conditional_test:=test-without-docker
+endif
+
 # Print environment variable
 $(info $(SEP))
 $(info GO="$(GOEXEC)")
@@ -60,7 +71,7 @@ $(info VERSION="$(VERSION)")
 $(info $(SEP))
 
 # PHONY actions
-.PHONY: build snap docs
+.PHONY: build snap docs test
 
 # main actions
 default: build
@@ -95,6 +106,18 @@ install_bin:
 	@echo -en "Installing netspot...                "
 	@install $(BIN_DIR)/netspot $(INSTALL_BIN_DIR)/
 	@echo -e $(OK)
+
+test: $(conditional_test)
+
+test-without-docker:
+	$(GOEXEC) test $(TEST_FLAGS) $(MODULES_TO_TEST)
+
+test-with-docker:
+	@echo "\033[93m[Starting docker container for InfluxDB]\033[0m"
+	@docker run --detach --rm --name netspot_influx -it -p "127.0.0.1:8086":8086 influxdb:1.8.0
+	-$(GOEXEC) test $(TEST_FLAGS) $(MODULES_TO_TEST)
+	@echo "\033[93m[Stopping docker container for InfluxDB]\033[0m"
+	@docker rm -f netspot_influx
 
 snap:
 	snapcraft
