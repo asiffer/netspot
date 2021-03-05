@@ -7,8 +7,8 @@ jobs:
     name: Build (all architectures)
     runs-on: ubuntu-latest
     container: 
-      image: golang:1.15.7-alpine
-      env:
+      image: golang:1.16.0-alpine
+     env:
         LIBPCAP_VERSION: 1.10.0
         LIBPCAP_DIR: /libpcap
         # SYSTEM
