@@ -34,7 +34,7 @@ The latest compiled binaries can be found below.
 
 ### Building from sources
 
-To build **netspot** from sources, you mainly need a `Go` compiler and `libpcap-dev`. Through the basic `make` command, **netspot** is dynamically
+To build **netspot** from sources, you mainly need a `Go` compiler (`>=1.16`) and `libpcap-dev`. Through the basic `make` command, **netspot** is dynamically
 linked to `libpcap` and your `libc` (generally GNU `libc`).
 
 ```sh
@@ -107,12 +107,18 @@ so you can consider a unix socket.
 netspot serve -e unix:///tmp/netspot.sock
 ```
 
-| Method | Path          | Description                               |
-| ------ | ------------- | ----------------------------------------- |
-| `GET`  | `/api/config` | Get the current config (JSON output)      |
-| `POST` | `/api/config` | Change the config (JSON expected)         |
-| `POST` | `/api/run`    | Manage the status of netspot (start/stop) |
+| Method | Path           | Description                               |
+| ------ | -------------- | ----------------------------------------- |
+| `GET`  | `/api/config`  | Get the current config (JSON output)      |
+| `POST` | `/api/config`  | Change the config (JSON expected)         |
+| `POST` | `/api/run`     | Manage the status of netspot (start/stop) |
+| `GET`  | `/api/stats`   | Get the list of available statistics      |
+| `GET`  | `/api/devices` | Get the list of available interfaces      |
 
+
+You can also visit the listening URL to look at the brand new basic read-only dashboard! It merely displays the config and the running status.
+
+![dashboard](assets/dashboard.png)
 
 
 ## Architecture overview
