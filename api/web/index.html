@@ -1,0 +1,130 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" type="image/png" href="/static/images/favicon.png" />
+</head>
+
+<body>
+    <header class="container-fluid">
+        <div>{{.Title}}</div>
+    </header>
+    <nav class="container-fluid">
+        <ul>
+            <li class="logo">§2n|1e|2t|1s|3[+]p|1o|2t|1</li>
+            <li>Dashboard</li>
+        </ul>
+        <ul>
+            <li><strong>Status</strong></li>
+            {{ if .isRunning }}
+            <li class="running">RUNNING</li>
+            {{ else }}
+            <li class="stopped">STOPPED</li>
+            {{ end }}
+            <li></li>
+        </ul>
+    </nav>
+    <main class="container-fluid">
+        <div class="grid container-fluid">
+            <!-- MINER -->
+            <article>
+                <header><strong>MINER</strong></header>
+                <fieldset>
+                    <label for="device">
+                    Device
+                    <input type="text" id="device" name="device" value="{{ .miner.device }}" readonly>
+                    </label> {{if .isDeviceInterface }}
+                    <label for="promiscuous">
+                        Promiscuous
+                        <input type="text" id="promiscuous" name="promiscuous" value="{{ .miner.promiscuous }}" readonly>
+                    </label>
+                    <label for="snapshot_len" data-tooltip="Maximum size of the packets">
+                        Snapshot length (bytes)
+                        <input type="text" id="snapshot_len" name="snapshot_len" value="{{ .miner.snapshot_len }}" readonly>
+                    </label>
+                    <label for="timeout" data-tooltip="Maximum delay before receiving packets">
+                        Timeout (s)
+                        <input type="text" id="timeout" name="timeout" value="{{ .miner.timeout }}" readonly>
+                    </label> {{end}}
+                </fieldset>
+            </article>
+            <!-- ANALYZER -->
+            <article>
+                <header><strong>ANALYZER</strong></header>
+                <fieldset>
+                    <label for="period" data-tooltip="Time between two statistic computations">
+                        Period (s)
+                        <input type="text" id="period" name="period" value="{{ toSeconds .analyzer.period }}" readonly>
+                    </label>
+
+                    <label for="stats">
+                        Loaded statistics
+                        <button id="stats" class="secondary outline" style="text-align: left" disabled>
+                            {{range $name := .analyzer.stats}}
+                            <kbd>{{ $name }}</kbd> {{end}}
+                        </button>
+                    </label>
+
+                </fieldset>
+            </article>
+            <!-- EXPORTER -->
+            <article>
+                <header><strong>EXPORTER</strong></header>
+                {{if or .exporter.console.data .exporter.console.alarm}}
+                <fieldset>
+                    <legend>Console</legend>
+                    <div class="grid">
+                        <label for="console-data">
+                            Data
+                            <input type="text" id="console-data" name="console-data" value="{{.exporter.console.data}}" readonly>
+                        </label>
+                        <label for="console-alarm">
+                            Alarm
+                            <input type="text" id="console-alarm" name="console-alarm" value="{{.exporter.console.alarm}}" readonly>
+                        </label>
+                    </div>
+                </fieldset>
+                {{ end }} {{if or .exporter.file.data .exporter.file.alarm}}
+                <fieldset>
+                    <legend>File</legend>
+                    <div class="grid">
+                        <label for="file-data">
+                            Data
+                            <input type="text" id="file-data" name="file-data" value="{{.exporter.file.data}}" readonly>
+                        </label>
+                        <label for="file-alarm">
+                            Alarm
+                            <input type="text" id="file-alarm" name="file-alarm" value="{{.exporter.file.alarm}}" readonly>
+                        </label>
+                    </div>
+                </fieldset>
+                {{ end }} {{if or .exporter.socket.data .exporter.socket.alarm}}
+                <fieldset>
+                    <legend>Socket</legend>
+                    <div class="grid">
+                        <label for="socket-data">
+                            Data
+                            <input type="text" id="socket-data" name="socket-data" value="{{.exporter.socket.data}}" readonly>
+                        </label>
+                        <label for="socket-alarm">
+                            Alarm
+                            <input type="text" id="socket-alarm" name="socket-alarm" value="{{.exporter.socket.alarm}}" readonly>
+                        </label>
+                    </div>
+                </fieldset>
+                {{ end }}
+
+            </article>
+
+
+        </div>
+    </main>
+</body>
+
+</html>
+{{end}}

@@ -89,7 +89,7 @@ var (
 		&cli.BoolFlag{
 			Name:    "exporter.console.data",
 			Aliases: []string{"v"},
-			Value:   false,
+			Value:   true,
 			Usage:   "Display statistics on the console",
 		},
 		&cli.StringFlag{
