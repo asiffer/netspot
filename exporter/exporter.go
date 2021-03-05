@@ -165,6 +165,7 @@ func Unload(name string) error {
 // It triggers error when a connection fails.
 func Start(series string) error {
 	for _, module := range loaded {
+		exporterLogger.Debug().Msgf("Starting module %s", module.Name())
 		if err := module.Start(series); err != nil {
 			return err
 		}
