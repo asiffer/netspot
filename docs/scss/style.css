@@ -6443,6 +6443,9 @@ readers do not read off random characters that represent icons */
   margin: 0 auto;
   text-align: center; }
 
+code {
+  padding: .2rem 0.3rem; }
+
 article, farticle {
   /* haut | droit | bas | gauche */
   text-align: justify;
@@ -6484,7 +6487,9 @@ farticle:hover {
   margin-top: -0.5em;
   margin-bottom: -0.4em; }
 
-h2, h3, h4 {
+h2,
+h3,
+h4 {
   margin-bottom: 0.5em; }
 
 .highlight {
@@ -6552,14 +6557,16 @@ nav ul:first-of-type {
 
 .banner {
   background-color: #2c3d49; }
-  .banner li, .banner a {
+  .banner li,
+  .banner a {
     color: #FFF; }
   .banner a:hover {
     color: #bbc6ce; }
 
 .info {
   display: block;
-  padding: 1em;
+  padding: 0.5em 1em;
+  margin-bottom: 1em;
   width: 100%;
   background-color: #edf0f3;
   border-left: 5px solid #1095c1; }
@@ -6583,7 +6590,8 @@ nav ul:first-of-type {
   .banner {
     background-color: white;
     color: #2c3d49; }
-    .banner li, .banner a {
+    .banner li,
+    .banner a {
       color: #2c3d49; }
     .banner a:hover {
       color: #bbc6ce; }

@@ -76,9 +76,21 @@ so you can consider a unix socket.</p>
 <td><code>/api/run</code></td>
 <td>Manage the status of netspot (start/stop)</td>
 </tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/stats</code></td>
+<td>Get the list of available statistics</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/devices</code></td>
+<td>Get the list of available interfaces</td>
+</tr>
 </tbody>
 </table>
-
+<p>In addition, a <code>Go</code> client is available in the <code>api/client</code> subpackage.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">go get -u github.com/asiffer/netspot/api/client
+</code></pre></div>
             </div>
             
         </main>

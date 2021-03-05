@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/maps"
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -160,7 +161,7 @@ func InitConfig() error {
 
 // JSON return the current config
 func JSON() ([]byte, error) {
-	return js.Marshal(konf.Raw())
+	return js.Marshal(maps.Unflatten(konf.Raw(), "."))
 }
 
 // Debug prints all the config
@@ -412,9 +413,12 @@ func LoadForTestRawToml(raw []byte) error {
 // LoadFromRawJSON loads from raw bytes
 func LoadFromRawJSON(raw []byte) error {
 	data, err := json.Parser().Unmarshal(raw)
+	// konf.Load(rawbytes.Provider(raw), json.Parser())
 	if err != nil {
 		return err
 	}
+	// flatten data
+	data, _ = maps.Flatten(data, nil, ".")
 	// check keys
 	for key := range data {
 		if !HasKey(key) {
