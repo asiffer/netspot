@@ -52,7 +52,11 @@
 interface, the API trafic must not pollute what <code>netspot</code> monitors,
 so you can consider a unix socket.</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">netspot serve -e unix:///tmp/netspot.sock
-</code></pre></div><table>
+</code></pre></div><p>If vous visit the listening URL, you can watch a basic dashboard that displays
+the current config of <code>netspot</code>.</p>
+<p><img src="/images/dashboard.png" alt="dashboard"></p>
+<p>The server exposes few methods that allows to do roughly everything.</p>
+<table>
 <thead>
 <tr>
 <th>Method</th>
