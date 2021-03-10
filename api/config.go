@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"netspot/config"
@@ -21,13 +20,6 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(data)
 		}
 	case "POST":
-		// header
-		if err := jsonOnly(r.Header); err != nil {
-			apiLogger.Error().Msg(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
-		}
 		// read content
 		raw, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -54,13 +46,9 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 			config.Fallback()
 			return
 		}
-		apiLogger.Info().Msg("Config has been updated")
+		msg := "Config has been updated"
+		apiLogger.Info().Msg(msg)
 		w.WriteHeader(http.StatusCreated)
-
-	default:
-		msg := fmt.Sprintf("Method %s not supported", method)
-		apiLogger.Warn().Msg(msg)
-		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(msg))
 
 	}

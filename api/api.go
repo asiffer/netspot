@@ -4,9 +4,7 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"netspot/analyzer"
@@ -48,17 +46,24 @@ func InitConfig() error {
 
 	// init router
 	router := mux.NewRouter()
-	router.HandleFunc("/api/run", RunHandler).Methods("POST")
-	router.HandleFunc("/api/config", ConfigHandler).Methods("GET", "POST")
-	router.HandleFunc("/api/ping", PingHandler).Methods("GET")
-	router.HandleFunc("/api/devices", DevicesHandler).Methods("GET")
-	router.HandleFunc("/api/stats", StatsHandler).Methods("GET")
-	router.HandleFunc("/", DashboardHandler).Methods("GET")
+	router.Path("/").Methods("GET").HandlerFunc(DashboardHandler)
+	router.Path("/api/run").Methods("POST").Headers("Content-Type", "application/json").HandlerFunc(RunHandler)
+	router.Path("/api/config").Methods("GET", "POST").HandlerFunc(ConfigHandler)
+	router.Path("/api/ping").Methods("GET").HandlerFunc(PingHandler)
+	router.Path("/api/devices").Methods("GET").HandlerFunc(DevicesHandler)
+	router.Path("/api/stats").Methods("GET").HandlerFunc(StatsHandler)
+
+	// logging middleware
+	router.Use(LoggingMiddleware)
+	// reset the 404 handler
+	router.MethodNotAllowedHandler = BadMethodHandler{}
+	// r := router.NewRoute()
+	// router.MethodNotAllowedHandler = r.HandlerFunc(BadMethodHandler).GetHandler()
+	router.NotFoundHandler = router.NewRoute().HandlerFunc(http.NotFound).GetHandler()
+
 	// static files
-	// http.Handle("/css", http.Pre http.StripPrefix("/web/static/css", http.FileServer(http.FS(content))))
-	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
 	http.Handle("/static/", http.FileServer(http.FS(root)))
-	http.Handle("/", logRequestHandler(router))
+	http.Handle("/", router)
 
 	// logs
 	apiLogger.Info().Msg("API package configured")
@@ -99,46 +104,6 @@ func requestSource(r *http.Request) string {
 		return fmt.Sprintf("%s (%s)", parts[0], strings.Join(parts[1:], ", "))
 	}
 	return hdrRealIP
-}
-
-func getBody(r *http.Request) string {
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err.Error()
-	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	return string(bodyBytes)
-}
-
-// this function wraps an handler to add basic logging
-func logRequestHandler(h http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		// print logs
-		apiLogger.Info().Msgf("%s %s", r.Method, r.RequestURI)
-		apiLogger.Debug().Msgf("body: %s, from: %s, referer: %s, user_agent: %s",
-			getBody(r),
-			requestSource(r),
-			r.Header.Get("Referer"),
-			r.Header.Get("User-Agent"))
-		// call the original http.Handler we're wrapping
-		h.ServeHTTP(w, r)
-	}
-
-	// http.HandlerFunc wraps a function so that it
-	// implements http.Handler interface
-	return http.HandlerFunc(fn)
-}
-
-func jsonOnly(header http.Header) error {
-	contentType := header.Values("Content-Type")
-	if len(contentType) == 0 {
-		return fmt.Errorf("Content-Type not given, accept 'application/json'")
-	}
-	if contentType[0] != "application/json" {
-		return fmt.Errorf("Content-Type %s is not accepted, use 'application/json'",
-			contentType[0])
-	}
-	return nil
 }
 
 func initSubpackages() error {

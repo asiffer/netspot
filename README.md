@@ -99,13 +99,19 @@ run as a service, exposing a minimal REST API.
 netspot serve
 ```
 
-By default it listens at `tcp://localhost:11000` but it can be changed with the `-e` flag. For instance, if you want to monitor the loopback
-interface, the API trafic must not pollute what **netspot** monitors,
-so you can consider a unix socket.
+By default it listens at `tcp://localhost:11000`, and you can visit `http://localhost:11000` to look at the simple dashboard that displays
+the current config of `netspot`.
+
+![dashboard](/images/dashboard.png)
+
+Naturally, depending on the interface(s) you monitor, you would like to change the API endpoint not to pollute what `netspot` is analyzing.
+You can be changed it with the `-e` flag. For instance, you can consider a unix socket.
 
 ```sh
 netspot serve -e unix:///tmp/netspot.sock
 ```
+
+The server exposes few methods that allows to do roughly everything. 
 
 | Method | Path           | Description                               |
 | ------ | -------------- | ----------------------------------------- |
@@ -115,10 +121,11 @@ netspot serve -e unix:///tmp/netspot.sock
 | `GET`  | `/api/stats`   | Get the list of available statistics      |
 | `GET`  | `/api/devices` | Get the list of available interfaces      |
 
+In addition, a `Go` client is available in the `api/client` subpackage.
 
-You can also visit the listening URL to look at the brand new basic read-only dashboard! It merely displays the config and the running status.
-
-![dashboard](assets/dashboard.png)
+```sh
+go get -u github.com/asiffer/netspot/api/client
+```
 
 
 ## Architecture overview
@@ -126,21 +133,21 @@ You can also visit the listening URL to look at the brand new basic read-only da
 ![architecture](assets/netspot-archi.png)
 
 
-At the lowest level, `netspot` parse packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
-The source can either be an network interface or a .pcap file (network capture).
+At the lowest level, `netspot` parses packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
+The packet source can either be an network interface or a .pcap file (network capture).
 
-At a given frequency, counter values are retrieved so as to build **statistics**, this is the role of the `analyzer`. The statistics are the measures monitored by `netspot`.
+At a given period (for instance every second), counter values are retrieved so as to build **statistics**. This is the role of the `analyzer`. The statistics are the measures monitored by `netspot`.
 
 Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. This algorithm learns the *normal* behaviour of the statistic and constantly updates its knowledge. When an abnormal value occurs, `SPOT` triggers an alarm.
 
-The analyzer forwards statistics values, SPOT thresholds and SPOT alarms to the `exporter`. This last component dispatch
-these information modules that binds to different backends 
-(console, file, socket or InfluxDB database).
+Finally, the `analyzer` forwards stat values, SPOT thresholds and SPOT alarms to the `exporter`. This last component dispatch
+these information to some modules that binds to different backends 
+(console, file, socket or InfluxDB database currently).
 
 
 ## Roadmap
 
-- [ ] Rework unit tests
+- [x] Rework unit tests
 - [ ] Enrich documentation
 - [ ] Frontend? TUI?
 - [ ] Port `netspot` to arduino :)
