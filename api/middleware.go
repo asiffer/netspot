@@ -19,7 +19,7 @@ type responseWriter struct {
 }
 
 func wrapResponseWriter(w http.ResponseWriter) *responseWriter {
-	return &responseWriter{ResponseWriter: w}
+	return &responseWriter{ResponseWriter: w, status: -1, wroteHeader: false}
 }
 
 func (rw *responseWriter) Status() int {
@@ -27,15 +27,11 @@ func (rw *responseWriter) Status() int {
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
-	if rw.wroteHeader {
-		return
+	if !rw.wroteHeader {
+		rw.status = code
+		rw.ResponseWriter.WriteHeader(code)
+		rw.wroteHeader = true
 	}
-
-	rw.status = code
-	rw.ResponseWriter.WriteHeader(code)
-	rw.wroteHeader = true
-
-	return
 }
 
 // LoggingMiddleware logs the incoming HTTP request & its duration.
@@ -52,7 +48,7 @@ func LoggingMiddleware(h http.Handler) http.Handler {
 
 		// print logs
 		var event *zerolog.Event
-		switch code := wrapped.Status(); { // missing expression means "true"
+		switch code := wrapped.Status(); {
 		case code < 200:
 			event = apiLogger.Warn()
 			break

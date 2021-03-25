@@ -1,130 +1,694 @@
-<!DOCTYPE html>
-<html><head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
     
-    <link rel="stylesheet" type="text/css" href="/netspot/scss/style.css">
-</head><body><div class="container-fluid banner">
-  <nav class="container">
-      <ul>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon-blue.svg">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.6">
+    
+    
+      
+        <title>Configuration - NETSPOT</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2c0c5eaf.min.css">
+      
         
-        <li class="netspot-mini"><strong>§2n|1</strong></li>
-      </ul>
-      <ul>
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.7fa14f5b.min.css">
         
-        <li><a href="/netspot/"><span>Home</span></a></li>
+      
+    
+    
+    
+      
         
-        <li><a href="/netspot/get-started/"><span>Get started</span></a></li>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../css/color.css">
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="blue2" data-md-color-primary="" data-md-color-accent="">
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
         
-        <li><a href="/netspot/download/"><span>Download</span></a></li>
+        <a href="#miner" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NETSPOT" class="md-header__button md-logo" aria-label="NETSPOT" data-md-component="logo">
+      
+  <img src="../../assets/favicon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NETSPOT
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="md-header__options">
+      
+    </div>
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
         
-        <li><a href="/netspot/advanced/"><span>Advanced</span></a></li>
-        
-        <li><a href="/netspot/developer/"><span>Developer</span></a></li>
-        
-      </ul>
+<a href="https://github.com/asiffer/netspot/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
-</div><main class="container">
-            <div class="toc">
-                <aside class="container">
-                    <nav>
-                        <ul>
-                        
-                        
-                        
-                            
-                                <li><a class="secondary" href="/netspot/get-started/basic/"><span>Basic usage</span></a></li>
-                            
-                        
-                            
-                                <li><a class="primary" href="/netspot/get-started/configuration/"><span>Configuration</span></a></li>
-                            
-                        
-                            
-                                <li><a class="secondary" href="/netspot/get-started/architecture/"><span>Architecture</span></a></li>
-                            
-                        
-                        </ul>
-                    </nav>
-                </aside>
-            </div>
-            <div class="content">
-            <h2>Configuration</h2>
-            <p>The configuration of netspot follows its architecture.
-There are three main sections: <code>miner</code>,
-<code>analyzer</code> and <code>exporter</code>. In addition, there is the
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NETSPOT" class="md-nav__button md-logo" aria-label="NETSPOT" data-md-component="logo">
+      
+  <img src="../../assets/favicon.svg" alt="logo">
+
+    </a>
+    NETSPOT
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/asiffer/netspot/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        Install
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Install" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Install
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/binaries/" class="md-nav__link">
+        Binaries
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/sources/" class="md-nav__link">
+        From sources
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/service/" class="md-nav__link">
+        Systemd service
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        Get started
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Get started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Get started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basic/" class="md-nav__link">
+        Basic usage
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Configuration
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#miner" class="md-nav__link">
+    Miner
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzer" class="md-nav__link">
+    Analyzer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exporter" class="md-nav__link">
+    Exporter
+  </a>
+  
+    <nav class="md-nav" aria-label="Exporter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#console" class="md-nav__link">
+    Console
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file" class="md-nav__link">
+    File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socket" class="md-nav__link">
+    Socket
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#influxdb" class="md-nav__link">
+    InfluxDB
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spot" class="md-nav__link">
+    Spot
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        Architecture
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        Developer
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Developer" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Developer
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/counter/" class="md-nav__link">
+        Counters
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/stat/" class="md-nav__link">
+        Statistics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/exporter/" class="md-nav__link">
+        Exporting module
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/toolchain/" class="md-nav__link">
+        Developer toolchain
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#miner" class="md-nav__link">
+    Miner
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzer" class="md-nav__link">
+    Analyzer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exporter" class="md-nav__link">
+    Exporter
+  </a>
+  
+    <nav class="md-nav" aria-label="Exporter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#console" class="md-nav__link">
+    Console
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file" class="md-nav__link">
+    File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socket" class="md-nav__link">
+    Socket
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#influxdb" class="md-nav__link">
+    InfluxDB
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spot" class="md-nav__link">
+    Spot
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/asiffer/netspot/edit/master/docs/get-started/configuration/index.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  <h1>Configuration</h1>
+                
+                <p>The configuration of netspot follows its architecture.
+There are three main sections: <code>miner</code>, 
+<code>analyzer</code> and <code>exporter</code>. In addition, there is the 
 <code>spot</code> section to configure the Spot algorithm.</p>
 <ul>
 <li><a href="#miner">Miner</a></li>
 <li><a href="#analyzer">Analyzer</a></li>
-<li><a href="#exporter">Exporter</a>
-<ul>
+<li><a href="#exporter">Exporter</a></li>
 <li><a href="#console">Console</a></li>
 <li><a href="#file">File</a></li>
 <li><a href="#socket">Socket</a></li>
 <li><a href="#influxdb">InfluxDB</a></li>
-</ul>
-</li>
 <li><a href="#spot">Spot</a></li>
 </ul>
 <h2 id="miner">Miner</h2>
 <p>The miner is responsible of packet parsing. So you give it
 all the necessary options to sniff either a network interface or
-a pcap file.</p>
+a pcap file. </p>
 <p>The main parameter is <code>device</code> that defines the packets source .
-By default, it is set to <code>&quot;any&quot;</code>, meaning that it sniffs all the
-network interfaces.
+By default, it is set to <code>"any"</code>, meaning that it sniffs all the 
+network interfaces. 
 In addition you will fins all the classical options you may pass
 to <code>libpcap</code>.</p>
-<div class="alert">
-    You must take care of the <code>timeout</code> parameter. By default, it is set to <code>0s</code>, meaning that packets are directly sent to netspot. If this value is changed, you are likely to have a time lag in the statistics computation.
+<div class="admonition danger">
+<p class="admonition-title">Timeout</p>
+<p>You must take care of the <code>timeout</code> parameter. By default, it is set to <code>0s</code>, meaning that packets are directly sent to netspot. If this value is changed, you are likely to have a time lag in the statistics computation.</p>
 </div>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># the Miner module manages the packets parsing</span>
-<span style="color:#998;font-style:italic"># and the counters</span>
-[miner]
-<span style="color:#998;font-style:italic"># name of the interface to listen or dump/pcap file path</span>
-<span style="color:#998;font-style:italic">#device = &#34;any&#34;</span>
-device = <span style="color:#b84">&#34;eth0&#34;</span>
-<span style="color:#998;font-style:italic">#device = &#34;/tmp/file.pcap&#34;</span>
-<span style="color:#998;font-style:italic"># interface only</span>
-promiscuous = <span style="font-weight:bold">true</span>
-snapshot_len = <span style="color:#099">65535</span>
-<span style="color:#998;font-style:italic"># instant mode</span>
-timeout = <span style="color:#b84">&#34;0s&#34;</span>
-</code></pre></div><h2 id="analyzer">Analyzer</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># the Miner module manages the packets parsing</span>
+<span class="c1"># and the counters</span>
+<span class="k">[miner]</span>
+<span class="c1"># name of the interface to listen or dump/pcap file path</span>
+<span class="c1">#device = &quot;any&quot;</span>
+<span class="n">device</span> <span class="o">=</span> <span class="s">&quot;eth0&quot;</span>
+<span class="c1">#device = &quot;/tmp/file.pcap&quot;</span>
+<span class="c1"># interface only</span>
+<span class="n">promiscuous</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="n">snapshot_len</span> <span class="o">=</span> <span class="mi">65535</span>
+<span class="c1"># instant mode</span>
+<span class="n">timeout</span> <span class="o">=</span> <span class="s">&quot;0s&quot;</span>
+</code></pre></div>
+<h2 id="analyzer">Analyzer</h2>
 <p>The analyzer computes the statistics. So we only need to
 set a list of statistics to monitor (parameter <code>stats</code>) and
 to define the computation <code>period</code>.
-The <code>period</code> is relative to the <code>device</code> netspot sniffs. If the <code>device</code> is a pcap file, the source of time is the
+The <code>period</code> is relative to the <code>device</code> netspot sniffs. If the <code>device</code> is a pcap file, the source of time is the 
 capture timestamps while it is the real time in the network interface case.</p>
-<div class="info">
-    You should set the <code>period</code> according to your device so as to make the stats computation relevant. For example, it is useless to set
-a very low value like <code>1ms</code> if you have few packets a second.
-In practice, you should tune
-this parameter to ensure a rather <strong>low variance</strong> of the computed statistics (i.e. stable values).
+<div class="admonition period">
+<p class="admonition-title">Period</p>
+<p>You should set the <code>period</code> according to your device so as to make the stats computation relevant. For example, it is useless to set a very low value like <code>1ms</code> if you have few packets a second. 
+In practice, you should tune 
+this parameter to ensure a rather <strong>low variance</strong> of the computed statistics (i.e. stable values).</p>
 </div>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># The Analyzer module manages the statistics</span>
-<span style="color:#998;font-style:italic"># and send data to the exporter</span>
-[analyzer]
-<span style="color:#998;font-style:italic"># time between two statistics computations</span>
-period = <span style="color:#b84">&#34;1s&#34;</span>
-<span style="color:#998;font-style:italic"># stats to load at startup</span>
-<span style="color:#998;font-style:italic">#stats = [&#34;AVG_PKT_SIZE&#34;]</span>
-stats = [<span style="color:#b84">&#34;PERF&#34;</span>, <span style="color:#b84">&#34;R_SYN&#34;</span>, <span style="color:#b84">&#34;R_ACK&#34;</span>]
-<span style="color:#998;font-style:italic">#stats = [</span>
-<span style="color:#998;font-style:italic">#    &#34;PERF&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;R_ACK&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;R_ARP&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;R_DST_SRC&#34;,</span>
-<span style="color:#998;font-style:italic">#    &#34;R_DST_SRC_PORT&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;R_ICMP&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;R_IP&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;R_SYN&#34;, </span>
-<span style="color:#998;font-style:italic">#    &#34;TRAFFIC&#34;</span>
-<span style="color:#998;font-style:italic">#]</span>
-</code></pre></div><h2 id="exporter">Exporter</h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># The Analyzer module manages the statistics</span>
+<span class="c1"># and send data to the exporter</span>
+<span class="k">[analyzer]</span>
+<span class="c1"># time between two statistics computations</span>
+<span class="n">period</span> <span class="o">=</span> <span class="s">&quot;1s&quot;</span>
+<span class="c1"># stats to load at startup</span>
+<span class="c1">#stats = [&quot;AVG_PKT_SIZE&quot;]</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="k">[&quot;PERF&quot;, &quot;R_SYN&quot;, &quot;R_ACK&quot;]</span>
+<span class="c1">#stats = [</span>
+<span class="c1">#    &quot;PERF&quot;, </span>
+<span class="c1">#    &quot;R_ACK&quot;, </span>
+<span class="c1">#    &quot;R_ARP&quot;, </span>
+<span class="c1">#    &quot;R_DST_SRC&quot;,</span>
+<span class="c1">#    &quot;R_DST_SRC_PORT&quot;, </span>
+<span class="c1">#    &quot;R_ICMP&quot;, </span>
+<span class="c1">#    &quot;R_IP&quot;, </span>
+<span class="c1">#    &quot;R_SYN&quot;, </span>
+<span class="c1">#    &quot;TRAFFIC&quot;</span>
+<span class="c1">#]</span>
+</code></pre></div>
+<h2 id="exporter">Exporter</h2>
 <p>The exporter dispatches statistics and alarms to
-the desired backend.
+the desired backend. 
 The exporter gathers several basic modules like
 the <code>console</code>, the <code>file</code> or the <code>socket</code>. In addition, netspot has also a module to send data
 to <code>influxdb</code>.</p>
@@ -132,82 +696,158 @@ to <code>influxdb</code>.</p>
 activate them independently.</p>
 <h3 id="console">Console</h3>
 <p>The configuration of this module could not be easier.</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># The exporter print or send data according</span>
-<span style="color:#998;font-style:italic"># to the loaded modules (and their options)</span>
-<span style="color:#998;font-style:italic"># [exporter]</span>
-[exporter.console]
-<span style="color:#998;font-style:italic"># print data to the console</span>
-data = <span style="font-weight:bold">true</span>
-<span style="color:#998;font-style:italic"># print alarms to the console</span>
-alarm = <span style="font-weight:bold">true</span>
-</code></pre></div><h3 id="file">File</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># The exporter print or send data according</span>
+<span class="c1"># to the loaded modules (and their options)</span>
+<span class="c1"># [exporter]</span>
+<span class="k">[exporter.console]</span>
+<span class="c1"># print data to the console</span>
+<span class="n">data</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="c1"># print alarms to the console</span>
+<span class="n">alarm</span> <span class="o">=</span> <span class="kc">true</span>
+</code></pre></div>
+<h3 id="file">File</h3>
 <p>The <code>file</code> module has a basic template. You can
 add <code>%s</code> in the output file: this will be replaced by the name of the running series.
 Data (and alarms) are stored as <code>json</code> records.</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[exporter.file]
-<span style="color:#998;font-style:italic"># Path to the file which will store the data.</span>
-<span style="color:#998;font-style:italic"># The value can contain a &#39;%s&#39; which will be</span>
-<span style="color:#998;font-style:italic"># replaced by the series name. </span>
-data = <span style="color:#b84">&#34;/tmp/netspot_%s_data.json&#34;</span>
-<span style="color:#998;font-style:italic"># Same as the data but for the alarms</span>
-<span style="color:#998;font-style:italic">#alarm = &#34;/tmp/netspot_%s_alarm.json&#34;</span>
-</code></pre></div><h3 id="socket">Socket</h3>
-<p>The <code>socket</code> allows to send data in a &ldquo;generic way&rdquo;, meaning without setting the protocol upon.</p>
-<p>In comparison to the above modules, you can add a <code>tag</code> into the sent data and change their format.
+<div class="highlight"><pre><span></span><code><span class="k">[exporter.file]</span>
+<span class="c1"># Path to the file which will store the data.</span>
+<span class="c1"># The value can contain a &#39;%s&#39; which will be</span>
+<span class="c1"># replaced by the series name. </span>
+<span class="n">data</span> <span class="o">=</span> <span class="s">&quot;/tmp/netspot_%s_data.json&quot;</span>
+<span class="c1"># Same as the data but for the alarms</span>
+<span class="c1">#alarm = &quot;/tmp/netspot_%s_alarm.json&quot;</span>
+</code></pre></div>
+<h3 id="socket">Socket</h3>
+<p>The <code>socket</code> allows to send data in a "generic way", meaning without setting the protocol upon.</p>
+<p>In comparison to the above modules, you can add a <code>tag</code> into the sent data and change their format. 
 Currently three formats are supported: <code>csv</code>, <code>json</code> and <code>gob</code> (golang binary format).</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[exporter.socket]
-<span style="color:#998;font-style:italic"># Path to the socket which will receive the data</span>
-<span style="color:#998;font-style:italic"># The format is the following: &lt;proto&gt;://&lt;address&gt;</span>
-data = <span style="color:#b84">&#34;unix:///tmp/netspot_data.socket&#34;</span>
-<span style="color:#998;font-style:italic"># Path to the socket which will receive the alarms</span>
-<span style="color:#998;font-style:italic"># The format is the following: &lt;proto&gt;://&lt;address&gt;</span>
-alarm = <span style="color:#b84">&#34;unix:///tmp/netspot_alarm.socket&#34;</span>
-<span style="color:#998;font-style:italic"># Additional tag when data are sent</span>
-tag = <span style="color:#b84">&#34;netspot&#34;</span>
-<span style="color:#998;font-style:italic"># Format of the data (accept csv, json or gob)</span>
-format = <span style="color:#b84">&#34;json&#34;</span>
-</code></pre></div><h3 id="influxdb">InfluxDB</h3>
-<p>Finally, you can send netspot data to an <a href="https://www.influxdata.com/">InfluxDB</a> database (version <code>v1.x</code>).
+<div class="highlight"><pre><span></span><code><span class="k">[exporter.socket]</span>
+<span class="c1"># Path to the socket which will receive the data</span>
+<span class="c1"># The format is the following: &lt;proto&gt;://&lt;address&gt;</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s">&quot;unix:///tmp/netspot_data.socket&quot;</span>
+<span class="c1"># Path to the socket which will receive the alarms</span>
+<span class="c1"># The format is the following: &lt;proto&gt;://&lt;address&gt;</span>
+<span class="n">alarm</span> <span class="o">=</span> <span class="s">&quot;unix:///tmp/netspot_alarm.socket&quot;</span>
+<span class="c1"># Additional tag when data are sent</span>
+<span class="n">tag</span> <span class="o">=</span> <span class="s">&quot;netspot&quot;</span>
+<span class="c1"># Format of the data (accept csv, json or gob)</span>
+<span class="n">format</span> <span class="o">=</span> <span class="s">&quot;json&quot;</span>
+</code></pre></div>
+<h3 id="influxdb">InfluxDB</h3>
+<p>Finally, you can send netspot data to an <a href="https://www.influxdata.com/">InfluxDB</a> database (version <code>v1.x</code>). 
 Classically, you need to define the endpoint, some credentials and the name of the database.
 Furthermore, for performance reasons, you can tune the <code>batch_size</code> (number of records to cache before sending).
-Like in the <code>socket</code> module, you can define an <code>agent_name</code> which is a kind of tag
+Like in the <code>socket</code> module, you can define an <code>agent_name</code> which is a kind of tag 
 (it can be very convenient for InfluxDB).</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[exporter.influxdb1]
-<span style="color:#998;font-style:italic">#data = true</span>
-<span style="color:#998;font-style:italic">#alarm = true</span>
-<span style="color:#998;font-style:italic">#address = &#34;http://127.0.0.1:8086&#34;</span>
-<span style="color:#998;font-style:italic">#database = &#34;netspot&#34;</span>
-<span style="color:#998;font-style:italic">#username = &#34;netspot&#34;</span>
-<span style="color:#998;font-style:italic">#password = &#34;netspot&#34;</span>
-<span style="color:#998;font-style:italic">#batch_size = 5</span>
-<span style="color:#998;font-style:italic">#agent_name = &#34;local&#34;</span>
-</code></pre></div><h2 id="spot">Spot</h2>
+<div class="highlight"><pre><span></span><code><span class="k">[exporter.influxdb1]</span>
+<span class="c1">#data = true</span>
+<span class="c1">#alarm = true</span>
+<span class="c1">#address = &quot;http://127.0.0.1:8086&quot;</span>
+<span class="c1">#database = &quot;netspot&quot;</span>
+<span class="c1">#username = &quot;netspot&quot;</span>
+<span class="c1">#password = &quot;netspot&quot;</span>
+<span class="c1">#batch_size = 5</span>
+<span class="c1">#agent_name = &quot;local&quot;</span>
+</code></pre></div>
+<h2 id="spot">Spot</h2>
 <p>The Spot section is specific to the configuration of the detection algorithm.
 To well understand the parameters, we advise to look at the <a href="/advanced/spot/">Spot details</a>.
 The parameters given in the <code>[spot]</code> section
 are the default parameter of the Spot instances monitoring the network statistics.</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># spot section manages the default spot parameters</span>
-[spot]
-<span style="color:#998;font-style:italic"># depth = 50</span>
-<span style="color:#998;font-style:italic"># q = 1e-4</span>
-<span style="color:#998;font-style:italic"># n_init = 1000</span>
-<span style="color:#998;font-style:italic"># level = 0.98</span>
-<span style="color:#998;font-style:italic"># up = true</span>
-<span style="color:#998;font-style:italic"># down = false</span>
-<span style="color:#998;font-style:italic"># alert = true</span>
-<span style="color:#998;font-style:italic"># bounded = true</span>
-<span style="color:#998;font-style:italic"># max_excess = 200</span>
-</code></pre></div><p>However, you can define another Spot configuration
-for some statistics. You only need to create a
-section <code>[spot.STAT_NAME]</code> and overwrite some parameters.</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#998;font-style:italic"># you can add a specific section for a statistic</span>
-<span style="color:#998;font-style:italic"># it overrides the default values</span>
-[spot.R_SYN]
-q = <span style="color:#099">1</span>e<span style="color:#099">-5</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># spot section manages the default spot parameters</span>
+<span class="k">[spot]</span>
+<span class="c1"># depth = 50</span>
+<span class="c1"># q = 1e-4</span>
+<span class="c1"># n_init = 1000</span>
+<span class="c1"># level = 0.98</span>
+<span class="c1"># up = true</span>
+<span class="c1"># down = false</span>
+<span class="c1"># alert = true</span>
+<span class="c1"># bounded = true</span>
+<span class="c1"># max_excess = 200</span>
 </code></pre></div>
+<p>However, you can define another Spot configuration
+for some statistics. You only need to create a 
+section <code>[spot.STAT_NAME]</code> and overwrite some parameters.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># you can add a specific section for a statistic</span>
+<span class="c1"># it overrides the default values</span>
+<span class="k">[spot.R_SYN]</span>
+<span class="n">q</span> <span class="o">=</span> <span class="mf">1e-5</span>
+</code></pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../basic/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Basic usage
             </div>
-            
-        </main>
-       
-    </body>
+          </div>
+        </a>
+      
+      
+        <a href="../architecture/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Architecture
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a1c7c35e.min.js"></script>
+      
+    
+  </body>
 </html>

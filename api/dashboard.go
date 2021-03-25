@@ -53,8 +53,6 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		apiLogger.Error().Msgf("Cannot read file 'index.html': %v", err)
 	}
 	t = template.Must(t.Parse(string(data)))
-	// Exécution de la fusion et injection dans le flux de sortie
-	// La variable p sera réprésentée par le "." dans le layout
-	// Exemple {{.}} == p
+	w.WriteHeader(http.StatusOK)
 	t.ExecuteTemplate(w, "layout", uconf)
 }
