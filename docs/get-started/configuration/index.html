@@ -511,6 +511,62 @@
   
 
     
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        About
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="About" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          About
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/ids/" class="md-nav__link">
+        Intrusion Detection System
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/performances/" class="md-nav__link">
+        Performances
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -618,16 +674,6 @@
 There are three main sections: <code>miner</code>, 
 <code>analyzer</code> and <code>exporter</code>. In addition, there is the 
 <code>spot</code> section to configure the Spot algorithm.</p>
-<ul>
-<li><a href="#miner">Miner</a></li>
-<li><a href="#analyzer">Analyzer</a></li>
-<li><a href="#exporter">Exporter</a></li>
-<li><a href="#console">Console</a></li>
-<li><a href="#file">File</a></li>
-<li><a href="#socket">Socket</a></li>
-<li><a href="#influxdb">InfluxDB</a></li>
-<li><a href="#spot">Spot</a></li>
-</ul>
 <h2 id="miner">Miner</h2>
 <p>The miner is responsible of packet parsing. So you give it
 all the necessary options to sniff either a network interface or
@@ -635,10 +681,10 @@ a pcap file. </p>
 <p>The main parameter is <code>device</code> that defines the packets source .
 By default, it is set to <code>"any"</code>, meaning that it sniffs all the 
 network interfaces. 
-In addition you will fins all the classical options you may pass
+In addition you will find all the classical options you may pass
 to <code>libpcap</code>.</p>
 <div class="admonition danger">
-<p class="admonition-title">Timeout</p>
+<p class="admonition-title">Danger</p>
 <p>You must take care of the <code>timeout</code> parameter. By default, it is set to <code>0s</code>, meaning that packets are directly sent to netspot. If this value is changed, you are likely to have a time lag in the statistics computation.</p>
 </div>
 <div class="highlight"><pre><span></span><code><span class="c1"># the Miner module manages the packets parsing</span>
@@ -660,8 +706,8 @@ set a list of statistics to monitor (parameter <code>stats</code>) and
 to define the computation <code>period</code>.
 The <code>period</code> is relative to the <code>device</code> netspot sniffs. If the <code>device</code> is a pcap file, the source of time is the 
 capture timestamps while it is the real time in the network interface case.</p>
-<div class="admonition period">
-<p class="admonition-title">Period</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
 <p>You should set the <code>period</code> according to your device so as to make the stats computation relevant. For example, it is useless to set a very low value like <code>1ms</code> if you have few packets a second. 
 In practice, you should tune 
 this parameter to ensure a rather <strong>low variance</strong> of the computed statistics (i.e. stable values).</p>

@@ -126,7 +126,8 @@ snap:
 
 docs:
 	@echo -e "\033[93m[Building docs]\033[0m"
-	@cd hugo; hugo
+	@mkdocs build
+	# @cd hugo; hugo
 
 clean:
 	@echo -en "Removing netspot binary   "

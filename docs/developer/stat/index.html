@@ -424,6 +424,62 @@
   
 
     
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        About
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="About" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          About
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/ids/" class="md-nav__link">
+        Intrusion Detection System
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/performances/" class="md-nav__link">
+        Performances
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -446,10 +502,11 @@
                 <p>The statistics are the real values <code>netspot</code> monitors. In the same manner as the counters, you can implement your
 own statistic according to your needs. In particular, they must be located
 in the <code>netspot/stats</code> subpackage.</p>
-<p>{{&lt; info &gt;}}
-  The analyzer is in charge of managing statistics. When you implement a 
-  new statistic you don't have to take care of neither load/unload operations nor Spot algorithm configuration.
-{{&lt; /info &gt;}}</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The analyzer is in charge of managing statistics. When you implement a 
+new statistic you don't have to take care of neither load/unload operations nor Spot algorithm configuration.</p>
+</div>
 <p>Statistics are built on top of the counters. They use some counters to 
 compute their own value. For example, the statistic <code>R_SYN</code> is computed
 as the ratio <code>SYN</code>/<code>IP</code> where <code>SYN</code> counts the number of SYN packets and
@@ -490,11 +547,12 @@ structure and code the following 3 functions:
     <span class="c1">// ...</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<p>{{&lt; alert &gt;}}
-  You have to register your statistic by calling the 
-  <code>Register(stat StatInterface)</code> in the <code>init()</code>
-  function. 
-{{&lt; /alert &gt;}}</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You have to register your statistic by calling the 
+<code>Register(stat StatInterface)</code> in the <code>init()</code>
+function. </p>
+</div>
 <p>Finally, your new statistic should be defined in a single 
 file and may look like below.</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// my_stat.go</span>
@@ -502,7 +560,7 @@ file and may look like below.</p>
 <span class="kn">package</span> <span class="nx">stats</span>
 
 <span class="kd">func</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
-    <span class="c1">// The statistic is registered at compile time</span>
+    <span class="c1">// The statistic is registered at the very beginning</span>
     <span class="nx">Register</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">STAT</span><span class="p">{</span><span class="nx">BaseStat</span><span class="p">{</span><span class="nx">name</span><span class="p">:</span> <span class="s">&quot;...&quot;</span><span class="p">}})</span>
 <span class="p">}</span>
 

@@ -5,26 +5,10 @@ body, html {
     font-family: 'Roboto';
 }
 
-.bg {
-    /* The image used */
-    /* margin: -1em -0.5em; */
-    /* background-image: url("/assets/cable.webp"); */
-    /* background-image: url("/assets/switch.jpeg"); */
-    background-image: url("/assets/favicon.png");
-    /* Full height */
-    height: 100%;
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
 .landing {
     position: fixed;
     width: 100%;
     top: 25vh;
-    /* margin: 0 20%; */
-    /* text-align: left; */
 }
 
 h1 {
@@ -32,13 +16,11 @@ h1 {
     font-size: 10em;
     margin: 0;
     width: 100%;
-    /* text-align: right; */
 }
 
 h2 {
     font-weight: lighter;
     width: 100%;
-    /* text-align: left; */
     font-size: 2em;
     margin: 0;
     margin-bottom: 1em;
@@ -54,14 +36,11 @@ h2 {
 .center {
     width: 100%;
     margin: 0 auto;
-    /* text-align: center; */
 }
 
-.button {
-    color: white;
-    background-color: var(--celadon-blue);
+.btn {
     border: solid 2px var(--celadon-blue);
-    border-radius: 8px;
+    border-radius: 0.1rem;
     text-decoration: none;
     padding: 0.5em 1em;
     text-align: center;
@@ -70,26 +49,36 @@ h2 {
     margin-right: 0.25em;
 }
 
-.button-inv {
+.btn-normal {
+    color: white;
+    background-color: var(--celadon-blue);
+}
+
+.btn-inv {
     color: var(--celadon-blue);
     background-color: transparent;
-    border: solid 2px var(--celadon-blue);
-    border-radius: 8px;
-    text-decoration: none;
-    padding: 0.5em 1em;
-    text-align: center;
-    display: inline-block;
-    font-size: 1.5em;
 }
 
-.button:hover {
+.btn-inv-muted {
+    color: var(--celadon-blue);
+    background-color: transparent;
+    opacity: 33%;
+}
+
+.btn-normal:hover {
     background-color: var(--prussian-blue);
-    border: solid 2px var(--prussian-blue);
+    border-color: var(--prussian-blue);
 }
 
-.button-inv:hover {
+.btn-inv:hover {
     color: var(--prussian-blue);
-    border: solid 2px var(--prussian-blue);
+    border-color: var(--prussian-blue);
+}
+
+.btn-inv-muted:hover {
+    color: var(--prussian-blue);
+    border-color: var(--prussian-blue);
+    opacity: 100%;
 }
 
 #background {
@@ -110,6 +99,34 @@ h2 {
     }
 }
 
-:root {
-    --logo: url('data:image/svg+xml;charset=utf-8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 170 170"><g transform="rotate(-45)"><g transform="translate(-60,60)"><rect x="10" y="10" width="100" height="100" fill="transparent" stroke="#1095c1" stroke-width="10"/><path d="M 35 35 h 50 v 50" fill="transparent" stroke="#1095c1" stroke-width="10"/><path d="M 35 85 l 50 -50" fill="transparent" stroke="#1095c1" stroke-width="10"/></g></g></svg>');
+@media screen and (max-width: 800px) {
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 1em;
+        text-align: center;
+    }
+    h1 {
+        font-weight: 700;
+        font-size: 7em;
+    }
+    h2 {
+        font-size: 1.5em;
+    }
+    .btn {
+        font-size: 1.25em;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    h1 {
+        font-weight: 600;
+        font-size: 6em;
+    }
+    h2 {
+        font-size: 1.25em;
+    }
+    .btn {
+        font-size: 1em;
+    }
 }
