@@ -340,29 +340,32 @@ func IsRunning() bool {
 
 // Stop stops the analysis and check that it is well stopped
 func Stop() error {
-	if IsRunning() {
-		analyzerLogger.Debug().Msg("Sending STOP message")
-		// send the STOP msg
-		defaultEventChannel <- STOP
-		// check that it did stop
-		timeout2 := time.After(5 * time.Second)
-		timeout5 := time.After(10 * time.Second)
-		for {
-			select {
-			case <-ackChannel:
-				// good
-				return nil
-			case <-timeout2:
-				// warning
-				analyzerLogger.Warn().Msg("Analyzer is still running")
-			case <-timeout5:
-				// timeout
-				analyzerLogger.Warn().Msg("Timeout reached")
-				return errors.New("The analyzer is not well stopped")
-			}
+	if !IsRunning() {
+		return fmt.Errorf("The analyzer is not running")
+	}
+
+	analyzerLogger.Debug().Msg("Sending STOP message")
+	// send the STOP msg
+	defaultEventChannel <- STOP
+
+	timeout := time.After(1 * time.Second)
+
+	// limit the loop number
+	for i := 0; i < 2; i++ {
+		select {
+		case <-ackChannel:
+			// good
+			return nil
+		case <-timeout:
+			// warning
+			analyzerLogger.Warn().Msg("Analyzer is still running")
+		case <-time.After(3 * time.Second):
+			// timeout
+			analyzerLogger.Warn().Msg("Timeout reached")
+			return errors.New("The analyzer is not well stopped")
 		}
 	}
-	return fmt.Errorf("The analyzer is not running")
+	return nil
 }
 
 // StatValues return a current snapshot of the stat values (and their thresholds)
@@ -532,6 +535,7 @@ func run() error {
 				analyzerLogger.Info().Msg("Stopping stats computation (controller)")
 				return nil
 			case STAT: // send data
+				analyzerLogger.Debug().Msg("Receiving STAT message")
 				smux.Lock()
 				snapshot := make(map[string]float64)
 				for s, v := range statValues {
