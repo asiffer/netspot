@@ -1,3 +1,4 @@
+// +build !race
 // bad_test.go
 //
 // It aims to deeply test the analyzer in weird cases
@@ -29,8 +30,10 @@ func TestBadStart(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
+	time.Sleep(100 * time.Millisecond)
 	// sending a bad ack message
 	go func() { ackChannel <- STOPPED }()
+	time.Sleep(100 * time.Millisecond)
 
 	if err := Start(); err == nil {
 		t.Errorf("An error was expected")
