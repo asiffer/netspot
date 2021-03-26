@@ -159,6 +159,14 @@ func InitConfig() error {
 	return konf.Load(confmap.Provider(defaultConfig, "."), nil)
 }
 
+// GetConfig returns a copy of the current config
+func GetConfig(unflatten bool) map[string]interface{} {
+	if !unflatten {
+		return konf.Copy().All()
+	}
+	return maps.Unflatten(konf.All(), ".")
+}
+
 // JSON return the current config
 func JSON() ([]byte, error) {
 	return js.Marshal(maps.Unflatten(konf.Raw(), "."))

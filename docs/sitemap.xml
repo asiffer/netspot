@@ -1,77 +1,55 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
-  <url>
-    <loc>/netspot/developer/counter/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/developer/stat/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/developer/exporter/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/developer/toolchain/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/get-started/basic/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/download/sources/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/get-started/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/advanced/service/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/download/service/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/download/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/advanced/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/get-started/configuration/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/get-started/architecture/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/advanced/spot/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/developer/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/</loc>
-  </url>
-  
-  <url>
-    <loc>/netspot/tags/</loc>
-  </url>
-  
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>None</loc>
+     <lastmod>2021-03-26</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
 </urlset>

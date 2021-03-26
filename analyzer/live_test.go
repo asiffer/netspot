@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"fmt"
 	"netspot/config"
 	"netspot/exporter"
 	"netspot/miner"
@@ -129,5 +130,47 @@ func TestLiveAll(t *testing.T) {
 			testOK()
 		}
 	}
+
+}
+
+func TestSnapshot(t *testing.T) {
+	title(t.Name())
+
+	config.Clean()
+	config.LoadDefaults()
+	config.LoadForTest(map[string]interface{}{
+		"miner.device":    testFiles[2],
+		"analyzer.period": "1s",
+		"analyzer.stats":  []string{"R_ARP", "R_ACK", "R_IP"},
+	})
+
+	if err := miner.InitConfig(); err != nil {
+		t.Error(err)
+	}
+	if err := exporter.InitConfig(); err != nil {
+		t.Error(err)
+	}
+	if err := InitConfig(); err != nil {
+		t.Error(err)
+	}
+
+	checkTitle("Starting the analyzer")
+	if err := Start(); err != nil {
+		testERROR()
+		t.Fatal(err)
+	}
+	testOK()
+
+	time.Sleep(50 * time.Millisecond)
+	if values := StatValues(); values == nil {
+		t.Log("StatValues return nil")
+	} else {
+		t.Logf("Values: %v", values)
+		for k, v := range values {
+			fmt.Println(k, v)
+		}
+	}
+
+	Stop()
 
 }

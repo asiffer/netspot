@@ -3,28 +3,39 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"netspot/analyzer"
 )
 
 // RunHandler manages start/stop actions
 func RunHandler(w http.ResponseWriter, r *http.Request) {
-	// accept only POST
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Only POST method is allowed"))
-		return
-	}
-	// parse form data
-	if err := r.ParseForm(); err != nil {
+	// read content
+	raw, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		apiLogger.Error().Msg(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	// check the requested action
-	switch action := r.PostFormValue("action"); action {
+	data := make(map[string]string)
+	if err := json.Unmarshal(raw, &data); err != nil {
+		apiLogger.Error().Msg(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	action, ok := data["action"]
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("No 'action' key found"))
+		return
+	}
+
+	switch action {
 	case "start":
 		if err := analyzer.Start(); err != nil {
 			apiLogger.Error().Msg(err.Error())
@@ -44,7 +55,7 @@ func RunHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Analyzer has stopped"))
 	default:
-		msg := fmt.Sprintf("Operation %s is not supported", action)
+		msg := fmt.Sprintf("Action %s is not supported", action)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(msg))
 	}

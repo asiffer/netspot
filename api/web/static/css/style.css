@@ -1,0 +1,111 @@
+@font-face {
+    font-family: 'Datalegreya-Gradient';
+    src: url('/static/fonts/Datalegreya-Gradient.otf') format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --spacing-factor-xl: 1.333;
+    --spacing-factor-md: 1.2;
+}
+
+.logo {
+    font-family: 'Datalegreya-Gradient';
+    color: var(--primary);
+    font-size: 3em;
+    margin-top: -0.1em;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-left: 0.1em;
+}
+
+
+/* body {
+    font-family: 'IBM Plex Sans', sans-serif;
+} */
+
+body>nav {
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    backdrop-filter: saturate(180%) blur(20px);
+    background-color: var(--nav-background);
+    box-shadow: 0px 1px 0 var(--nav-border);
+}
+
+body>header {
+    width: 100%;
+    margin: 0 auto;
+    background-color: #2e3440;
+    height: auto;
+    text-align: left;
+    color: #ffffff;
+    padding: 0;
+    font-size: 3em;
+    font-weight: bolder;
+}
+
+body>main {
+    padding-top: calc(1rem * var(--spacing-factor-xl) + 3.5rem);
+}
+
+article {
+    margin-top: 0;
+    margin-bottom: 0;
+    overflow: visible;
+}
+
+button>kbd {
+    margin-bottom: 0.1rem;
+}
+
+.running {
+    color: white;
+    background-color: var(--valid);
+    display: inline-block;
+    padding: .375rem .5rem;
+    border-radius: var(--block-round);
+}
+
+.stopped {
+    color: white;
+    background-color: var(--invalid);
+    display: inline-block;
+    padding: .375rem .5rem;
+    border-radius: var(--block-round);
+}
+
+[data-tooltip]:not(a):not(button):not(input) {
+    border-bottom: none;
+}
+
+input:hover,
+input:active,
+input:focus {
+    outline: 0;
+    border-color: var(--primary);
+}
+
+button.outline:disabled {
+    border-color: var(--muted-border);
+}
+
+kbd,
+button {
+    transition-duration: 0.2s;
+}
+
+button:disabled:hover,
+button:disabled:active,
+button:disabled:focus {
+    outline: 0;
+    border-color: var(--primary);
+}
+
+button:disabled:hover>kbd {
+    background-color: var(--primary-hover);
+}

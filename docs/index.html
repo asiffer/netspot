@@ -1,65 +1,52 @@
 <!DOCTYPE html>
-<html><head>
-	<meta name="generator" content="Hugo 0.74.3" />
-    <meta charset="utf-8">
+<html>
+
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link rel="stylesheet" type="text/css" href="/netspot/scss/style.css">
-</head><body><div class="container-fluid banner">
-  <nav class="container">
-      <ul>
-        
-        <li class="netspot-mini"><strong>§2n|1</strong></li>
-      </ul>
-      <ul>
-        
-        <li><a href="/netspot/"><span>Home</span></a></li>
-        
-        <li><a href="/netspot/get-started/"><span>Get started</span></a></li>
-        
-        <li><a href="/netspot/download/"><span>Download</span></a></li>
-        
-        <li><a href="/netspot/advanced/"><span>Advanced</span></a></li>
-        
-        <li><a href="/netspot/developer/"><span>Developer</span></a></li>
-        
-      </ul>
-  </nav>
-</div><main class="container">
+    <link rel="stylesheet" href="css/color.css">
+    <link rel="stylesheet" href="css/nord.css">
+    <link rel="stylesheet" href="css/landing.css">
+</head>
 
-<main class="container">
-    <div class="container center">
-      <hgroup>
-      <h1 class="netspot">§2n|1e|2t|1s|3[+]p|1o|2t|1</h1>
-      <h5>A simple IDS with statistical learning</h5>
-      </hgroup>
-      <a role="button" href="/netspot//get-started/">Get Started</a>
-      <a role="button" href="/netspot//download/">Download</a>
+<body>
+
+    <!-- <div class="bg"></div> -->
+
+    <div id="background">
+        <svg version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        width="auto" height="100%" viewBox="0 0 170 170" style="margin-left: 30%; opacity: 25%; ">
+            <g transform="rotate(-45)">
+            <g transform="translate(-60,60)">
+            <rect x="10" y="10" width="100" height="100" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/> 
+            <path d="M 35 35 h 50 v 50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
+            <path d="M 35 85 l 50 -50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
+            </g></g>
+            <animate attributeType="XML" attributeName="width" from="1100" to="1100" dur="1s" repeatCount="indefinite"/>
+        </svg>
     </div>
-    <div class="grid" style="margin-top: 4em;">
-        <div><article>
-            <header><i class="fas fa-brain fa-4x center"></i></header>
-            <main>Netspot finds <b>abnormal behaviors</b> in network statistics.
-            Based on the SPOT algorithm, it automatically builds and updates a
-            threshold aimed to flag extreme events (peaks).</main>
-          </article></div>
-          <div><article>
-            <header><i class="fas fa-shipping-fast fa-4x center"></i></header>
-            <main>Netspot is basically able to treat <b>1M packets/s</b>
-            on the guy next door computer. Even on embedded device like a Raspberry Pi (3B+),
-            netspot can process about <b>100k packets/s</b>.</main>
-          </article></div>
-          <div><article>
-            <header><i class="fas fa-layer-group fa-4x center"></i></header>
-            <main>Netspot get used to your needs. Developers can easily implement
-            <b>new statistics</b> and <b>new connectors</b> to send netspot
-            data where they want.
-            </br></br></main>
-          </article></div>
-      </div>
-</main>
 
-</main><footer class="container-fluid ff">
-    Powered by <a href="https://picocss.com/">picocss</a>, <a href="https://github.com/figs-lab/datalegreya">Datalegreya</a>
-</footer></body>
+    <div class="landing">
+        <div class="container">
+            <h1>netsp<svg version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em" height="1em" viewBox="0 0 170 170" style="margin-bottom: -0.2em;">
+               <g transform="rotate(-45)">
+               <g transform="translate(-60,60)">
+               <rect x="10" y="10" width="100" height="100" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/> 
+               <path d="M 35 35 h 50 v 50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
+               <path d="M 35 85 l 50 -50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
+               </g></g>
+            </svg>t</h1>
+        </h2>
+            <h2>A simple IDS with statistical learning</h2>
+            <div class="center">
+                <a href="/download/binaries" class="btn btn-normal">Install</a>
+                <a href="/get-started/basic" class="btn btn-inv">Get started</a>
+                <a href="/about/ids/" class="btn btn-inv-muted">IDS ???</a>
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>
