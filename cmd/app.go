@@ -10,7 +10,7 @@ import (
 )
 
 // Version is the major netspot version
-const Version = "v2.0a"
+const Version = "2.0a"
 
 var (
 	configFile string
