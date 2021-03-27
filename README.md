@@ -102,7 +102,7 @@ netspot serve
 By default it listens at `tcp://localhost:11000`, and you can visit `http://localhost:11000` to look at the simple dashboard that displays
 the current config of `netspot`.
 
-![dashboard](/images/dashboard.png)
+![dashboard](assets/dashboard.png)
 
 Naturally, depending on the interface(s) you monitor, you would like to change the API endpoint not to pollute what `netspot` is analyzing.
 You can be changed it with the `-e` flag. For instance, you can consider a unix socket.

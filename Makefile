@@ -113,10 +113,10 @@ test-without-docker:
 	$(GOEXEC) test $(TEST_FLAGS) $(MODULES_TO_TEST)
 
 test-with-docker:
-	@echo "\033[93m[Starting docker container for InfluxDB]\033[0m"
+	@echo -e "\033[93m[Starting docker container for InfluxDB]\033[0m"
 	@docker run --detach --rm --name netspot_influx -it -p "127.0.0.1:8086":8086 influxdb:1.8.0
 	-$(GOEXEC) test $(TEST_FLAGS) $(MODULES_TO_TEST)
-	@echo "\033[93m[Stopping docker container for InfluxDB]\033[0m"
+	@echo -e "\033[93m[Stopping docker container for InfluxDB]\033[0m"
 	@docker rm -f netspot_influx
 
 snap:
