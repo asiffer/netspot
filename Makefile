@@ -20,10 +20,10 @@ LD     ?= $(shell command -v ld)
 
 # package details
 PACKAGE_NAME := netspot
-VERSION      := $(shell grep Version cmd/app.go | sed -e 's/[",]//g' -e 's/Version://g' -e 's/[\t\ ]//g')
+VERSION      := $(shell grep 'Version =' cmd/app.go | awk '{print $$NF}' | sed -e 's/"//g')
 PACKAGE_DESC := "A simple IDS with statistical learning"
 MAINTAINER   := asiffer
-
+GIT_COMMIT   := $(shell git rev-list -1 HEAD)
 
 # sources
 SRC_DIR   := $(shell pwd)
@@ -31,7 +31,7 @@ EXTRA_DIR := $(SRC_DIR)/extra
 
 # golang compiler
 GO                   := CC=$(CC) LD=$(LD) GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
-GO_LDFLAGS           := -s -w
+GO_LDFLAGS           := -s -w -X "github.com/asiffer/netspot/cmd.gitCommit=$(GIT_COMMIT)"
 GO_BUILD_EXTRA_FLAGS := -a
 
 # build directories

@@ -9,9 +9,13 @@ import (
 	cli "github.com/urfave/cli/v2"
 )
 
+// Version is the major netspot version
+const Version = "v2.0a"
+
 var (
 	configFile string
 	logLevel   int
+	gitCommit  string
 )
 
 var (
@@ -22,6 +26,13 @@ Its core mainly relies on the SPOT algorithm (https://asiffer.github.io/libspot/
 which flags extreme events on high throughput streaming data.
 `
 )
+
+func getVersion() string {
+	if len(gitCommit) == 0 {
+		return Version
+	}
+	return fmt.Sprintf("%s %s", Version, gitCommit)
+}
 
 var (
 	commonFlags = []cli.Flag{
@@ -106,7 +117,7 @@ var (
 		Name:                 "netspot",
 		Usage:                "A simple IDS with statistical learning",
 		Authors:              []*cli.Author{{Name: "asr"}},
-		Version:              "2.0a",
+		Version:              getVersion(),
 		Copyright:            "GPLv3",
 		Description:          removeCharacters(desc, []string{"\n"}),
 		EnableBashCompletion: true,
