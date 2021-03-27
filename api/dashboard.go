@@ -44,10 +44,6 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	t := template.New("Title").Funcs(funcMap)
 
-	// Déclaration des fichiers à parser
-	// t = template.Must(t.Parse(dashbardTemplate))
-	// t = template.Must(t.ParseFiles("/home/asr/go/src/netspot/api/templates/main.html"))
-
 	data, err := content.ReadFile("web/index.html")
 	if err != nil {
 		apiLogger.Error().Msgf("Cannot read file 'index.html': %v", err)
