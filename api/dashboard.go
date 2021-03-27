@@ -6,11 +6,12 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
-	"netspot/analyzer"
-	"netspot/config"
-	"netspot/miner"
 	"text/template"
 	"time"
+
+	"github.com/asiffer/netspot/analyzer"
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/miner"
 )
 
 //go:embed web/index.html web/static/css/*.css web/static/images/* web/static/fonts/*.otf

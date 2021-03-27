@@ -4,8 +4,8 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/asiffer/netspot/analyzer"
 	"net/http"
-	"netspot/analyzer"
 )
 
 // StatsHandler returns the list of the available stats along with

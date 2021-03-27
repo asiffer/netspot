@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"netspot/analyzer"
-	"netspot/api"
-	"netspot/config"
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/asiffer/netspot/analyzer"
+	"github.com/asiffer/netspot/api"
+	"github.com/asiffer/netspot/config"
 
 	cli "github.com/urfave/cli/v2"
 )

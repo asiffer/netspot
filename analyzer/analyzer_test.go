@@ -5,9 +5,6 @@ package analyzer
 import (
 	"fmt"
 	"io/ioutil"
-	"netspot/config"
-	"netspot/exporter"
-	"netspot/miner"
 	"os"
 	"path"
 	"path/filepath"
@@ -15,6 +12,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/exporter"
+	"github.com/asiffer/netspot/miner"
 
 	"github.com/rs/zerolog"
 )

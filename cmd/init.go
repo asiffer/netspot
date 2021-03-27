@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"netspot/analyzer"
-	"netspot/api"
-	"netspot/config"
-	"netspot/exporter"
-	"netspot/miner"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/asiffer/netspot/analyzer"
+	"github.com/asiffer/netspot/api"
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/exporter"
+	"github.com/asiffer/netspot/miner"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

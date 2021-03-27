@@ -1,9 +1,10 @@
 package miner
 
 import (
-	"netspot/config"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 func TestInitConfig(t *testing.T) {

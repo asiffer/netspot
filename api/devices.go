@@ -4,8 +4,8 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/asiffer/netspot/miner"
 	"net/http"
-	"netspot/miner"
 )
 
 // DevicesHandler returns the list of available interfaces

@@ -8,12 +8,13 @@ package miner
 import (
 	"errors"
 	"fmt"
-	"netspot/miner/counters"
 	"os"
 	"path"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/asiffer/netspot/miner/counters"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"

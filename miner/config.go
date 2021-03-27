@@ -4,10 +4,11 @@ package miner
 
 import (
 	"fmt"
-	"netspot/config"
-	"netspot/miner/counters"
 	"path/filepath"
 	"time"
+
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/miner/counters"
 )
 
 //----------------------------------------------------------------------------//

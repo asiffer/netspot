@@ -5,8 +5,9 @@ package stats
 
 import (
 	"fmt"
-	"netspot/config"
 	"sync"
+
+	"github.com/asiffer/netspot/config"
 
 	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"

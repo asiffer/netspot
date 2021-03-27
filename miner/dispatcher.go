@@ -2,8 +2,9 @@ package miner
 
 import (
 	"fmt"
-	"netspot/miner/counters"
 	"sync"
+
+	"github.com/asiffer/netspot/miner/counters"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
