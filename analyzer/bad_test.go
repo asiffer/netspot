@@ -6,7 +6,7 @@
 package analyzer
 
 import (
-	"netspot/miner"
+	"github.com/asiffer/netspot/miner"
 	"testing"
 	"time"
 )

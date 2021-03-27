@@ -6,8 +6,9 @@ package exporter
 import (
 	"encoding/json"
 	"fmt"
-	"netspot/config"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 
 	"github.com/rs/zerolog"
 )

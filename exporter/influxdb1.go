@@ -4,9 +4,10 @@ package exporter
 
 import (
 	"fmt"
-	"netspot/config"
 	"regexp"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
 )

@@ -1,9 +1,9 @@
 package api
 
 import (
+	"github.com/asiffer/netspot/config"
 	"io/ioutil"
 	"net/http"
-	"netspot/config"
 )
 
 // ConfigHandler returns the current config

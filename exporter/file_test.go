@@ -5,9 +5,10 @@ package exporter
 import (
 	"fmt"
 	"io/ioutil"
-	"netspot/config"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 const filePrefix = "exporter.file"

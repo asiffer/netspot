@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"netspot/analyzer"
-	"netspot/config"
-	"netspot/exporter"
-	"netspot/miner"
 	"strings"
+
+	"github.com/asiffer/netspot/analyzer"
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/exporter"
+	"github.com/asiffer/netspot/miner"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"

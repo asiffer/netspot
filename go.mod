@@ -1,4 +1,4 @@
-module netspot
+module github.com/asiffer/netspot
 
 go 1.16
 
@@ -8,7 +8,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265 // indirect
 	github.com/google/gopacket v1.1.19
-	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab
 	github.com/knadh/koanf v0.15.0

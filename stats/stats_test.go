@@ -5,10 +5,11 @@ package stats
 import (
 	"fmt"
 	"math/rand"
-	"netspot/config"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 var (

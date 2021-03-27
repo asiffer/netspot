@@ -5,9 +5,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/asiffer/netspot/analyzer"
 	"io/ioutil"
 	"net/http"
-	"netspot/analyzer"
 )
 
 // RunHandler manages start/stop actions

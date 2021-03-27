@@ -22,7 +22,7 @@
 package main
 
 import (
-	"netspot/cmd"
+	"github.com/asiffer/netspot/cmd"
 
 	"github.com/rs/zerolog/log"
 )

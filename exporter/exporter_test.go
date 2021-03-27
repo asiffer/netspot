@@ -5,7 +5,6 @@ package exporter
 import (
 	"bytes"
 	"fmt"
-	"netspot/config"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"

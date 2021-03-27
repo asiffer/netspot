@@ -3,9 +3,10 @@
 package exporter
 
 import (
-	"netspot/config"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 const consolePrefix = "exporter.console"

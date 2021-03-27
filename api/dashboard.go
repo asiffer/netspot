@@ -6,11 +6,12 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
-	"netspot/analyzer"
-	"netspot/config"
-	"netspot/miner"
 	"text/template"
 	"time"
+
+	"github.com/asiffer/netspot/analyzer"
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/miner"
 )
 
 //go:embed web/index.html web/static/css/*.css web/static/images/* web/static/fonts/*.otf
@@ -43,10 +44,6 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	t := template.New("Title").Funcs(funcMap)
-
-	// Déclaration des fichiers à parser
-	// t = template.Must(t.Parse(dashbardTemplate))
-	// t = template.Must(t.ParseFiles("/home/asr/go/src/netspot/api/templates/main.html"))
 
 	data, err := content.ReadFile("web/index.html")
 	if err != nil {

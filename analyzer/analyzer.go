@@ -8,12 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"netspot/config"
-	"netspot/exporter"
-	"netspot/miner"
-	"netspot/stats"
 	"sync"
 	"time"
+
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/exporter"
+	"github.com/asiffer/netspot/miner"
+	"github.com/asiffer/netspot/stats"
 
 	"github.com/asiffer/gospot"
 	"github.com/rs/zerolog"

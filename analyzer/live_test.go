@@ -2,11 +2,12 @@ package analyzer
 
 import (
 	"fmt"
-	"netspot/config"
-	"netspot/exporter"
-	"netspot/miner"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
+	"github.com/asiffer/netspot/exporter"
+	"github.com/asiffer/netspot/miner"
 )
 
 func TestLivePcapSmall(t *testing.T) {

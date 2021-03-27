@@ -4,10 +4,11 @@ package exporter
 
 import (
 	"fmt"
-	"netspot/config"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 const (

@@ -8,10 +8,11 @@ package exporter
 import (
 	"errors"
 	"fmt"
-	"netspot/config"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

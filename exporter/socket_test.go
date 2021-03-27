@@ -9,10 +9,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"netspot/config"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 var (
