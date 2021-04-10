@@ -582,8 +582,7 @@ to <code>libpcap</code>. At least, you will need <code>libpcap-dev</code> on you
 <p>Look at this magic! 
 <div class="highlight"><pre><span></span><code>go install github.com/asiffer/netspot
 </code></pre></div>
-It installs <code>netspot</code> to <code>$GOPATH/bin/netspot</code>, so you must ensure it is in your path to use it
-directly from cli.</p>
+It installs <code>netspot</code> to <code>$GOPATH/bin/netspot</code>, so you must ensure it is in your path to use it directly from cli.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This method basically run the <code>Go</code> compiler on the sources. However it differs from the <code>make</code> build as the latter use additional "release" flags. In addition, the version output by the binary won't embed the git hash (only the major version).</p>
