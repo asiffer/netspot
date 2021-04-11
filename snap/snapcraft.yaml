@@ -6,6 +6,9 @@ description: |
   which aims to detect abnormal behaviours from network
   statistics.
 base: core18
+icon: assets/favicon-blue.svg
+type: app
+license: GPL-3.0+
 
 grade: devel
 confinement: devmode
@@ -13,9 +16,8 @@ confinement: devmode
 parts:
   netspot:
     plugin: go
-    source-type: local
+    go-channel: 1.16/stable
     source: .
-    go-importpath: netspot
     build-packages:
       - gcc
       - git
