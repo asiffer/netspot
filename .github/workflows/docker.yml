@@ -22,6 +22,8 @@ jobs:
         tags: latest ${{ github.sha }}
         dockerfiles: |
           ./Dockerfile
+        build-args: |
+          GIT_COMMIT=${{ github.sha }}
 
     - name: Push GitHub container registry
       id: push-to-ghcr
