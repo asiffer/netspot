@@ -84,9 +84,12 @@ func byteToInt(array []byte) (int, int) {
 
 func consoleWidth() int {
 	command := exec.Command("stty", "size")
+	if command == nil {
+		return defaultConsoleWidth
+	}
 	command.Stdin = os.Stdin
 	out, err := command.Output()
-	if err != nil {
+	if err != nil || len(out) == 0 {
 		return defaultConsoleWidth
 	}
 	// height

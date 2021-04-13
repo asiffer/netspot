@@ -74,10 +74,23 @@ RUN cd $GOPATH/src/netspot; make build_netspot_static
 # ========================================================================== #
 FROM alpine:latest
 
-ENV NETSPOT /usr/bin/netspot
+ARG NETSPOT=/bin/netspot
+
+ENV NETSPOT ${NETSPOT}
+# configuration
+ENV NETSPOT_ENDPOINT tcp://127.0.0.1:11000
+ENV NETSPOT_CONFIG_FILE /etc/netspot.toml
+
+# install the final binary
 COPY --from=builder /go/src/netspot/bin/* ${NETSPOT}
-RUN apk add libcap
-RUN adduser -HD -s /dev/null netspot; chown netspot:netspot ${NETSPOT}
-RUN setcap cap_net_admin,cap_net_raw=eip ${NETSPOT}
+# add the right capabilities (to run it as non-root)
+# ! the container must be run with "--cap-add NET_ADMIN" parameter !
+RUN apk add libcap; setcap cap_net_admin,cap_net_raw=eip ${NETSPOT}
+# add a non-root user
+RUN adduser -HD -s /dev/null netspot
+# create an empty config file
+RUN touch ${NETSPOT_CONFIG_FILE}
+# change user
 USER netspot
-CMD [${NETSPOT}, "serve", "-e", "tcp://127.0.0.1:11000"]
+# Go
+CMD ${NETSPOT} "serve" "-e" ${NETSPOT_ENDPOINT} "-c" ${NETSPOT_CONFIG_FILE}

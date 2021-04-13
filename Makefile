@@ -28,10 +28,9 @@ MAINTAINER   := asiffer
 GIT_COMMIT   := $(shell env | grep GIT_COMMIT= | sed -e 's/GIT_COMMIT=//' -e 's/"//g')
 
 ifndef GIT_COMMIT
-	GIT_COMMIT:=$(shell git rev-list -1 HEAD)
+	GIT_COMMIT:=$(shell git rev-list --count HEAD)
 endif
 
-# GIT_COMMIT   := $(shell git rev-list -1 HEAD)
 
 # sources
 SRC_DIR   := $(shell pwd)

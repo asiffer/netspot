@@ -1,10 +1,7 @@
 name: Build and Push Image
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-      - 20-docker-distribution
+
 
 jobs:
   build:
@@ -19,11 +16,11 @@ jobs:
       uses: redhat-actions/buildah-build@v2
       with:
         image: asiffer/netspot
-        tags: latest ${{ github.sha }}
+        tags: latest 2.0a-${{ GITHUB_RUN_ID }}
         dockerfiles: |
           ./Dockerfile
         build-args: |
-          GIT_COMMIT=${{ github.sha }}
+          GIT_COMMIT=${{ GITHUB_RUN_ID }}
 
     - name: Push GitHub container registry
       id: push-to-ghcr
