@@ -81,6 +81,7 @@ jobs:
     
   release:
     if: ${{ github.event == 'repository_dispatch' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Download amd64 binary
         uses: actions/download-artifact@v2
