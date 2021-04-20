@@ -1,16 +1,18 @@
 name: Test
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
+  pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - 'sources/**'
+
 
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
     container: 
-      image: golang:1.16.2-alpine
+      image: golang:1.16.3-alpine
       env:
         # SYSTEM
         PACKAGES: bash curl linux-headers git git-lfs flex bison wget make bluez-dev bluez libpcap libpcap-dev gcc musl-dev
