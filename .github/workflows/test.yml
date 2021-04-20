@@ -25,7 +25,12 @@ jobs:
         - 8086/tcp
     steps:
       - name: Get packages
-        run: apk update; apk add $PACKAGES
+        run: |
+          apk update; apk add $PACKAGES
+          echo ${{ github.action }}
+          echo ${{ github.event }}
+          echo ${{ github.event_name }}
+          echo ${{ github.event_path }}
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
