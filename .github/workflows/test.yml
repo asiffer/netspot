@@ -49,6 +49,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: release_build # trigger build
-          client-payload: ${{ github.event.client_payload }} # forward payload to build
+          event-type: release_build
+          client-payload: '{"tag":"${{ github.event.client_payload.tag }}"}'
 
