@@ -1,0 +1,51 @@
+name: Documentation & Release
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [release_docs]
+
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    container: python:3.9.4-buster
+    env:
+        PYTHON_PACKAGES: mkdocs mkdocs-markdownextradata-plugin mkdocs-material pymdown-extensions
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    
+    - name: Install dependencies
+      run: |
+        apt update && apt install -y build-essentials
+        pip3 install pip --upgrade
+        pip3 install $PYTHON_PACKAGES --upgrade
+
+    - name: Put current version into environment
+      run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
+
+    - name: Build docs
+      run: make docs
+    
+    - name: Commit & Push changes
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        message: Docs updated by Github Actions
+    
+    - name: Create a new tag
+      uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "v${{ env.NETSPOT_VERSION }}"
+          prerelease: true
+          title: "Development Build"
+
+    - name: Trigger test
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: release_test
+        client-payload: ${{ github.event.client_payload }} # forward payload to test
+

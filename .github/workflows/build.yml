@@ -60,67 +60,31 @@ jobs:
         with:
           name: netspot
           path: bin/
-      
-      - name: Upload amd64 binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: netspot-amd64
-          path: bin/netspot-${NETSPOT_VERSION}-amd64-linux-static
 
-      - name: Upload arm binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: netspot-arm
-          path: bin/netspot-${NETSPOT_VERSION}-arm-linux-static
-
-      - name: Upload arm64 binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: netspot-arm64
-          path: bin/netspot-${NETSPOT_VERSION}-arm64-linux-static
-    
-  release:
-    if: ${{ github.event == 'repository_dispatch' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download amd64 binary
-        uses: actions/download-artifact@v2
-        with:
-          name: netspot-amd64
-    
+      # steps in case of repository_dispatch (release) #
       - name: Upload amd64 binary to release
+        if: ${{ github.event == 'repository_dispatch' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: netspot-${NETSPOT_VERSION}-amd64-linux-static
-          asset_name: netspot-${NETSPOT_VERSION}-amd64-linux-static
+          file: netspot-${{ env.NETSPOT_VERSION }}-amd64-linux-static
           tag: ${{ github.event.client_payload.tag }}
           overwrite: true
-      
-      - name: Download arm binary
-        uses: actions/download-artifact@v2
-        with:
-          name: netspot-arm
     
       - name: Upload arm binary to release
+        if: ${{ github.event == 'repository_dispatch' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: netspot-${NETSPOT_VERSION}-arm-linux-static
-          asset_name: netspot-${NETSPOT_VERSION}-arm-linux-static
+          file: netspot-${{ env.NETSPOT_VERSION }}-arm-linux-static
           tag: ${{ github.event.client_payload.tag }}
           overwrite: true
-      
-      - name: Download arm64 binary
-        uses: actions/download-artifact@v2
-        with:
-          name: netspot-arm64
     
       - name: Upload arm64 binary to release
+        if: ${{ github.event == 'repository_dispatch' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: netspot-${NETSPOT_VERSION}-arm64-linux-static
-          asset_name: netspot-${NETSPOT_VERSION}-arm64-linux-static
+          file: netspot-${{ env.NETSPOT_VERSION }}-arm64-linux-static
           tag: ${{ github.event.client_payload.tag }}
           overwrite: true
