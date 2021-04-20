@@ -5,6 +5,9 @@
 # Shell for $shell commands
 SHELL        := /bin/bash
 
+# debug mode
+DEBUG := true
+
 # Fancyness
 SEP  := $(shell printf "%80s" | tr " " "-")
 OK   := "[\033[92mOK\033[0m]"
@@ -58,12 +61,15 @@ TEST_FLAGS                := -v -race -coverprofile=coverage.txt -covermode=atom
 MODULES_TO_TEST           := $(shell $(GOEXEC) list ./... | grep -v 'netspot/api/client')
 START_DOCKER_FOR_INFLUXDB := true
 
+
+
 ifeq ($(START_DOCKER_FOR_INFLUXDB), true)
     conditional_test:=test-with-docker
 else
     conditional_test:=test-without-docker
 endif
 
+ifeq ($(DEBUG), true)
 # Print environment variable
 $(info $(SEP))
 $(info GO="$(GOEXEC)")
@@ -77,6 +83,7 @@ $(info SRC_DIR="$(SRC_DIR)")
 $(info VERSION="$(VERSION)")
 $(info GIT_COMMIT="$(GIT_COMMIT)")
 $(info $(SEP))
+endif
 
 # PHONY actions
 .PHONY: build snap docs test
@@ -90,6 +97,9 @@ deps:
 	@echo -n "Retrieving dependencies...           "
 	@$(GO) get -u ./...
 	@echo -e $(OK)
+
+print_version:
+	@echo "$(VERSION)"
 
 build_netspot:
 	@echo -e "\033[93m[Building netspot]\033[0m"
@@ -137,6 +147,7 @@ docker:
 
 docs:
 	@echo -e "\033[93m[Building docs]\033[0m"
+	@sed -i -e 's/^    version:.*/    version: $(VERSION)/' mkdocs.yml
 	@mkdocs build
 	# @cd hugo; hugo
 

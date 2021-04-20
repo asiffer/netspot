@@ -1,16 +1,20 @@
 name: Test
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
+  pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - 'sources/**'
+  repository_dispatch:
+    types: [release_test]
+
 
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
     container: 
-      image: golang:1.16.2-alpine
+      image: golang:1.16.3-alpine
       env:
         # SYSTEM
         PACKAGES: bash curl linux-headers git git-lfs flex bison wget make bluez-dev bluez libpcap libpcap-dev gcc musl-dev
@@ -38,4 +42,13 @@ jobs:
           make test START_DOCKER_FOR_INFLUXDB=false
           curl -s https://codecov.io/bash > codecov.sh
           bash codecov.sh
+    
+      # steps in case of repository_dispatch (release) #
+      - name: Trigger build
+        if: ${{ github.event == 'repository_dispatch' }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: release_build # trigger build
+          client-payload: ${{ github.event.client_payload }} # forward payload to build
 

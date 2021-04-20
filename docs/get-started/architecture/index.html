@@ -514,11 +514,7 @@
                   <h1>Architecture</h1>
                 
                 <p>The picture below details the internal structure of <code>netspot</code>. It aims to present how the IDS is designed and it is also likely to help both the user and the developer to better understand the tool.</p>
-<!-- {{< svg >}}
-<object data="/netspot/images/archi.svg" type="image/svg+xml" style="width: 100%;"></object>
-{{< /svg >}} -->
 <object data="/assets/archi.svg" type="image/svg+xml" style="width: 100%;"></object>
-<!-- ![](/assets/archi.svg) -->
 
 <p>At the lowest level, <code>netspot</code> parse packets and increment some basic <strong>counters</strong>. This part is performed by the <code>miner</code> subpackage.
 The source can either be an network interface or a .pcap file (network capture).</p>
