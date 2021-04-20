@@ -42,10 +42,10 @@ jobs:
           make test START_DOCKER_FOR_INFLUXDB=false
           curl -s https://codecov.io/bash > codecov.sh
           bash codecov.sh
-    
+
       # steps in case of repository_dispatch (release) #
       - name: Trigger build
-        if: ${{ github.event == 'repository_dispatch' }}
+        if: ${{ github.event_name == 'release_test' }}
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

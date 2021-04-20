@@ -63,7 +63,7 @@ jobs:
 
       # steps in case of repository_dispatch (release) #
       - name: Upload amd64 binary to release
-        if: ${{ github.event == 'repository_dispatch' }}
+        if: ${{ github.event_name == 'release_build' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
           overwrite: true
     
       - name: Upload arm binary to release
-        if: ${{ github.event == 'repository_dispatch' }}
+        if: ${{ github.event_name == 'release_build' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -81,7 +81,7 @@ jobs:
           overwrite: true
     
       - name: Upload arm64 binary to release
-        if: ${{ github.event == 'repository_dispatch' }}
+        if: ${{ github.event_name == 'release_build' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
