@@ -18,7 +18,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        apt update && apt install -y build-essentials
+        apt update && apt install -y build-essential
         pip3 install pip --upgrade
         pip3 install $PYTHON_PACKAGES --upgrade
 

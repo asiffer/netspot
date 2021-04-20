@@ -1,6 +1,7 @@
 ![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg)
 ![Test](https://github.com/asiffer/netspot/workflows/Test/badge.svg)
 [![Coverage](https://codecov.io/gh/asiffer/netspot/branch/master/graph/badge.svg)](https://codecov.io/gh/asiffer/netspot)
+[![GoReport](https://goreportcard.com/badge/github.com/asiffer/netspot)](https://goreportcard.com/report/github.com/asiffer/netspot)
 
 # netspot
 
