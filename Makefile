@@ -23,7 +23,14 @@ PACKAGE_NAME := netspot
 VERSION      := $(shell grep 'Version =' cmd/app.go | awk '{print $$NF}' | sed -e 's/"//g')
 PACKAGE_DESC := "A simple IDS with statistical learning"
 MAINTAINER   := asiffer
-GIT_COMMIT   := $(shell git rev-list -1 HEAD)
+
+# read git commit from env first
+GIT_COMMIT   := $(shell env | grep GIT_COMMIT= | sed -e 's/GIT_COMMIT=//' -e 's/"//g')
+
+ifndef GIT_COMMIT
+	GIT_COMMIT:=$(shell git rev-list --count HEAD)
+endif
+
 
 # sources
 SRC_DIR   := $(shell pwd)
@@ -68,6 +75,7 @@ $(info AR="$(AR)")
 $(info LD="$(LD)")
 $(info SRC_DIR="$(SRC_DIR)")
 $(info VERSION="$(VERSION)")
+$(info GIT_COMMIT="$(GIT_COMMIT)")
 $(info $(SEP))
 
 # PHONY actions
@@ -123,6 +131,9 @@ snap:
 	snapcraft
 	mkdir -p $(SNAP_DIR)
 	mv *.snap $(SNAP_DIR)
+
+docker:
+	docker build --build-arg GIT_COMMIT=$(GIT_COMMIT) -t netspot:$(VERSION) .
 
 docs:
 	@echo -e "\033[93m[Building docs]\033[0m"
