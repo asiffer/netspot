@@ -2,7 +2,7 @@ name: Documentation & Release
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [release_docs]
+    types: [release]
 
 
 jobs:
