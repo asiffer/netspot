@@ -137,6 +137,7 @@ docker:
 
 docs:
 	@echo -e "\033[93m[Building docs]\033[0m"
+	@sed -i -e 's/^    version:.*/    version: $(VERSION)/' mkdocs.yml
 	@mkdocs build
 	# @cd hugo; hugo
 
