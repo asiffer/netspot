@@ -145,11 +145,13 @@ snap:
 docker:
 	docker build --build-arg GIT_COMMIT=$(GIT_COMMIT) -t netspot:$(VERSION) .
 
-docs:
+render_readme:
+	@python3 dev/readme/render.py --version $(VERSION)
+
+docs: render_readme
 	@echo -e "\033[93m[Building docs]\033[0m"
 	@sed -i -e 's/^    version:.*/    version: $(VERSION)/' mkdocs.yml
 	@mkdocs build
-	# @cd hugo; hugo
 
 clean:
 	@echo -en "Removing netspot binary   "
