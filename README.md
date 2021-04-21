@@ -1,3 +1,4 @@
+![Release](https://shields.io/github/v/release/asiffer/netspot?include_prereleases)
 ![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg)
 ![Test](https://github.com/asiffer/netspot/workflows/Test/badge.svg)
 [![Coverage](https://codecov.io/gh/asiffer/netspot/branch/master/graph/badge.svg)](https://codecov.io/gh/asiffer/netspot)
@@ -20,7 +21,6 @@ picture below).
 
 **netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
 
-<!-- ![SPOT algorithm](assets/netspot4.png) -->
 
 
 ## Installation
@@ -91,9 +91,7 @@ data = true
 netspot run --config netspot.toml
 ```
 
-
 All the available statistics can be listed with the `netspot  ls` command.
-
 
 
 To print the default config (in TOML format only), you can run the following command:
