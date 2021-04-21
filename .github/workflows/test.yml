@@ -48,7 +48,7 @@ jobs:
         if: ${{ github.event_name == 'repository_dispatch' }}
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           event-type: release_build
           client-payload: '{"tag":"${{ github.event.client_payload.tag }}"}'
 
