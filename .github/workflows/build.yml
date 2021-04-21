@@ -25,7 +25,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Put current version into environment
-        run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
+        run: |
+          echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
+          env
 
       - name: Symbolic link to GOPATH
         run: ln -s $GITHUB_WORKSPACE $GOPATH/src/netspot
@@ -67,7 +69,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: netspot-${{ env.NETSPOT_VERSION }}-amd64-linux-static
+          file: bin/netspot-${{ env.NETSPOT_VERSION }}-amd64-linux-static
           tag: ${{ github.event.client_payload.tag }}
           overwrite: true
     
@@ -76,7 +78,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: netspot-${{ env.NETSPOT_VERSION }}-arm-linux-static
+          file: bin/netspot-${{ env.NETSPOT_VERSION }}-arm-linux-static
           tag: ${{ github.event.client_payload.tag }}
           overwrite: true
     
@@ -85,6 +87,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: netspot-${{ env.NETSPOT_VERSION }}-arm64-linux-static
+          file: bin/netspot-${{ env.NETSPOT_VERSION }}-arm64-linux-static
           tag: ${{ github.event.client_payload.tag }}
           overwrite: true
