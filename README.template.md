@@ -167,10 +167,15 @@ these information to some modules that binds to different backends
 
 This is the second big refactoring. Many things have changed, making the way to use **netspot** more *modern*.
 
-- Single and statically-compiled binary. Forget about the server, just run the binary on what you want (a server mode still exists but it is rather minimal)
+- Single and statically-compiled binary is provided
 - Better performances! I think that **netspot** can process 
-twice as fast: **1M pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+. 
-- Developper process has been improved so as to "easily" add new counters, statistics and exporting modules.
+twice as fast: **1M+ pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+. 
+- Developer process has been improved so as to "easily" add new counters, statistics and exporting modules.
+- Docs has been enriched
+- Static dashboard is available on server mode
+- First docker image is provided
+- Release process is fully automated through `repository_dispatch` events cascade
+- Some minor bugs have been fixed
 
 ### Version 1.3
 
