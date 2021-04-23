@@ -171,6 +171,7 @@ This is the second big refactoring. Many things have changed, making the way to 
 - Better performances! I think that **netspot** can process 
 twice as fast: **1M+ pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+. 
 - Developer process has been improved so as to "easily" add new counters, statistics and exporting modules.
+- More tests and a better coverage
 - Docs has been enriched
 - Static dashboard is available on server mode
 - First docker image is provided
