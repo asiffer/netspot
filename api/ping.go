@@ -3,14 +3,12 @@
 package api
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
 // PingHandler responds to ping requests
 func PingHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("PING HANDLER")
 	// accept only GET
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)

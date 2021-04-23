@@ -1,0 +1,55 @@
+site_name: NETSPOT
+docs_dir: 'sources'
+site_dir: 'docs'
+repo_url: https://github.com/asiffer/netspot
+site_url: https://asiffer.github.io/netspot/
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - attr_list
+  - admonition
+
+plugins:
+  - search
+  - markdownextradata
+
+theme:
+    name: material
+    logo: assets/favicon.svg
+    favicon: assets/favicon-blue.svg
+    palette:
+      scheme: "blue2"
+    features:
+      - navigation.sections
+
+
+
+extra_css:
+  - css/color.css
+  - css/extra.css
+
+
+extra:
+  netspot:
+    version: 2.0a
+
+nav:
+    - Home: 'index.html'
+    - Install:
+      - 'download/binaries/index.md'
+      - 'download/sources/index.md'
+      - 'download/docker/index.md'
+      - 'download/service/index.md'
+    - "Get started":
+        - 'get-started/basic/index.md'
+        - 'get-started/configuration/index.md'
+        - 'get-started/architecture/index.md'
+    - Developer:
+      - 'developer/counter/index.md'
+      - 'developer/stat/index.md'
+      - 'developer/exporter/index.md'
+      - 'developer/toolchain/index.md'
+    - About:
+      - 'about/ids.md'
+      - 'about/performances.md'

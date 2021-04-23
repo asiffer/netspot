@@ -1,6 +1,8 @@
+![Release](https://shields.io/github/v/release/asiffer/netspot?include_prereleases)
 ![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg)
 ![Test](https://github.com/asiffer/netspot/workflows/Test/badge.svg)
 [![Coverage](https://codecov.io/gh/asiffer/netspot/branch/master/graph/badge.svg)](https://codecov.io/gh/asiffer/netspot)
+[![GoReport](https://goreportcard.com/badge/github.com/asiffer/netspot)](https://goreportcard.com/report/github.com/asiffer/netspot)
 
 # netspot
 
@@ -19,7 +21,6 @@ picture below).
 
 **netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
 
-<!-- ![SPOT algorithm](assets/netspot4.png) -->
 
 
 ## Installation
@@ -45,6 +46,16 @@ make
 
 To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
 presents how **netspot** is (cross-)built based on the `golang:alpine` docker image.
+
+### (NEW) Docker
+
+`netspot` is now available through a docker image, hosted on Github. You can have a look to the [local registry](https://github.com/users/asiffer/packages/container/package/netspot) to pull the image.
+
+Once you have pulled the image, you can run `netspot` interactively through:
+```sh
+docker run --rm -it --name netspot --cap-add NET_ADMIN --network host netspot:latest
+```
+
 
 ## Get started
 
@@ -80,9 +91,7 @@ data = true
 netspot run --config netspot.toml
 ```
 
-
 All the available statistics can be listed with the `netspot  ls` command.
-
 
 
 To print the default config (in TOML format only), you can run the following command:
