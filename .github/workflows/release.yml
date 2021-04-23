@@ -47,5 +47,5 @@ jobs:
       with:
         token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
         event-type: release_test
-        client-payload: '{"tag":"${{ github.event.client_payload.tag }}"}' # forward payload to test
+        client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # forward payload to test
 
