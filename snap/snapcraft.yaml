@@ -10,7 +10,7 @@ icon: assets/favicon-blue.svg
 type: app
 license: GPL-3.0+
 
-grade: devel
+grade: stable
 confinement: devmode
 
 parts:
@@ -28,3 +28,18 @@ parts:
 apps:
   netspot:
     command: bin/netspot
+    # plugs:
+      # - network
+      # - network-bind
+      # - netlink-connector
+      # - netlink-audit
+      # - network-control
+      # - network-observe
+      # - network-manager
+      # - network-manager-observe
+      # - bluez
+      # - network-setup-observe
+      # - network-setup-control
+      # - network-status
+      # - hardware-observe
+      # - system-observe

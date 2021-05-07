@@ -39,10 +39,17 @@ endif
 SRC_DIR   := $(shell pwd)
 EXTRA_DIR := $(SRC_DIR)/extra
 
+# libpcap
+LIBPCAP_DL_DIR   := /tmp/libpcap
+LIBPCAP_VERSION  := 1.10.0
+LIBPCAP_BASE_URL := https://www.tcpdump.org/release
+LIBPCAP_DIR      := $(LIBPCAP_DL_DIR)/libpcap-$(LIBPCAP_VERSION)
+
 # golang compiler
 GO                   := CC=$(CC) LD=$(LD) GOARCH=$(ARCH) GOOS=$(OS) $(shell which go)
 GO_LDFLAGS           := -s -w -X "github.com/asiffer/netspot/cmd.gitCommit=$(GIT_COMMIT)"
 GO_BUILD_EXTRA_FLAGS := -a
+CGO_STATIC           := CGO_CFLAGS="-O2 -I$(LIBPCAP_DIR)" CGO_LDFLAGS="-L$(LIBPCAP_DIR)"
 
 # build directories
 BIN_DIR    := $(SRC_DIR)/bin
@@ -50,6 +57,8 @@ DIST_DIR   := $(SRC_DIR)/dist
 DOCKER_DIR := $(DIST_DIR)/docker
 DEBIAN_DIR := $(DIST_DIR)/debian
 SNAP_DIR   := $(DIST_DIR)/snap
+
+
 
 # installation
 DESTDIR              :=
@@ -158,3 +167,14 @@ clean:
 	@rm -f $(BIN_DIR)/netspot
 	@echo -e $(OK)
 
+build_libpcap:
+	@echo -en "Downloading libpcap       "
+	@mkdir -p $(LIBPCAP_DL_DIR)
+	@wget -P $(LIBPCAP_DL_DIR) $(LIBPCAP_BASE_URL)/libpcap-$(LIBPCAP_VERSION).tar.gz
+	@cd $(LIBPCAP_DL_DIR) && tar -xvf libpcap-$(LIBPCAP_VERSION).tar.gz
+	@echo -e $(OK)
+	@echo -en "Building libpcap          "
+	@cd $(LIBPCAP_DIR); ./configure; make
+	@echo -e $(OK)
+	$(eval GO_LDFLAGS += -extldflags "-static")
+	@$(CGO_STATIC) $(GO) build $(GO_BUILD_EXTRA_FLAGS) -ldflags='$(GO_LDFLAGS)' -o $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS)-static $(SRC_DIR)/*.go
