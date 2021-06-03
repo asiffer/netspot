@@ -21,7 +21,6 @@ import (
 
 var (
 	apiLogger zerolog.Logger
-	router    *mux.Router
 	network   string
 	address   string
 )
@@ -42,7 +41,7 @@ func InitConfig() error {
 	var err error
 	network, address, err = config.GetSocket("api.endpoint")
 	if err != nil {
-		return fmt.Errorf("Error while parsing endpoint: %v", err)
+		return fmt.Errorf("error while parsing endpoint: %v", err)
 	}
 
 	// init router
@@ -109,31 +108,31 @@ func requestSource(r *http.Request) string {
 
 func initSubpackages() error {
 	if err := miner.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Miner: %v", err)
+		return fmt.Errorf("error while initializing the Miner: %v", err)
 	}
 	if err := analyzer.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Analyzer: %v", err)
+		return fmt.Errorf("error while initializing the Analyzer: %v", err)
 	}
 	if err := exporter.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Exporter: %v", err)
+		return fmt.Errorf("error while initializing the Exporter: %v", err)
 	}
 	return nil
-}
-
-func extractProtoAndAddr(endpoint string) (string, string, error) {
-	s := strings.Split(endpoint, "://")
-	if len(s) < 2 {
-		return "", "", fmt.Errorf("Bad format, expect PROTO://ADDR, got %s", endpoint)
-	}
-	return s[0], s[1], nil
 }
 
 // Server =================================================================== //
 // ========================================================================== //
 // ========================================================================== //
 
-// Serve set up the netspot server, the API is now
-// available
+// @title Netspot API
+// @version 2.0
+// @description Netspot as a service
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.email asr@nabla.ovh
+// @license.name GPLv3
+// @license.url https://www.gnu.org/licenses/gpl-3.0.en.html
+// @host localhost:11000
+// @BasePath /
 func Serve() error {
 	// open socket
 	lis, err := net.Listen(network, address)
