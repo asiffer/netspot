@@ -1,56 +1,91 @@
 package api
 
 import (
-	"github.com/asiffer/netspot/config"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/asiffer/netspot/config"
 )
 
-// ConfigHandler returns the current config
-func ConfigHandler(w http.ResponseWriter, r *http.Request) {
-	switch method := r.Method; method {
-	case "GET":
-		if data, err := config.JSON(); err != nil {
-			apiLogger.Error().Msg(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write(data)
-		}
-	case "POST":
-		// read content
-		raw, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			apiLogger.Error().Msg(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		// make a backup
-		config.Save()
-		// load into config
-		if err := config.LoadFromRawJSON(raw); err != nil {
-			apiLogger.Error().Msg(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			config.Fallback()
-			return
-		}
-		// reload packages
-		if err := initSubpackages(); err != nil {
-			apiLogger.Error().Msg(err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			config.Fallback()
-			return
-		}
-		msg := "Config has been updated"
-		apiLogger.Info().Msg(msg)
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(msg))
+// ConfigPostHandler update the IDS config
+//
+// @Summary Update the config of the IDS
+// @Description You can update the netspot config through this endpoint
+// @Accept  json
+// @Produce plain,json
+// @Success 201 {string} string "Acknowledge message"
+// @Failure 400 {object} apiError "Error message"
+// @Failure 405 {object} apiError "Error message"
+// @Failure 500 {object} apiError "Error message"
+// @Router /api/config [post]
+func ConfigPostHandler(w http.ResponseWriter, r *http.Request) {
+	// accept only POST
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write(APIError("Only POST method is allowed").JSON())
+		return
+	}
 
+	// read content
+	raw, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		apiLogger.Error().Msg(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(APIErrorFromError(err).JSON())
+		return
+	}
+	// make a backup
+	config.Save()
+	// load into config
+	if err := config.LoadFromRawJSON(raw); err != nil {
+		apiLogger.Error().Msg(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(APIErrorFromError(err).JSON())
+		config.Fallback()
+		return
+	}
+	// reload packages
+	if err := initSubpackages(); err != nil {
+		apiLogger.Error().Msg(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(APIErrorFromError(err).JSON())
+		config.Fallback()
+		return
+	}
+	msg := "Config has been updated"
+	apiLogger.Info().Msg(msg)
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(msg))
+
+}
+
+// ConfigGetHandler returns the current config
+//
+// @Summary Get the config of the IDS
+// @Description You can fetch the netspot config through this endpoint
+// @Accept  json
+// @Produce json
+// @Success 200 {object} string "Acknowledge message"
+// @Failure 400 {object} apiError "Error message"
+// @Failure 405 {object} apiError "Error message"
+// @Failure 500 {object} apiError "Error message"
+// @Router /api/config [get]
+func ConfigGetHandler(w http.ResponseWriter, r *http.Request) {
+	// accept only GET
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write(APIError("Only GET method is allowed").JSON())
+		return
+	}
+
+	if data, err := config.JSON(); err != nil {
+		apiLogger.Error().Msg(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(APIErrorFromError(err).JSON())
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
 	}
 
 }
