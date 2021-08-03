@@ -12,10 +12,9 @@ import (
 // @Summary Server healthcheck
 // @Description This endpoints basically aims to check if the server is up
 // @Accept  json
-// @Produce  json
 // @Success 200
 // @Failure 405 {object} apiError "Error message"
-// @Router /api/ping [get]
+// @Router /ping [get]
 func PingHandler(w http.ResponseWriter, r *http.Request) {
 	// accept only GET
 	if r.Method != "GET" {

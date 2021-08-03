@@ -1,0 +1,158 @@
+basePath: /api
+definitions:
+  api.apiError:
+    properties:
+      error:
+        example: Oh my god! Something wrong happened
+        type: string
+    type: object
+host: localhost:11000
+info:
+  contact:
+    email: asr@nabla.ovh
+    name: API Support
+  description: Netspot as a service
+  license:
+    name: GPLv3
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  termsOfService: http://swagger.io/terms/
+  title: Netspot API
+  version: "2.0"
+paths:
+  /config:
+    get:
+      consumes:
+      - application/json
+      description: You can fetch the netspot config through this endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Acknowledge message
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+        "405":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+        "500":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+      summary: Get the config of the IDS
+    post:
+      consumes:
+      - application/json
+      description: You can update the netspot config through this endpoint
+      parameters:
+      - description: Input config
+        in: body
+        name: config
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - text/plain
+      - application/json
+      responses:
+        "201":
+          description: Acknowledge message
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+        "405":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+        "500":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+      summary: Update the config of the IDS
+  /devices:
+    get:
+      consumes:
+      - application/json
+      description: This returns the list of the network interfaces that can be monitored
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of the available devices
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+      summary: List the available devices
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: This endpoints basically aims to check if the server is up
+      responses:
+        "200":
+          description: ""
+        "405":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+      summary: Server healthcheck
+  /run:
+    post:
+      consumes:
+      - application/json
+      description: Use this path to start/stop the IDS
+      parameters:
+      - description: the action to perform
+        enum:
+        - '"start"'
+        - '"stop"'
+        in: body
+        name: action
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comment about the action performed
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+      summary: Manage the IDS status
+  /stats:
+    get:
+      consumes:
+      - application/json
+      description: This returns the list of the statistics than can be loaded
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Available statistics along with their description
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error message
+          schema:
+            $ref: '#/definitions/api.apiError'
+      summary: List the available statistics
+swagger: "2.0"

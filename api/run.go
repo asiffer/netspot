@@ -21,7 +21,7 @@ import (
 // @Param action body string false "the action to perform" Enums("start", "stop")
 // @Success 200 {string} string "Comment about the action performed"
 // @Failure 400 {object} apiError "Error message"
-// @Router /api/run [post]
+// @Router /run [post]
 func RunHandler(w http.ResponseWriter, r *http.Request) {
 	// read content
 	raw, err := ioutil.ReadAll(r.Body)

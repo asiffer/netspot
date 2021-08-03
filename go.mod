@@ -24,9 +24,10 @@ require (
 	github.com/swaggo/http-swagger v1.0.0
 	github.com/swaggo/swag v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
+	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/exp v0.0.0-20210603111838-86dd7ad88cc9 // indirect
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
-	golang.org/x/sys v0.0.0-20210603125802-9665404d3644 // indirect
+	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/tools v0.1.2 // indirect
 	gonum.org/v1/gonum v0.9.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect

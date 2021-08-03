@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/asiffer/netspot/analyzer"
@@ -22,6 +23,8 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+const apiBasePath = "/api"
+
 var (
 	apiLogger zerolog.Logger
 	network   string
@@ -30,6 +33,11 @@ var (
 
 // init does nothin here
 func init() {}
+
+// apiPath
+func apiPath(s string) string {
+	return path.Join(apiBasePath, s)
+}
 
 // InitLogger initialize the sublogger for API
 func InitLogger() {
@@ -49,15 +57,19 @@ func InitConfig() error {
 
 	// init router
 	router := mux.NewRouter()
+
+	// dashboard
 	router.Path("/").Methods("GET").HandlerFunc(DashboardHandler)
-	router.Path("/api/run").Methods("POST").Headers("Content-Type", "application/json").HandlerFunc(RunHandler)
-	router.Path("/api/config").Methods("GET").HandlerFunc(ConfigGetHandler)
-	router.Path("/api/config").Methods("POST").HandlerFunc(ConfigPostHandler)
-	router.Path("/api/ping").Methods("GET").HandlerFunc(PingHandler)
-	router.Path("/api/devices").Methods("GET").HandlerFunc(DevicesHandler)
-	router.Path("/api/stats").Methods("GET").HandlerFunc(StatsHandler)
+
+	// API
+	router.Path(apiPath("/run")).Methods("POST").Headers("Content-Type", "application/json").HandlerFunc(RunHandler)
+	router.Path(apiPath("/config")).Methods("GET").HandlerFunc(ConfigGetHandler)
+	router.Path(apiPath("/config")).Methods("POST").Headers("Content-Type", "application/json").HandlerFunc(ConfigPostHandler)
+	router.Path(apiPath("/ping")).Methods("GET").HandlerFunc(PingHandler)
+	router.Path(apiPath("/devices")).Methods("GET").HandlerFunc(DevicesHandler)
+	router.Path(apiPath("/stats")).Methods("GET").HandlerFunc(StatsHandler)
 	// Swagger
-	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix(apiPath("/docs")).Handler(httpSwagger.WrapHandler)
 
 	// logging middleware
 	router.Use(LoggingMiddleware)
@@ -138,7 +150,7 @@ func initSubpackages() error {
 // @license.name GPLv3
 // @license.url https://www.gnu.org/licenses/gpl-3.0.en.html
 // @host localhost:11000
-// @BasePath /
+// @BasePath /api
 func Serve() error {
 	// open socket
 	lis, err := net.Listen(network, address)

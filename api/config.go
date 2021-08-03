@@ -13,11 +13,12 @@ import (
 // @Description You can update the netspot config through this endpoint
 // @Accept  json
 // @Produce plain,json
+// @Param config body map[string]string true "Input config"
 // @Success 201 {string} string "Acknowledge message"
 // @Failure 400 {object} apiError "Error message"
 // @Failure 405 {object} apiError "Error message"
 // @Failure 500 {object} apiError "Error message"
-// @Router /api/config [post]
+// @Router /config [post]
 func ConfigPostHandler(w http.ResponseWriter, r *http.Request) {
 	// accept only POST
 	if r.Method != "POST" {
@@ -26,6 +27,7 @@ func ConfigPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	// read content
 	raw, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -69,7 +71,7 @@ func ConfigPostHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} apiError "Error message"
 // @Failure 405 {object} apiError "Error message"
 // @Failure 500 {object} apiError "Error message"
-// @Router /api/config [get]
+// @Router /config [get]
 func ConfigGetHandler(w http.ResponseWriter, r *http.Request) {
 	// accept only GET
 	if r.Method != "GET" {

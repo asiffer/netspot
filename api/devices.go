@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Success 200 {array} string "list of the available devices"
 // @Failure 500 {object} apiError "error message"
-// @Router /api/devices [get]
+// @Router /devices [get]
 func DevicesHandler(w http.ResponseWriter, r *http.Request) {
 	// accept only GET
 	if r.Method != "GET" {
