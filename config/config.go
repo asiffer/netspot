@@ -79,7 +79,7 @@ var usage = map[string]string{
 	"spot.max_excess": "Number of tail observations. (see spot.bounded)",
 }
 
-// networks accpeted by golang/net/Dial
+// networks accepted by golang/net/Dial
 var dialNetworks = []string{
 	"tcp",
 	"tcp4",
@@ -122,13 +122,13 @@ func checkPath(p string) error {
 func parseAddress(conn string) (string, string, error) {
 	raw := strings.Split(conn, "://")
 	if len(raw) != 2 {
-		return "", "", fmt.Errorf("The address is not valid, its format must be proto://address")
+		return "", "", fmt.Errorf("the address is not valid, its format must be proto://address")
 	}
 	// Known networks are "tcp", "tcp4" (IPv4-only), "tcp6" (IPv6-only),
 	// "udp", "udp4" (IPv4-only), "udp6" (IPv6-only), "ip", "ip4" (IPv4-only),
 	// "ip6" (IPv6-only), "unix", "unixgram" and "unixpacket".
 	if !isValidDialNetwork(raw[0]) {
-		return "", "", fmt.Errorf("The network %s is not valid (see https://golang.org/pkg/net/#Dial) to get valid ones", raw[0])
+		return "", "", fmt.Errorf("the network %s is not valid (see https://golang.org/pkg/net/#Dial) to get valid ones", raw[0])
 	}
 	return raw[0], raw[1], nil
 }
@@ -145,7 +145,7 @@ func guessParser(file string) (koanf.Parser, error) {
 	case ".toml":
 		return toml.Parser(), nil
 	default:
-		return nil, fmt.Errorf("Extension '%s' not supported", ext)
+		return nil, fmt.Errorf("extension '%s' not supported", ext)
 	}
 }
 
@@ -214,11 +214,11 @@ func HasNotNilKey(key string) bool {
 // GetString returns a string key
 func GetString(key string) (string, error) {
 	if !HasKey(key) {
-		return "", fmt.Errorf("Key %s does not exist", key)
+		return "", fmt.Errorf("key %s does not exist", key)
 	}
 	s := konf.String(key)
 	if s == "" {
-		return "", fmt.Errorf("Error while parsing key %s", key)
+		return "", fmt.Errorf("error while parsing key %s", key)
 	}
 	return s, nil
 }
@@ -226,11 +226,11 @@ func GetString(key string) (string, error) {
 // GetStringList returns a slice of string
 func GetStringList(key string) ([]string, error) {
 	if !HasKey(key) {
-		return nil, fmt.Errorf("Key %s does not exist", key)
+		return nil, fmt.Errorf("key %s does not exist", key)
 	}
 	s := konf.Strings(key)
 	// if len(s) == 0 {
-	// 	return nil, fmt.Errorf("Error while parsing key %s", key)
+	// 	return nil, fmt.Errorf("error while parsing key %s", key)
 	// }
 	return s, nil
 }
@@ -238,7 +238,7 @@ func GetStringList(key string) ([]string, error) {
 // GetPath return a valid path
 func GetPath(key string) (string, error) {
 	if !HasKey(key) {
-		return "", fmt.Errorf("Key %s does not exist", key)
+		return "", fmt.Errorf("key %s does not exist", key)
 	}
 	p := konf.String(key)
 	if err := checkPath(p); err != nil {
@@ -250,7 +250,7 @@ func GetPath(key string) (string, error) {
 // GetSocket returns a valid socket: proto, address
 func GetSocket(key string) (string, string, error) {
 	if !HasKey(key) {
-		return "", "", fmt.Errorf("Key %s does not exist", key)
+		return "", "", fmt.Errorf("key %s does not exist", key)
 	}
 	return parseAddress(konf.String(key))
 }
@@ -258,7 +258,7 @@ func GetSocket(key string) (string, string, error) {
 // GetDataFormat returns a valid data format (for socket only)
 func GetDataFormat(key string) (string, error) {
 	if !HasKey(key) {
-		return "", fmt.Errorf("Key %s does not exist", key)
+		return "", fmt.Errorf("key %s does not exist", key)
 	}
 	k := konf.String(key)
 	for _, f := range dataFormat {
@@ -266,17 +266,17 @@ func GetDataFormat(key string) (string, error) {
 			return f, nil
 		}
 	}
-	return "", fmt.Errorf("The format %s is not accepted (only csv, json and gob)", k)
+	return "", fmt.Errorf("the format %s is not accepted (only csv, json and gob)", k)
 }
 
 // GetInt returns a int key
 func GetInt(key string) (int, error) {
 	if !HasKey(key) {
-		return 0, fmt.Errorf("Key %s does not exist", key)
+		return 0, fmt.Errorf("key %s does not exist", key)
 	}
 	i := konf.Int(key)
 	if i == 0 {
-		return 0, fmt.Errorf("Error while parsing key %s (got 0)", key)
+		return 0, fmt.Errorf("error while parsing key %s (got 0)", key)
 	}
 	return i, nil
 }
@@ -284,11 +284,11 @@ func GetInt(key string) (int, error) {
 // GetStrictlyPositiveInt returns a int key > 0
 func GetStrictlyPositiveInt(key string) (int, error) {
 	if !HasKey(key) {
-		return 0, fmt.Errorf("Key %s does not exist", key)
+		return 0, fmt.Errorf("key %s does not exist", key)
 	}
 	i := konf.Int(key)
 	if i <= 0 {
-		return 0, fmt.Errorf("Error while parsing key %s (got %d)", key, i)
+		return 0, fmt.Errorf("error while parsing key %s (got %d)", key, i)
 	}
 	return i, nil
 }
@@ -296,11 +296,11 @@ func GetStrictlyPositiveInt(key string) (int, error) {
 // GetFloat64 returns a float64 key
 func GetFloat64(key string) (float64, error) {
 	if !HasKey(key) {
-		return 0., fmt.Errorf("Key %s does not exist", key)
+		return 0., fmt.Errorf("key %s does not exist", key)
 	}
 	f := konf.Float64(key)
 	if f == 0.0 {
-		return 0.0, fmt.Errorf("Error while parsing key %s (got 0.0)", key)
+		return 0.0, fmt.Errorf("error while parsing key %s (got 0.0)", key)
 	}
 	return f, nil
 }
@@ -308,11 +308,11 @@ func GetFloat64(key string) (float64, error) {
 // GetStrictlyPositiveFloat64 returns only strictly positive float64 key
 func GetStrictlyPositiveFloat64(key string) (float64, error) {
 	if !HasKey(key) {
-		return 0., fmt.Errorf("Key %s does not exist", key)
+		return 0., fmt.Errorf("key %s does not exist", key)
 	}
 	f := konf.Float64(key)
 	if f <= 0. {
-		return 0., fmt.Errorf("Error while parsing key %s (got %f)", key, f)
+		return 0., fmt.Errorf("error while parsing key %s (got %f)", key, f)
 	}
 	return f, nil
 }
@@ -320,7 +320,7 @@ func GetStrictlyPositiveFloat64(key string) (float64, error) {
 // GetBool returns a boolean key
 func GetBool(key string) (bool, error) {
 	if !HasKey(key) {
-		return false, fmt.Errorf("Key %s does not exist", key)
+		return false, fmt.Errorf("key %s does not exist", key)
 	}
 	return konf.Bool(key), nil
 }
@@ -337,7 +337,7 @@ func MustBool(key string) bool {
 // GetDuration returns a duration key
 func GetDuration(key string) (time.Duration, error) {
 	if !HasKey(key) {
-		return 0, fmt.Errorf("Key %s does not exist", key)
+		return 0, fmt.Errorf("key %s does not exist", key)
 	}
 	return konf.Duration(key), nil
 }
@@ -356,7 +356,7 @@ func SetValue(key string, value interface{}) error {
 // which provides default values
 func LoadDefaults() error {
 	if err := konf.Load(confmap.Provider(defaultConfig, "."), nil); err != nil {
-		return fmt.Errorf("Error while loading default conf: %v", err)
+		return fmt.Errorf("error while loading default conf: %v", err)
 	}
 	return nil
 }
@@ -380,7 +380,7 @@ func LoadFromCli(c *cli.Context) error {
 	configLogger.Debug().Msgf("Loading cli parameters")
 	// configLogger.Debug().Msgf("Before CLI:\n %+v", konf.All())
 	if err := konf.Load(Provider(c, "."), nil); err != nil {
-		return fmt.Errorf("Error loading config from cli: %v", err)
+		return fmt.Errorf("error loading config from cli: %v", err)
 	}
 
 	configLogger.Debug().Msgf("Final config:\n %+v", konf.All())
@@ -398,7 +398,7 @@ func LoadConfig(filename string) error {
 	}
 	// load config (it overrides default config)
 	if err := konf.Load(file.Provider(filename), parser); err != nil {
-		return fmt.Errorf("Error loading config file %s: %v", filename, err)
+		return fmt.Errorf("error loading config file %s: %v", filename, err)
 	}
 	return nil
 }
@@ -430,7 +430,7 @@ func LoadFromRawJSON(raw []byte) error {
 	// check keys
 	for key := range data {
 		if !HasKey(key) {
-			return fmt.Errorf("The key '%s' is unknown", key)
+			return fmt.Errorf("the key '%s' is unknown", key)
 		}
 	}
 	return konf.Load(confmap.Provider(data, "."), nil)
@@ -482,16 +482,14 @@ func Save() {
 	configLogger.Debug().Msg("Configuration saved")
 }
 
-// Fallback keeps the last saved configurtion and
+// Fallback keeps the last saved configuration and
 // restores it as the current config
 func Fallback() error {
 	if savedKonf == nil {
-		return fmt.Errorf("No configuration to restore")
+		return fmt.Errorf("no configuration to restore")
 	}
 	konf = savedKonf.Copy()
 	savedKonf = nil
 	configLogger.Debug().Msg("Configuration restored")
 	return nil
 }
-
-func main() {}

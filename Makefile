@@ -101,7 +101,7 @@ deps:
 print_version:
 	@echo "$(VERSION)"
 
-build_netspot:
+build_netspot: 
 	@echo -e "\033[93m[Building netspot]\033[0m"
 	@export GOPATH=$(GOPATH)
 	@echo -n "Building go package...               "
@@ -152,6 +152,10 @@ docs: render_readme
 	@echo -e "\033[93m[Building docs]\033[0m"
 	@sed -i -e 's/^    version:.*/    version: $(VERSION)/' mkdocs.yml
 	@mkdocs build
+
+swagger:
+	@echo -e "\033[93m[Building API docs]\033[0m"
+	@cd $(SRC_DIR)/api && swag init --parseInternal
 
 clean:
 	@echo -en "Removing netspot binary   "

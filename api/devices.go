@@ -4,16 +4,25 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/asiffer/netspot/miner"
 	"net/http"
+
+	"github.com/asiffer/netspot/miner"
 )
 
 // DevicesHandler returns the list of available interfaces
+//
+// @Summary List the available devices
+// @Description This returns the list of the network interfaces that can be monitored
+// @Accept  json
+// @Produce json
+// @Success 200 {array} string "list of the available devices"
+// @Failure 500 {object} apiError "error message"
+// @Router /devices [get]
 func DevicesHandler(w http.ResponseWriter, r *http.Request) {
 	// accept only GET
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Only GET method is allowed"))
+		w.Write(APIError("Only GET method is allowed").JSON())
 		return
 	}
 	// return the devices
@@ -21,7 +30,7 @@ func DevicesHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, err := json.Marshal(miner.GetAvailableDevices())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		w.Write(APIErrorFromError(err).JSON())
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

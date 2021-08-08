@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -34,19 +33,19 @@ func init() {
 func initSubpackages() error {
 
 	if err := miner.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Miner: %v", err)
+		return fmt.Errorf("error while initializing the Miner: %v", err)
 	}
 
 	if err := analyzer.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Analyzer: %v", err)
+		return fmt.Errorf("error while initializing the Analyzer: %v", err)
 	}
 
 	if err := exporter.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the Exporter: %v", err)
+		return fmt.Errorf("error while initializing the Exporter: %v", err)
 	}
 
 	if err := api.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the API: %v", err)
+		return fmt.Errorf("error while initializing the API: %v", err)
 	}
 
 	return nil
@@ -55,22 +54,6 @@ func initSubpackages() error {
 //------------------------------------------------------------------------------
 // SIDE FUNCTIONS
 //------------------------------------------------------------------------------
-
-//fileExists returns whether the given file exists
-func fileExists(path string) bool {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return false
-	}
-	_, err = os.Stat(absPath)
-	if err == nil {
-		return true
-	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
 
 func byteToInt(array []byte) (int, int) {
 	size := len(array)
@@ -167,15 +150,14 @@ func initConsoleWriter() {
 	}
 
 	output.FormatFieldValue = func(i interface{}) string {
-		switch i.(type) {
+		switch f := i.(type) {
 		case float64:
-			f := i.(float64)
 			if f < 1e-3 {
 				return fmt.Sprintf("%e", f)
 			}
 			return fmt.Sprintf("%.5f", f)
 		case int32, int16, int8, int:
-			return fmt.Sprintf("%d", i)
+			return fmt.Sprintf("%d", f)
 		default:
 			return "\033[1m" + strings.ToUpper(fmt.Sprintf("%s", i)) + "\033[0m"
 		}
@@ -203,20 +185,13 @@ func setLogging(level int) {
 	zerolog.SetGlobalLevel(l)
 }
 
-// disableLogging disable the log output. Warning! It disables the log
-// for all the modules using zerolog
-func disableLogging() {
-	// managerLogger.Info().Msg("Disabling logging")
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-}
-
 func initConfig(c *cli.Context) error {
 	// update logging level
 	setLogging(c.Int("log-level"))
 
 	// init the 'config' package only
 	if err := config.InitConfig(); err != nil {
-		return fmt.Errorf("Error while initializing the 'config' package: %v", err)
+		return fmt.Errorf("error while initializing the 'config' package: %v", err)
 	}
 
 	// load config
