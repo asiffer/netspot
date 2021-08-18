@@ -13,11 +13,11 @@ const SpotAlertJsonFormat = "\"status\":\"%s\",\"stat\":\"%s\",\"value\":%f,\"co
 // SpotAlert is a simple structure to log alerts sent
 // by spot instances
 type SpotAlert struct {
-	Status      string
-	Stat        string
-	Value       float64
-	Code        int
-	Probability float64
+	Status      string  // UP_ALERT or DOWN_ALERT
+	Stat        string  // Stat is the name of the statistic
+	Value       float64 // Value is the [abnormal] value if the statistic
+	Code        int     // Code is a return code of the SPOT algorithms (useless here)
+	Probability float64 // Probability corresponds to the probability to see an event at least as extreme (higher or lower depending on the Status)
 }
 
 func (s *SpotAlert) toUntypedMap() map[string]interface{} {

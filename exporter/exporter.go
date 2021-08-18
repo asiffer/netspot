@@ -16,8 +16,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	cli "github.com/urfave/cli/v2"
 )
 
 var (
@@ -27,8 +25,6 @@ var (
 	available = make(map[string]ExportingModule)
 	// logger
 	exporterLogger zerolog.Logger
-	// additional cli flags
-	additionalFlags = make([]cli.Flag, 0)
 )
 
 // ExportingModule is the general interface which denotes
@@ -46,18 +42,6 @@ type ExportingModule interface {
 	Warn(time.Time, *SpotAlert) error
 	// Close the module
 	Close() error
-}
-
-// ModuleParameter is a more general object to register
-// exporting modules
-type ModuleParameter struct {
-	value   interface{}
-	example interface{}
-	info    string
-}
-
-func init() {
-
 }
 
 // reset the variables of the package
@@ -89,14 +73,15 @@ func InitConfig() error {
 	for _, module := range available {
 		// it inits the module
 		// the module manages whether to load itself or not
+		// Maybe we should think at letting this action to the module
 		if err := module.Init(); err != nil {
-			return fmt.Errorf("Error while initializing '%s' module: %v",
+			return fmt.Errorf("error while initializing '%s' module: %v",
 				module.Name(), err)
 		}
 	}
 
 	exporterLogger.Debug().Msgf("Loaded modules: %v", loadedModules())
-	exporterLogger.Info().Msg("Exporter package configured")
+	exporterLogger.Info().Msg("exporter package configured")
 	return nil
 }
 
@@ -140,7 +125,7 @@ func HasStarted() bool {
 func Load(name string) error {
 	if isLoaded(name) {
 		// return nil
-		return fmt.Errorf("The '%s' module is already loaded", name)
+		return fmt.Errorf("the '%s' module is already loaded", name)
 	}
 	loaded = append(loaded, available[name])
 	exporterLogger.Debug().Msgf("'%s' module loaded", name)
@@ -151,7 +136,7 @@ func Load(name string) error {
 func Unload(name string) error {
 	i := findExportingModule(name)
 	if i < 0 {
-		return fmt.Errorf("The '%s' ExportingModule is not loaded", name)
+		return fmt.Errorf("the '%s' ExportingModule is not loaded", name)
 	}
 
 	// swap
@@ -181,7 +166,7 @@ func Write(t time.Time, data map[string]float64) error {
 	for _, h := range loaded {
 		err := h.Write(t, data)
 		if err != nil {
-			return fmt.Errorf("Error from %s: %v", h.Name(), err)
+			return fmt.Errorf("error from %s: %v", h.Name(), err)
 		}
 	}
 	return nil
@@ -192,7 +177,7 @@ func Warn(t time.Time, s *SpotAlert) error {
 	for _, h := range loaded {
 		err := h.Warn(t, s)
 		if err != nil {
-			return fmt.Errorf("Error from %s: %v", h.Name(), err)
+			return fmt.Errorf("error from %s: %v", h.Name(), err)
 		}
 	}
 	return nil
@@ -214,7 +199,7 @@ func Close() error {
 func Zero() error {
 	if HasStarted() {
 		exporterLogger.Error().Msg("Cannot reload, exporter is active")
-		return errors.New("Cannot reload, exporter is active")
+		return errors.New("cannot reload, exporter is active")
 	}
 	reset()
 	exporterLogger.Info().Msg("Exporter package (re)loaded")
