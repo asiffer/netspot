@@ -1,4 +1,4 @@
-name: Documentation & Release
+name: Release
 on:
   workflow_dispatch:
   repository_dispatch:
@@ -12,22 +12,22 @@ jobs:
     container: python:3.9.4-buster
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
-    
-    - name: Install dependencies
-      run: |
-        apt update && apt install -y build-essential
+      - name: Check out code
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: |
+          apt update && apt install -y build-essential
 
-    - name: Put current version into environment
-      run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
+      - name: Put current version into environment
+        run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
 
-    - name: Trigger docs
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
-          event-type: release_docs
-          client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # send payload to docs
+      - name: Trigger docs
+          uses: peter-evans/repository-dispatch@v1
+          with:
+            token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+            event-type: release_docs
+            client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # send payload to docs
 
     # - name: Build docs
     #   run: make docs
