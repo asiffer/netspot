@@ -4,7 +4,6 @@ on:
   repository_dispatch:
     types: [release]
 
-
 jobs:
   build:
     name: Build docs
@@ -14,7 +13,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-      
+
       - name: Install dependencies
         run: |
           apt update && apt install -y build-essential
@@ -23,21 +22,22 @@ jobs:
         run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
 
       - name: Trigger docs
-          uses: peter-evans/repository-dispatch@v1
-          with:
-            token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
-            event-type: release_docs
-            client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # send payload to docs
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          event-type: release_docs
+          client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # send payload to docs
+
 
     # - name: Build docs
     #   run: make docs
-    
+
     # - name: Commit & Push changes
     #   uses: actions-js/push@master
     #   with:
     #     github_token: ${{ secrets.GITHUB_TOKEN }}
     #     message: Docs updated by Github Actions
-    
+
     # - name: Create a new tag
     #   uses: "marvinpinto/action-automatic-releases@latest"
     #   with:
@@ -52,4 +52,3 @@ jobs:
     #     token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
     #     event-type: release_test
     #     client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # forward payload to test
-
