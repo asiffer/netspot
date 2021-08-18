@@ -6,7 +6,7 @@ summary: The counter is the more atomic object within netspot.
 
 Counters are elements of the `miner`. In the Go project layout, they must be located in the `miner/counter` sub-package.
 
-Every counter is related to a network layer (or directly to a packet). It means that it will access *only* on its layer specific field (we do not recommend to parse further layers in counters logic).
+Every counter is related to a network layer (or directly to a packet). It means that it will access _only_ on its layer specific field (we do not recommend to parse further layers in counters logic).
 The following layers are currently available:
 
 - PKT (raw packet)
@@ -16,8 +16,8 @@ The following layers are currently available:
 - TCP
 - UDP
 
-
 A counter must implement 3 simple functions given by the interface below.
+
 ```go
 type BaseCtrInterface interface {
 	Name() string  // the name of the counter
@@ -26,14 +26,15 @@ type BaseCtrInterface interface {
 }
 ```
 
-In addition, it must implement a `Process` function related to 
-the layers it depends on. For instance, an IPv4 counter must have 
+In addition, it must implement a `Process` function related to
+the layers it depends on. For instance, an IPv4 counter must have
 a method with the following signature
+
 ```go
 Process(ip *layers.IPv4)
 ```
 
-You can have a look to the counters already implemented within netspot. As a general example, a counter is a simple file with the 
+You can have a look to the counters already implemented within netspot. As a general example, a counter is a simple file with the
 following content.
 
 ```go
@@ -81,6 +82,6 @@ func (c *COUNTER) Process(*layers.IPv4) {
 Obviously, you can create more complex counters with additonal structures but you should keep in mind that its operation
 should be rather atomic.
 
-
+<!-- prettier-ignore -->
 !!! Atomic
 	We recall that several goroutines are likely to call the `Process` function. It means that the internal counter value access is under high concurrency. For this purpose, you may have a look to the [`atomic/sync`](https://golang.org/pkg/sync/atomic/) package. You can also have a look to [this example](https://gobyexample.com/atomic-counters).

@@ -6,7 +6,9 @@ summary: netspot is also simple by its design
 
 The picture below details the internal structure of `netspot`. It aims to present how the IDS is designed and it is also likely to help both the user and the developer to better understand the tool.
 
-<object data="/assets/archi.svg" type="image/svg+xml" style="width: 100%;"></object>
+<object data="img/netspot-archi.svg" type="image/svg+xml" style="width: 100%;"></object>
+
+<!-- ![Architecture](img/netspot-archi.svg) -->
 
 At the lowest level, `netspot` parse packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
 The source can either be an network interface or a .pcap file (network capture).

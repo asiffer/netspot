@@ -4,7 +4,6 @@ title: Performances
 
 Performance is a key feature for network intrusion detection systems. The simplicity of `netspot` actually makes it **fast**.
 
-
 ## Comparison with other IDS
 
 If we compare `netspot` with [`Suricata`](https://suricata-ids.org/) (common rule-based IDS) and [Kitsune](https://arxiv.org/pdf/1802.09089) (trendy anomaly-based IDS in the research area), we merely notice
@@ -12,23 +11,30 @@ that `netspot` is far faster.
 
 The performances of Kitsune come from their original paper while some experiments have been performed on a [capture file](https://drive.google.com/file/d/1fERsIA4uW9Qa1ej-L_3bWqjbRf7UK2wS/view?usp=sharing) (provided by the authors of Kitsune) for `Suricata` and `netspot`.
 
-
 ### Desktop
 
-<!-- <div style="width: 100%; margin: 0 auto; text-align: center">
-<object type="image/svg+xml" data="/assets/perf-desktop.svg"></object>
-</div> -->
-![Desktop](/assets/perf-desktop.png)
+<!-- <div style="width: 100%; margin: 0 auto; text-align: center"> -->
+
+<!-- <object type="image/svg+xml" data="img/perf-desktop.svg"></object> -->
+
+<object data="img/perf-desktop.svg" type="image/svg+xml" style="width: 100%;"></object>
+
+<!-- </div> -->
+<!-- ![Desktop](img/perf-desktop.png) -->
 
 ### Raspberry Pi 3B+
 
+<!-- prettier-ignore -->
 !!! warning
     Suricata was not available on ARM platform during our tests
 
 <!-- <div style="width: 100%; margin: 0 auto; text-align: center">
 <object type="image/svg+xml" data="/assets/perf-rpi.svg"></object>
 </div> -->
-![Raspberry Pi](/assets/perf-rpi.png)
+
+<object type="image/svg+xml" data="img/perf-rpi.svg"></object>
+
+<!-- ![Raspberry Pi](img/perf-rpi.png) -->
 
 ## Number of processors
 
@@ -39,7 +45,9 @@ available on [MAWILAB](http://mawi.wide.ad.jp/mawi/samplepoint-F/2020/2020082314
 
 The graph below shows that even if you have few cores (or you want to limit their use), `netspot` remains efficient.
 
-![img](/assets/perf-procs.png)
+<object type="image/svg+xml" data="img/perf-procs.svg"></object>
+
+<!-- ![img](img/perf-procs.png) -->
 
 <!-- <div style="width: 100%; margin: 0 auto; text-align: center">
 <object type="image/svg+xml" data="/assets/perf-procs.svg"></object>

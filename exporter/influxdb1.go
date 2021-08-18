@@ -12,10 +12,6 @@ import (
 	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
-const (
-	defaultBatchSize = 10
-)
-
 // InfluxDB is sends data to an InfluxDB database (v1)
 type InfluxDB struct {
 	data       bool
@@ -116,20 +112,20 @@ func (i *InfluxDB) Start(series string) error {
 		Password: i.password,
 	})
 	if err != nil {
-		return fmt.Errorf("Error while initializing InfluxDB client (%v)", err)
+		return fmt.Errorf("error while initializing InfluxDB client (%v)", err)
 	}
 
 	// create database (a valid client is required)
 	err = i.checkDatabase()
 	if err != nil {
-		return fmt.Errorf("Error while creating InfluxDB database '%s' (%v)", i.database, err)
+		return fmt.Errorf("error while creating InfluxDB database '%s' (%v)", i.database, err)
 	}
 
 	// create the batch of records
 	i.batch, err = influx.NewBatchPoints(influx.BatchPointsConfig{
 		Database: i.database})
 	if err != nil {
-		return fmt.Errorf("Error while creating InfluxDB batch of data points (%v)", err)
+		return fmt.Errorf("error while creating InfluxDB batch of data points (%v)", err)
 	}
 	return nil
 }
@@ -213,7 +209,7 @@ func (i *InfluxDB) checkDatabase() error {
 	// avoid injection
 	database, err := sanitizeDB(i.database)
 	if err != nil {
-		return fmt.Errorf("Error while sanitizing database name (%v)", err)
+		return fmt.Errorf("error while sanitizing database name (%v)", err)
 	}
 
 	// create database if it does not exist yet
@@ -227,7 +223,7 @@ func (i *InfluxDB) checkDatabase() error {
 // Flush sends the batch of points to influxdb1.
 func (i *InfluxDB) flush() error {
 	if err := i.client.Write(i.batch); err != nil {
-		return fmt.Errorf("Error while writing batch of data (%v)", err)
+		return fmt.Errorf("error while writing batch of data (%v)", err)
 	}
 	// reset
 	i.batchID = 0
