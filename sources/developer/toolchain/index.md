@@ -6,7 +6,7 @@ summary: How to build netspot
 
 `netspot` is distributed as statically-compiled binaries. The final executables
 notably embed the `libpcap` and `musl` libraries.
-Using a musl-based system (like [alpine](https://alpinelinux.org/)) 
+Using a musl-based system (like [alpine](https://alpinelinux.org/))
 is then far easier to compile `netspot`.
 Obviously, you can dynamically link `netspot` to `libpcap` and the
 more common GNU libc, but the installation will require these
@@ -56,6 +56,7 @@ CMD ["/bin/bash"]
 ```
 
 So you basically need to build this image (from the `dev/image/` folder)
+
 ```bash
 docker build -t alpine-crossbuild-libpcap:latest .
 ```
@@ -68,18 +69,18 @@ by setting the `TARGET_ARCH` environment variable.
 docker build --build-arg TARGET_ARCH="x86_64-linux" -t alpine-crossbuild-libpcap:latest .
 ```
 
+<!-- prettier-ignore -->
 !!! warning
     Some environment variables must be set before building and not
     when a container starts (see the bash scripts below).
 
-
 The Dockerfile includes two bash scripts:
+
 - `install_toolchain.sh`, to download the cross-compilers
 - `get_libpcap_sources.sh`, to download the sources of `libpcap`
 
 You can inspect these files to check what environment variables
 they require.
-
 
 ### Compilation
 
@@ -87,12 +88,14 @@ Now your image is ready, you just have to compile `netspot`.
 The [dev/build/](https://github.com/asiffer/netspot/tree/master/dev/build)
 folder gathers scripts for this purpose.
 
-The `builder.sh` script is the main file you have to run to compile 
+The `builder.sh` script is the main file you have to run to compile
 `netspot` for a specific architecture
+
 ```bash
 builder.sh <ARCH>
 ```
 
+<!-- prettier-ignore -->
 !!! warning
     The available `ARCH` depend on the previous image.
     By default you can choose between
@@ -100,7 +103,6 @@ builder.sh <ARCH>
     - x86_64-linux
     - arm-linux
     - aarch64-linux
-
 
 This script must be executed within an instance of the previous image
 (container). So first, you have to run a container (here we suppose that `netspot` code
@@ -112,13 +114,14 @@ docker run --detach -it -v "${GOPATH}/src/netspot:/go/src/netspot" --name netspo
 ```
 
 Then you can run the compilation for a specific architecture:
+
 ```bash
 docker exec netspot-build /go/src/netspot/dev/build/builder.sh <ARCH>
 ```
 
+<!-- prettier-ignore -->
 !!! info
     The final binaries are located in the `bin/` folder.
-
 
 The second script (`run.sh`) is an example that combine both steps.
 You can adapt it to your workflow.
