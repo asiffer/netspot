@@ -2,3 +2,4 @@
 docs/
 bin
 coverage*
+.coverage*
