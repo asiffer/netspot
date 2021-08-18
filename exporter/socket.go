@@ -49,7 +49,7 @@ func checkFormat(f string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("The format %s is not accepted (only csv, json and gob)", f)
+	return fmt.Errorf("the format %s is not accepted (only csv, json and gob)", f)
 }
 
 // Main functions =========================================================== //
@@ -144,7 +144,7 @@ func (s *Socket) Write(t time.Time, data map[string]float64) error {
 		case "gob":
 			bin, err = toGob(raw)
 		default:
-			return fmt.Errorf("Bad data format (%s)", s.format)
+			return fmt.Errorf("bad data format (%s)", s.format)
 		}
 		_, err = s.dataConn.Write(bin)
 		return err
@@ -171,7 +171,7 @@ func (s *Socket) Warn(t time.Time, x *SpotAlert) error {
 		case "gob":
 			bin, err = toGob(raw)
 		default:
-			return fmt.Errorf("Bad data format (%s)", s.format)
+			return fmt.Errorf("bad data format (%s)", s.format)
 		}
 		_, err = s.alarmConn.Write(bin)
 		return err
@@ -183,12 +183,12 @@ func (s *Socket) Warn(t time.Time, x *SpotAlert) error {
 func (s *Socket) Close() error {
 	if s.dataConn != nil {
 		if err := s.dataConn.Close(); err != nil {
-			return fmt.Errorf("Error while closing '%s' shipper (%v)", s.Name(), err)
+			return fmt.Errorf("error while closing '%s' shipper (%v)", s.Name(), err)
 		}
 	}
 	if s.alarmConn != nil {
 		if err := s.alarmConn.Close(); err != nil {
-			return fmt.Errorf("Error while closing '%s' shipper (%v)", s.Name(), err)
+			return fmt.Errorf("error while closing '%s' shipper (%v)", s.Name(), err)
 		}
 	}
 	return nil

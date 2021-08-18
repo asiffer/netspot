@@ -5,6 +5,8 @@ package exporter
 import (
 	"testing"
 	"time"
+
+	"github.com/asiffer/netspot/config"
 )
 
 func TestInitInflux(t *testing.T) {
@@ -54,6 +56,56 @@ func TestInitInflux(t *testing.T) {
 
 	if err = inf.Close(); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestInitInfluxBadConfiguration(t *testing.T) {
+	inf := InfluxDB{}
+	conf := map[string]interface{}{
+		"exporter.influxdb.data":       true,
+		"exporter.influxdb.alarm":      true,
+		"exporter.influxdb.address":    "http://127.0.0.1:8086",
+		"exporter.influxdb.database":   "netspot",
+		"exporter.influxdb.username":   "netspot",
+		"exporter.influxdb.password":   "netspot",
+		"exporter.influxdb.batch_size": -5,
+		"exporter.influxdb.agent_name": "local",
+	}
+
+	conf["exporter.influxdb.database"] = ""
+	config.LoadForTest(conf)
+	if err := inf.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.influxdb.password"] = ""
+	config.LoadForTest(conf)
+	if err := inf.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.influxdb.username"] = ""
+	config.LoadForTest(conf)
+	if err := inf.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.influxdb.address"] = ""
+	config.LoadForTest(conf)
+	if err := inf.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.influxdb.batch_size"] = "@@@"
+	config.LoadForTest(conf)
+	if err := inf.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.influxdb.agent_name"] = ""
+	config.LoadForTest(conf)
+	if err := inf.Init(); err == nil {
+		t.Errorf("an error was expected")
 	}
 }
 
