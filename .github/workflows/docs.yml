@@ -1,0 +1,40 @@
+name: Update documentation
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [release_docs]
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    container: python:3.9.4-buster
+    env:
+      PYTHON_PACKAGES: mkdocs mkdocs-markdownextradata-plugin mkdocs-material pymdown-extensions
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apt update && apt install -y build-essential
+          pip3 install pip --upgrade
+          pip3 install $PYTHON_PACKAGES --upgrade
+
+      - name: Build docs
+        run: make docs
+
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: Docs updated by Github Actions
+
+      - name: Trigger tag
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          event-type: release_tag
+          client-payload: '{"tag":"${{ github.event.client_payload.tag }}"}' # forward payload to test
+          # client-payload: '{"tag":"v${{ env.NETSPOT_VERSION }}"}' # forward payload to test
