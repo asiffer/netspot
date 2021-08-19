@@ -1,0 +1,32 @@
+name: Tag
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [release_tag]
+
+jobs:
+  build:
+    name: Create tag
+    runs-on: ubuntu-latest
+    container: python:3.9.4-buster
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Create a new tag
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ github.event.client_payload.tag }}"
+          prerelease: true
+          title: "Development Build"
+
+      - name: Trigger test
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          event-type: release_test
+          client-payload: '{"tag":"${{ github.event.client_payload.tag }}"}' # forward payload to test
+

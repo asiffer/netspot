@@ -1,0 +1,239 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Netspot as a service",
+        "title": "Netspot API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "email": "asr@nabla.ovh"
+        },
+        "license": {
+            "name": "GPLv3",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
+        },
+        "version": "2.0"
+    },
+    "host": "localhost:11000",
+    "basePath": "/api",
+    "paths": {
+        "/config": {
+            "get": {
+                "description": "You can fetch the netspot config through this endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get the config of the IDS",
+                "responses": {
+                    "200": {
+                        "description": "Acknowledge message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    },
+                    "405": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "You can update the netspot config through this endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain",
+                    "application/json"
+                ],
+                "summary": "Update the config of the IDS",
+                "parameters": [
+                    {
+                        "description": "Input config",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Acknowledge message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    },
+                    "405": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/devices": {
+            "get": {
+                "description": "This returns the list of the network interfaces that can be monitored",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List the available devices",
+                "responses": {
+                    "200": {
+                        "description": "list of the available devices",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "This endpoints basically aims to check if the server is up",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Server healthcheck",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "405": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/run": {
+            "post": {
+                "description": "Use this path to start/stop the IDS",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Manage the IDS status",
+                "parameters": [
+                    {
+                        "enum": [
+                            "\"start\"",
+                            "\"stop\""
+                        ],
+                        "description": "the action to perform",
+                        "name": "action",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment about the action performed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats": {
+            "get": {
+                "description": "This returns the list of the statistics than can be loaded",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List the available statistics",
+                "responses": {
+                    "200": {
+                        "description": "Available statistics along with their description",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "$ref": "#/definitions/api.apiError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.apiError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Oh my god! Something wrong happened"
+                }
+            }
+        }
+    }
+}

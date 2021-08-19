@@ -10,12 +10,10 @@ import (
 )
 
 // Version is the major netspot version
-const Version = "2.0a"
+const Version = "2.1"
 
 var (
-	configFile string
-	logLevel   int
-	gitCommit  string
+	gitCommit string
 )
 
 var (

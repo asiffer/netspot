@@ -4,13 +4,30 @@
 [![Coverage](https://codecov.io/gh/asiffer/netspot/branch/master/graph/badge.svg)](https://codecov.io/gh/asiffer/netspot)
 [![GoReport](https://goreportcard.com/badge/github.com/asiffer/netspot)](https://goreportcard.com/report/github.com/asiffer/netspot)
 
-# netspot
-
 ![netspot](assets/netspot6.png)
 
 A simple IDS with statistical learning
 
 Visit the project page: **https://asiffer.github.io/netspot/**
+
+Join the [**Discord**](https://discord.gg/82HW2fydvD) server!
+
+- [Overview](#overview)
+- [Installation](#installation)
+  - [Binaries](#binaries)
+  - [Building from sources](#building-from-sources)
+  - [(NEW) Docker](#new-docker)
+- [Get started](#get-started)
+  - [Inline](#inline)
+  - [Service](#service)
+  - [Architecture overview](#architecture-overview)
+  - [Roadmap](#roadmap)
+- [Notes](#notes)
+  - [Version 2.0a](#version-20a)
+  - [Version 1.3](#version-13)
+  - [Version 1.2](#version-12)
+  - [Version 1.1](#version-11)
+  - [Version 1.0](#version-10)
 
 ## Overview
 
@@ -20,8 +37,6 @@ The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a stat
 picture below).
 
 **netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
-
-
 
 ## Installation
 
@@ -52,15 +67,17 @@ presents how **netspot** is (cross-)built based on the `golang:alpine` docker im
 `netspot` is now available through a docker image, hosted on Github. You can have a look to the [local registry](https://github.com/users/asiffer/packages/container/package/netspot) to pull the image.
 
 Once you have pulled the image, you can run `netspot` interactively through:
+
 ```sh
 docker run --rm -it --name netspot --cap-add NET_ADMIN --network host netspot:latest
 ```
 
-
 ## Get started
 
+### Inline
+
 Basically, you can run `netspot` on a network interface. In the example below,
-`netspot` monitors the `PERF` statistics (packet processing rate) on the `eth0` interface. 
+`netspot` monitors the `PERF` statistics (packet processing rate) on the `eth0` interface.
 The computation period is `1s` and the values are printed to the console (`-v`).
 
 ```sh
@@ -68,11 +85,13 @@ netspot run -d eth0 -s PERF -p 1s -v
 ```
 
 You can also analyze a capture file.
+
 ```sh
 netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
 ```
 
 All these command-line options can be set in a config file:
+
 ```toml
 # netspot.toml
 
@@ -91,17 +110,17 @@ data = true
 netspot run --config netspot.toml
 ```
 
-All the available statistics can be listed with the `netspot  ls` command.
-
+All the available statistics can be listed with the `netspot ls` command.
 
 To print the default config (in TOML format only), you can run the following command:
+
 ```sh
 netspot defaults
 ```
 
-### Netspot As A Service
+### Service
 
-Even if it is not the main way to use **netspot**, it can 
+Even if it is not the main way to use **netspot**, it can
 run as a service, exposing a minimal REST API.
 
 ```sh
@@ -120,7 +139,7 @@ You can be changed it with the `-e` flag. For instance, you can consider a unix
 netspot serve -e unix:///tmp/netspot.sock
 ```
 
-The server exposes few methods that allows to do roughly everything. 
+The server exposes few methods that allows to do roughly everything.
 
 | Method | Path           | Description                               |
 | ------ | -------------- | ----------------------------------------- |
@@ -136,56 +155,66 @@ In addition, a `Go` client is available in the `api/client` subpackage.
 go get -u github.com/asiffer/netspot/api/client
 ```
 
+## Developer
 
-## Architecture overview
+`netspot` is rather modular so as to let people enriching it. Developers can notably
+create their own counters, statistics or exporting modules. You should have a look to
+the [project website](https://asiffer.github.io/netspot/developer/).
+
+### Architecture overview
 
 ![architecture](assets/netspot-archi.png)
-
 
 At the lowest level, `netspot` parses packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
 The packet source can either be an network interface or a .pcap file (network capture).
 
 At a given period (for instance every second), counter values are retrieved so as to build **statistics**. This is the role of the `analyzer`. The statistics are the measures monitored by `netspot`.
 
-Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. This algorithm learns the *normal* behaviour of the statistic and constantly updates its knowledge. When an abnormal value occurs, `SPOT` triggers an alarm.
+Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. This algorithm learns the _normal_ behaviour of the statistic and constantly updates its knowledge. When an abnormal value occurs, `SPOT` triggers an alarm.
 
 Finally, the `analyzer` forwards stat values, SPOT thresholds and SPOT alarms to the `exporter`. This last component dispatch
-these information to some modules that binds to different backends 
+these information to some modules that binds to different backends
 (console, file, socket or InfluxDB database currently).
 
+### Roadmap
 
-## Roadmap
+Here are some ideas to improve netspot:
 
-- [x] Rework unit tests
-- [ ] Enrich documentation
-- [ ] Frontend? TUI?
-- [ ] Port `netspot` to arduino :)
+- [ ] InfluxDB (v2+) exporting module
+- [ ] ElasticSearch exporting module
+- [ ] MySQL exporting module
+- [ ] New counters/statistics
+- [ ] Provide a bare metal snap
+- [ ] Web-based GUI (or TUI) for the netspot service
+- [ ] Port `netspot` to arduino or other small dev board
+
+### Building documentation
+
+The docs is built with [`mkdocs`](https://www.mkdocs.org/). You also need some extensions:
+
+```shell
+pip3 install mkdocs-markdownextradata-plugin
+```
 
 ## Notes
 
 ### Version 2.0a
 
-This is the second big refactoring. Many things have changed, making the way to use **netspot** more *modern*.
+This is the second big refactoring. Many things have changed, making the way to use **netspot** more _modern_.
 
-- Single and statically-compiled binary is provided
-- Better performances! I think that **netspot** can process 
-twice as fast: **1M+ pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+. 
-- Developer process has been improved so as to "easily" add new counters, statistics and exporting modules.
-- More tests and a better coverage
-- Docs has been enriched
-- Static dashboard is available on server mode
-- First docker image is provided
-- Release process is fully automated through `repository_dispatch` events cascade
-- Some minor bugs have been fixed
+- Single and statically-compiled binary. Forget about the server, just run the binary on what you want (a server mode still exists but it is rather minimal)
+- Better performances! I think that **netspot** can process
+  twice as fast: **1M pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+.
+- Developper process has been improved so as to "easily" add new counters, statistics and exporting modules.
 
 ### Version 1.3
 
 The IDS is quite ready for a release!
-* New counters and new stats
-* New HTTP API with OpenAPI spec
-* Cleaner code
-* New distributions options (Debian package, Docker image, `armhf` and `aarch64` binaries)
 
+- New counters and new stats
+- New HTTP API with OpenAPI spec
+- Cleaner code
+- New distributions options (Debian package, Docker image, `armhf` and `aarch64` binaries)
 
 ### Version 1.2
 
@@ -202,7 +231,6 @@ This version is cleaner than the previous one. Some object have been added so as
 Now, I am reflecting on improving performances. Python is not very efficient for this purpose so I will probably use another programming language for specific and highly parallelizable tasks.
 
 Sorry Scapy, but you take too long time to parse and dispatch packets...
-
 
 ### Version 1.0
 

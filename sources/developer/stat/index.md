@@ -8,26 +8,27 @@ The statistics are the real values `netspot` monitors. In the same manner as the
 own statistic according to your needs. In particular, they must be located
 in the `netspot/stats` subpackage.
 
+<!-- prettier-ignore -->
 !!! note
     The analyzer is in charge of managing statistics. When you implement a 
     new statistic you don't have to take care of neither load/unload operations nor Spot algorithm configuration.
 
-
-Statistics are built on top of the counters. They use some counters to 
+Statistics are built on top of the counters. They use some counters to
 compute their own value. For example, the statistic `R_SYN` is computed
 as the ratio `SYN`/`IP` where `SYN` counts the number of SYN packets and
 `IP` counts the number of IP packets.
 
 The general interface of a statistic (`StatInterface`) is quite rich but
 only few functions must be implemented.
+
 ```go
 // StatInterface gathers the common behavior of the statistics
 type StatInterface interface {
-	Name() string 
+	Name() string
 	Configure() error
-	Requirement() []string             
-	Compute(ctrvalues []uint64) float64 
-	Update(val float64) int             
+	Requirement() []string
+	Compute(ctrvalues []uint64) float64
+	Update(val float64) int
 	UpProbability(quantile float64) float64
 	DownProbability(quantile float64) float64
 	GetThresholds() (float64, float64)
@@ -38,6 +39,7 @@ type StatInterface interface {
 Actually, statistics must inherit from the the `BaseStat` object which
 already implements some functions of the `StatInterface` (especially
 all related to the Spot algorithm).
+
 ```go
 // BaseStat is the basic structure which defines a statistic. It
 // embeds a string (its unique name) and a DSpot instance which monitors
@@ -48,28 +50,27 @@ type BaseStat struct {
 }
 ```
 
-To define a new statistic you only need to inehrit from the previous 
+To define a new statistic you only need to inehrit from the previous
 structure and code the following 3 functions:
+
 ```go
 type StatInterface interface {
     // ...
-    Name() string 
-    Requirement() []string             
-    Compute(ctrvalues []uint64) float64 
+    Name() string
+    Requirement() []string
+    Compute(ctrvalues []uint64) float64
     // ...
 }
 ```
 
+<!-- prettier-ignore -->
 !!! warning
     You have to register your statistic by calling the 
     `Register(stat StatInterface)` in the `init()`
-    function. 
+    function.
 
-
-Finally, your new statistic should be defined in a single 
+Finally, your new statistic should be defined in a single
 file and may look like below.
-
-
 
 ```go
 // my_stat.go

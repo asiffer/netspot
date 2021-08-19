@@ -107,6 +107,52 @@ func initDataAlarmSockets() (net.Listener, net.Listener, error) {
 	return dataSocket, alarmSocket, nil
 }
 
+func TestInitSocketBadConfiguration(t *testing.T) {
+	s := Socket{}
+
+	conf := map[string]interface{}{
+		"exporter.socket.data":   "???",
+		"exporter.socket.alarm":  "???",
+		"exporter.socket.tag":    "",
+		"exporter.socket.format": "",
+	}
+	config.LoadForTest(conf)
+	if err := s.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.socket.data"] = "tcp://127.0.0.1:8899"
+	conf["exporter.socket.alarm"] = "???"
+
+	config.LoadForTest(conf)
+	if err := s.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.socket.data"] = "tcp://127.0.0.1:8899"
+	conf["exporter.socket.alarm"] = "tcp://127.0.0.1:8899"
+
+	config.LoadForTest(conf)
+	if err := s.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.socket.tag"] = "a_bad_tag_but_enough"
+
+	config.LoadForTest(conf)
+	if err := s.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+	conf["exporter.socket.format"] = "BAD"
+
+	config.LoadForTest(conf)
+	if err := s.Init(); err == nil {
+		t.Errorf("an error was expected")
+	}
+
+}
+
 func TestInitStartCloseSocket(t *testing.T) {
 	title(t.Name())
 

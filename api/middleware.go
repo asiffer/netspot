@@ -51,13 +51,10 @@ func LoggingMiddleware(h http.Handler) http.Handler {
 		switch code := wrapped.Status(); {
 		case code < 200:
 			event = apiLogger.Warn()
-			break
 		case code < 300:
 			event = apiLogger.Info()
-			break
 		case code < 400:
 			event = apiLogger.Warn()
-			break
 		default:
 			event = apiLogger.Error()
 		}
@@ -82,11 +79,3 @@ func (b BadMethodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Write([]byte(msg))
 }
-
-// BadMethodHandler catch requests with Bad methods
-// func BadMethodHandler(w http.ResponseWriter, r *http.Request) {
-// 	msg := fmt.Sprintf("Method %s is not allowed", r.Method)
-// 	apiLogger.Error().Msg(msg)
-// 	w.WriteHeader(http.StatusMethodNotAllowed)
-// 	w.Write([]byte(msg))
-// }

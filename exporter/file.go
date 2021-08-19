@@ -11,11 +11,6 @@ import (
 	"github.com/asiffer/netspot/config"
 )
 
-const (
-	dataFileFormat  = "netspot_data_%s.json"  // format to name the file where data are logged
-	alarmFileFormat = "netspot_alarm_%s.json" // format to name the file where anomalies are logged
-)
-
 // File is the file logger
 type File struct {
 	data             bool
@@ -111,16 +106,16 @@ func (f *File) Warn(t time.Time, s *SpotAlert) error {
 	return nil
 }
 
-// Close does nothing here
+// Close the file handles
 func (f *File) Close() error {
 	if f.alarmFileHandler != nil {
 		if err := f.alarmFileHandler.Close(); err != nil {
-			return fmt.Errorf("Error while closing '%s' module (%v)", f.Name(), err)
+			return fmt.Errorf("error while closing '%s' module (%v)", f.Name(), err)
 		}
 	}
 	if f.dataFileHandler != nil {
 		if err := f.dataFileHandler.Close(); err != nil {
-			return fmt.Errorf("Error while closing '%s' module (%v)", f.Name(), err)
+			return fmt.Errorf("error while closing '%s' module (%v)", f.Name(), err)
 		}
 	}
 	return nil

@@ -30,25 +30,69 @@ var (
 
 var (
 	testFiles []string
-	wd        string
 )
 
-var (
-	testDir string
-)
-
-func init() {
+func TestMain(m *testing.M) {
+	// Do stuff BEFORE the tests
 	zerolog.SetGlobalLevel(zerolog.Disabled)
-	setTestDir()
-	pcapFile1 = filepath.Join(testDir, "empire.pcapng")
-	pcapFile2 = filepath.Join(testDir, "snort.pcap")
-	pcapFile3 = filepath.Join(testDir, "mirai.pcap")
+	testDir, err := findTestDir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Test dir:", testDir)
+
+	infos, err := ioutil.ReadDir(testDir)
+	if err != nil {
+		fmt.Println(err)
+	}
+	testFiles = make([]string, len(infos))
+	for i, f := range infos {
+		testFiles[i] = path.Join(testDir, f.Name())
+	}
+	sort.Strings(testFiles)
+
+	fmt.Println("Test files:", testFiles)
+
+	pcapFile1 = testFiles[0] // empire.pcapng
+	pcapFile2 = testFiles[4] // snort.pcap
+	pcapFile3 = testFiles[2] // mirai.pcap
+
+	// Netspot loads
+	config.LoadDefaults()
+	miner.InitLogger()
+	if err := miner.InitConfig(); err != nil {
+		fmt.Println(err)
+		os.Exit(3)
+	}
+	InitLogger()
+
+	// run tests
+	exitVal := m.Run()
+
+	// Do stuff AFTER the tests!
+	// nothing
+
+	os.Exit(exitVal)
 }
 
-func setTestDir() {
+func dirExists(dir string) bool {
+	_, err := os.Stat(dir)
+	return !os.IsNotExist(err)
+}
+
+func findTestDir() (string, error) {
 	wd, _ := os.Getwd()
-	testDir = filepath.Join(wd, "../test")
-	fmt.Println(testDir)
+	base := "/"
+	for i := 0; i < 3; i++ {
+		d := filepath.Join(wd, base, "test")
+		if dirExists(d) {
+			return d, nil
+		}
+		base += "../"
+	}
+	return "", fmt.Errorf("test/ directory not found")
 }
 
 func title(s string) {
@@ -73,40 +117,6 @@ func title(s string) {
 func checkTitle(s string) {
 	format := "%-" + fmt.Sprint(HeaderWidth-7) + "s"
 	fmt.Printf(format, s)
-}
-
-func findTestFiles() error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	testDir := path.Join(wd, "../test")
-	infos, err := ioutil.ReadDir(testDir)
-	if err != nil {
-		return err
-	}
-	testFiles = make([]string, len(infos))
-	for i, f := range infos {
-		testFiles[i] = path.Join(testDir, f.Name())
-	}
-	sort.Strings(testFiles)
-	fmt.Println(testFiles)
-	return nil
-}
-
-func init() {
-	// load test files
-	if err := findTestFiles(); err != nil {
-		panic(err)
-	}
-	config.LoadDefaults()
-
-	miner.InitLogger()
-	if err := miner.InitConfig(); err != nil {
-		panic(err)
-	}
-	InitLogger()
-
 }
 
 func testOK() {
