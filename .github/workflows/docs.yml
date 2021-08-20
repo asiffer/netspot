@@ -31,6 +31,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: Docs updated by Github Actions
+          branch: master
 
       - name: Trigger tag
         if: ${{ github.event_name == 'repository_dispatch' }}
