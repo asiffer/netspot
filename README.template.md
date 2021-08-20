@@ -188,12 +188,12 @@ Here are some ideas to improve netspot:
 - [ ] Web-based GUI (or TUI) for the netspot service
 - [ ] Port `netspot` to arduino or other small dev board
 
-### Building documentation
+### Building documentation
 
 The docs is built with [`mkdocs`](https://www.mkdocs.org/). You also need some extensions:
 
 ```shell
-pip3 install mkdocs-markdownextradata-plugin
+pip3 install mkdocs mkdocs-markdownextradata-plugin mkdocs-material pymdown-extensions
 ```
 
 ## Notes
