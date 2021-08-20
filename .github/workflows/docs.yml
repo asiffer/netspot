@@ -1,4 +1,4 @@
-name: Update documentation
+name: Documentation
 on:
   workflow_dispatch:
   repository_dispatch:
