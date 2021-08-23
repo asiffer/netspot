@@ -1,7 +1,7 @@
-FROM golang:1.15.6-alpine
+FROM golang:1.17.0-alpine
 
 # LIBPCAP
-ENV LIBPCAP_VERSION 1.9.1
+ENV LIBPCAP_VERSION 1.10.1
 ENV LIBPCAP_DIR /libpcap
 
 # SYSTEM
