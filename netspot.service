@@ -1,0 +1,52 @@
+[Unit]
+Description=A Simple IDS with Statistical Learning
+
+[Service]
+ExecStart=/usr/bin/netspot serve -c /etc/netspot.toml
+# ProtectSystem can be set to "true" to make /usr and /boot 
+# or /efi read-only for this process. If set to "full", /etc 
+# is read-only too. "strict" makes the entire filesystem 
+# hierarchy read-only. 
+ProtectSystem=full
+# ProtectHome can be set to "true" to make /home, /root and 
+# /run/user empty and inaccessible from the point of view 
+# of the service.
+ProtectHome=true
+# PrivateTmp makes sure that the process’s temp directories 
+# are only visible to itself, and not another process. 
+# Additionally, they’ll be emptied once the process finishes.
+PrivateTmp=true
+# With systemd we can have a brand new user and group allocated 
+# for us when the service starts. These users are prevented 
+# from changing any state in the system except in the 
+# directories detailed above. Once the service exits, the user 
+# is removed–it never actually exists in /etc/passwd. This makes 
+# it harder to create a persistent route in to a system after an 
+# exploit.
+DynamicUser=true
+# If true, explicit module loading will be denied. This allows 
+# to turn off module load and unload operations on modular 
+# kernels. It is recommended to turn this on for most services 
+# that do not need special file systems or extra kernel modules 
+# to work
+ProtectKernelModules=true
+# If true, kernel variables accessible through /proc/sys, /sys, 
+# /proc/sysrq-trigger, /proc/latency_stats, /proc/acpi, 
+# /proc/timer_stats, /proc/fs and /proc/irq will be made read-only 
+# to all processes of the unit. Usually, tunable kernel variables 
+# should only be written at boot-time, with the sysctl.d mechanism. 
+# Almost no services need to write to these at runtime; it is hence 
+# recommended to turn this on for most services
+ProtectKernelTunables=true
+# Controls which capabilities to include in the capability bounding 
+# set for the executed process
+# 
+# CAP_NET_RAW seems enough to read a network interface but if you 
+# to turn the latter into promisc mode, you need CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW,CAP_NET_ADMIN
+# Environment variables
+# GOMAXPROCS limits the number of procs spawned by the go runtime
+Environment="GOMAXPROCS=2"
+
+[Install]
+WantedBy=multi-user.target

@@ -163,7 +163,8 @@ func initConsoleWriter() {
 		}
 	}
 
-	output.PartsOrder = []string{"time", "level", "caller", "message"}
+	// output.PartsOrder = []string{"time", "level", "caller", "message"}
+	output.PartsOrder = []string{"level", "caller", "message"}
 
 	// set the logger
 	log.Logger = log.Output(output)

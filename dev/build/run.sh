@@ -16,6 +16,10 @@
 CONTAINER=netspot-build
 IMAGE=alpine-crossbuild-libpcap:latest
 ARCH="x86_64-linux arm-linux aarch64-linux"
+PWD=$(pwd)
+SRC=$(realpath "${PWD}/../..")
+
+echo $GOPATH
 
 function is_arch_available() {
     for arch in ${ARCH}; do
@@ -39,7 +43,8 @@ if [[ $# -eq 1 ]]; then
     fi
 fi
 
-docker run --detach -it -v "${GOPATH}/src/netspot:/go/src/netspot" --name "${CONTAINER}" "${IMAGE}"
+docker run --detach -it -v "${SRC}:/go/src/netspot" --name "${CONTAINER}" "${IMAGE}"
+# docker run --detach -it -v "${GOPATH}/src/netspot:/go/src/netspot" --name "${CONTAINER}" "${IMAGE}"
 trap "docker rm -f ${CONTAINER}" EXIT
 
 for arch in ${ARCH}; do

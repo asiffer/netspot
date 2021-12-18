@@ -142,7 +142,7 @@ func initSubpackages() error {
 // ========================================================================== //
 
 // @title Netspot API
-// @version 2.0
+// @version 2.1
 // @description Netspot as a service
 // @termsOfService http://swagger.io/terms/
 // @contact.name API Support
@@ -151,6 +151,7 @@ func initSubpackages() error {
 // @license.url https://www.gnu.org/licenses/gpl-3.0.en.html
 // @host localhost:11000
 // @BasePath /api
+// @Schemes http
 func Serve() error {
 	// open socket
 	lis, err := net.Listen(network, address)

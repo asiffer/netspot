@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# create directories
+mkdir -p "${DESTDIR}/usr/bin"
+mkdir -p "${DESTDIR}/lib/systemd/system/"
+
+# put artifacts inside the fs
+cp ./netspot "${DESTDIR}/usr/bin/netspot"
+cp ./netspot.service "${DESTDIR}/lib/systemd/system/netspot.service"
