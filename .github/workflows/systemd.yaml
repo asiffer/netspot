@@ -30,3 +30,20 @@ jobs:
 
       - name: Build service
         run: make portable_service
+
+      - name: Upload service file
+      - uses: actions/upload-artifact@v2
+        with:
+          name: netspot-systemd
+          path: dev/systemd/netspot*.tar.xz
+
+      # steps in case of repository_dispatch (release) #
+      - name: Upload service file to release
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dev/systemd/netspot*.tar.xz
+          tag: ${{ github.event.client_payload.tag }}
+          overwrite: true
+          file_glob: true
