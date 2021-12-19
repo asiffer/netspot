@@ -19,8 +19,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "${{ github.event.client_payload.tag }}"
-          prerelease: true
-          title: "Development Build"
+          prerelease: false
+          title: "${{ github.event.client_payload.tag }}"
 
       - name: Trigger test
         if: ${{ github.event_name == 'repository_dispatch' }}

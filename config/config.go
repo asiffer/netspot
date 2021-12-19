@@ -6,6 +6,7 @@ package config
 import (
 	js "encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -373,7 +374,12 @@ func LoadFromCli(c *cli.Context) error {
 	if len(p) > 0 {
 		// load config file arguments
 		if err := LoadConfig(p); err != nil {
-			return err
+			switch err.(type) {
+			case *ConfigNotFoundError:
+				configLogger.Warn().Msgf(err.Error())
+			default:
+				return err
+			}
 		}
 	}
 	// now load the cli arguments (override the config file)
@@ -398,7 +404,12 @@ func LoadConfig(filename string) error {
 	}
 	// load config (it overrides default config)
 	if err := konf.Load(file.Provider(filename), parser); err != nil {
-		return fmt.Errorf("error loading config file %s: %v", filename, err)
+		switch e := err.(type) {
+		case *fs.PathError:
+			return &ConfigNotFoundError{e.Path}
+		default:
+			return fmt.Errorf("error loading config file %s: %v", filename, err)
+		}
 	}
 	return nil
 }

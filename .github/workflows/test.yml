@@ -3,18 +3,17 @@ on:
   workflow_dispatch:
   pull_request:
     paths-ignore:
-    - 'docs/**'
-    - 'sources/**'
+      - "docs/**"
+      - "sources/**"
   repository_dispatch:
     types: [release_test]
-
 
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: 
-      image: golang:1.16.3-alpine
+    container:
+      image: golang:1.17.5-alpine
       env:
         # SYSTEM
         PACKAGES: bash curl linux-headers git git-lfs flex bison wget make bluez-dev bluez libpcap libpcap-dev gcc musl-dev
@@ -22,7 +21,7 @@ jobs:
       influxdb:
         image: influxdb:1.8
         ports:
-        - 8086/tcp
+          - 8086/tcp
     steps:
       - name: Get packages
         run: apk update; apk add $PACKAGES
@@ -51,4 +50,3 @@ jobs:
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           event-type: release_build
           client-payload: '{"tag":"${{ github.event.client_payload.tag }}"}'
-

@@ -59,10 +59,12 @@ cd netspot
 make
 ```
 
-To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
-presents how **netspot** is (cross-)built based on the `golang:alpine` docker image.
+Then you install it with `make install` (as root). Since version 2.1 it also installs a systemd service file.
 
-### (NEW) Docker
+To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
+details how **netspot** is (cross-)built based on the `golang:alpine` docker image.
+
+### Docker
 
 `netspot` is now available through a docker image, hosted on Github. You can have a look to the [local registry](https://github.com/users/asiffer/packages/container/package/netspot) to pull the image.
 
@@ -71,6 +73,12 @@ Once you have pulled the image, you can run `netspot` interactively through:
 ```sh
 docker run --rm -it --name netspot --cap-add NET_ADMIN --network host netspot:latest
 ```
+
+### (NEW) Systemd
+
+Since version `2.1`, `netspot` is also available through a [systemd portable service](https://systemd.io/PORTABLE_SERVICES/).
+
+You can also grab the `netspot.service` file and install it at /usr/local/lib/systemd/system/.
 
 ## Get started
 

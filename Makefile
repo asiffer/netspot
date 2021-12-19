@@ -45,16 +45,18 @@ GO_LDFLAGS           := -s -w -X "github.com/asiffer/netspot/cmd.gitCommit=$(GIT
 GO_BUILD_EXTRA_FLAGS := -a
 
 # build directories
-BIN_DIR    := $(SRC_DIR)/bin
-DIST_DIR   := $(SRC_DIR)/dist
-DOCKER_DIR := $(DIST_DIR)/docker
-DEBIAN_DIR := $(DIST_DIR)/debian
-SNAP_DIR   := $(DIST_DIR)/snap
+BIN_DIR     := $(SRC_DIR)/bin
+DIST_DIR    := $(SRC_DIR)/dist
+DOCKER_DIR  := $(DIST_DIR)/docker
+DEBIAN_DIR  := $(DIST_DIR)/debian
+SNAP_DIR    := $(DIST_DIR)/snap
+SYSTEMD_DIR := $(SRC_DIR)/dev/systemd
 
 # installation
 DESTDIR              :=
 INSTALL_BIN_DIR      := $(DESTDIR)/usr/bin
 INSTALL_CONF_DIR     := $(DESTDIR)/etc/netspot
+INSTALL_SERVICE_DIR  := $(DESTDIR)/lib/systemd/system/
 
 # test
 TEST_FLAGS                := -v -race -coverprofile=coverage.txt -covermode=atomic
@@ -91,7 +93,8 @@ endif
 # main actions
 default: build
 build: build_netspot
-install: install_bin
+install: install_bin install_service
+uninstall: uninstall_bin uninstall_service
 
 deps:
 	@echo -n "Retrieving dependencies...           "
@@ -117,12 +120,35 @@ build_netspot_static:
 	@echo -e $(OK)
 
 install_bin:
-	@echo -e "\033[93m[Installing binaries]\033[0m"
+	@echo -e "\033[93m[Installing binary]\033[0m"
 	@echo -en "Creating directory...                "
 	@mkdir -p $(INSTALL_BIN_DIR)
-	@echo $(OK)
+	@echo -e $(OK)
 	@echo -en "Installing netspot...                "
-	@install $(BIN_DIR)/netspot $(INSTALL_BIN_DIR)/
+	@install $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS) $(INSTALL_BIN_DIR)/netspot
+	@echo -e $(OK)
+
+install_service:
+	@echo -e "\033[93m[Installing service]\033[0m"
+	@echo -en "Creating directory...                "
+	@mkdir -p $(INSTALL_SERVICE_DIR)
+	@echo -e $(OK)
+	@echo -en "Installing netspot.service...        "
+	@install netspot.service $(INSTALL_SERVICE_DIR)/netspot.service
+	@systemctl daemon-reload
+	@echo -e $(OK)
+
+uninstall_bin:
+	@echo -e "\033[93m[Removing binary]\033[0m"
+	@echo -en "Removing netspot...                  "
+	@rm -f $$(command -v netspot)
+	@echo -e $(OK)
+
+uninstall_service:
+	@echo -e "\033[93m[Removing service]\033[0m"
+	@echo -en "Removing netspot...                  "
+	@rm -f $(INSTALL_SERVICE_DIR)/netspot.service
+	@systemctl daemon-reload
 	@echo -e $(OK)
 
 test: $(conditional_test)
@@ -154,6 +180,8 @@ docs: render_readme
 	@mkdocs build
 
 swagger:
+	@echo -e "\033[93m[Updating version]\033[0m"
+	@sed -i -e 's/@version .*/@version $(VERSION)/' api/main.go
 	@echo -e "\033[93m[Building API docs]\033[0m"
 	@cd $(SRC_DIR)/api && swag init --parseInternal
 
@@ -161,4 +189,15 @@ clean:
 	@echo -en "Removing netspot binary   "
 	@rm -f $(BIN_DIR)/netspot
 	@echo -e $(OK)
+
+portable_service: build_netspot
+	rm -f $(SYSTEMD_DIR)/netspot*
+	cp $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS) $(SYSTEMD_DIR)/netspot
+	cp netspot.service $(SYSTEMD_DIR)/netspot.service
+	sudo mkosi --directory=$(SYSTEMD_DIR) \
+	           --image-version=$(VERSION)-$(ARCH)-$(OS) \
+			   --format=tar \
+			   --compress \
+			   --image-id=netspot \
+			   --package=libpcap
 

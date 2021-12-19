@@ -1,4 +1,7 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "Netspot as a service",
@@ -12,7 +15,7 @@
             "name": "GPLv3",
             "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
         },
-        "version": "2.0"
+        "version": "2.1"
     },
     "host": "localhost:11000",
     "basePath": "/api",

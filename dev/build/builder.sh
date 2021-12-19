@@ -35,7 +35,7 @@ prepare_env() {
 # arguments:
 # $1: target-arch (arm-linux, x86_64-linux, aarch64-linux)
 build_libpcap() {
-    cd $LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION
+    cd "$LIBPCAP_DIR/libpcap-$LIBPCAP_VERSION"
     # remove previous builds
     if [ -f "Makefile" ]; then
         make clean

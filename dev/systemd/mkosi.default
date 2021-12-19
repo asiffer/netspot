@@ -1,0 +1,21 @@
+# This is a settings file for OS image generation using mkosi (https://github.com/systemd/mkosi).
+# Simply invoke "mkosi" in the project directory to build an OS image.
+
+[Distribution]
+Distribution=fedora
+Release=34
+Architecture=x86_64
+
+; [Output]
+; Format=gpt_btrfs
+; Bootable=yes
+; Output=netspot.raw
+; Compress=xz
+; Format=tar
+; Output=netspot.tar
+
+; [Partitions]
+; RootSize=800M
+
+[Packages]
+Cache=/var/cache/dnf

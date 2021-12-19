@@ -17,7 +17,7 @@ info:
     url: https://www.gnu.org/licenses/gpl-3.0.en.html
   termsOfService: http://swagger.io/terms/
   title: Netspot API
-  version: "2.0"
+  version: "2.1"
 paths:
   /config:
     get:
@@ -155,4 +155,6 @@ paths:
           schema:
             $ref: '#/definitions/api.apiError'
       summary: List the available statistics
+schemes:
+- http
 swagger: "2.0"
