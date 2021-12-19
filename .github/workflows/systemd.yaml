@@ -1,7 +1,8 @@
 name: Systemd Portable Service
 on:
-  push:
   workflow_dispatch:
+  repository_dispatch:
+    types: [release_build]
 
 jobs:
   build:
