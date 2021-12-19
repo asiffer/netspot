@@ -18,7 +18,9 @@ jobs:
           go-version: "1.17.5"
 
       - name: Install libpcap
-        run: apt update -y && apt install -y libpcap-dev
+        run: |
+          sudo apt update -y
+          sudo apt install -y libpcap-dev
 
       - name: Install mkosi
         uses: systemd/mkosi@v12
