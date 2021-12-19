@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install mkosi
-        run: systemd/mkosi@v12
+        uses: systemd/mkosi@v12
 
       - name: Put current version into environment
         run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
