@@ -12,16 +12,19 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
+      - name: Install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17.5"
+
+      - name: Install libpcap
+        run: apt update -y && apt install -y libpcap-dev
+
       - name: Install mkosi
         uses: systemd/mkosi@v12
 
       - name: Put current version into environment
         run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
-
-      - name: Install golang
-        uses: actions/setup-go@v2
-        with:
-          go-version: "1.17.5"
 
       - name: Build service
         run: make portable_service
