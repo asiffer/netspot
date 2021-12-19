@@ -6,17 +6,22 @@ on:
 jobs:
   build:
     name: Build portable service
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: setup-mkosi
-        uses: systemd/mkosi@v12
+      - name: Install mkosi
+        run: systemd/mkosi@v12
 
       - name: Put current version into environment
         run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
+
+      - name: Install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17.5"
 
       - name: Build service
         run: make portable_service
