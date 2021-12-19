@@ -190,14 +190,14 @@ clean:
 	@rm -f $(BIN_DIR)/netspot
 	@echo -e $(OK)
 
-portable_service:
+portable_service: build_netspot
 	rm -f $(SYSTEMD_DIR)/netspot*
 	cp $(BIN_DIR)/netspot-$(VERSION)-$(ARCH)-$(OS) $(SYSTEMD_DIR)/netspot
 	cp netspot.service $(SYSTEMD_DIR)/netspot.service
 	sudo mkosi --directory=$(SYSTEMD_DIR) \
 	           --image-version=$(VERSION)-$(ARCH)-$(OS) \
-			   --format=gpt_ext4 \
-			   --bootable \
-			   --root-size=800M \
-			   --image-id=netspot
+			   --format=tar \
+			   --compress \
+			   --image-id=netspot \
+			   --package=libpcap
 

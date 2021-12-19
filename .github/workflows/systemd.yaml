@@ -18,5 +18,5 @@ jobs:
       - name: Put current version into environment
         run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
 
-      - name: Build
+      - name: Build service
         run: make portable_service
