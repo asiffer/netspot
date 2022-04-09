@@ -142,7 +142,7 @@ func initSubpackages() error {
 // ========================================================================== //
 
 // @title Netspot API
-// @version 2.1
+// @version 2.1.1
 // @description Netspot as a service
 // @termsOfService http://swagger.io/terms/
 // @contact.name API Support
