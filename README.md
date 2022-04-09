@@ -44,9 +44,9 @@ picture below).
 
 The latest compiled binaries can be found below.
 
-[![amd64](https://img.shields.io/badge/v2.1-amd64-5e81ac?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1/netspot-2.1-amd64-linux-static)
-[![arm](https://img.shields.io/badge/v2.1-arm-81a1c1?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1/netspot-2.1-arm-linux-static)
-[![arm64](https://img.shields.io/badge/v2.1-arm64-88c0d0?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1/netspot-2.1-arm64-linux-static)
+[![amd64](https://img.shields.io/badge/v2.1.1-amd64-5e81ac?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.1/netspot-2.1.1-amd64-linux-static)
+[![arm](https://img.shields.io/badge/v2.1.1-arm-81a1c1?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.1/netspot-2.1.1-arm-linux-static)
+[![arm64](https://img.shields.io/badge/v2.1.1-arm64-88c0d0?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.1/netspot-2.1.1-arm64-linux-static)
 
 ### Building from sources
 
@@ -59,10 +59,12 @@ cd netspot
 make
 ```
 
-To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
-presents how **netspot** is (cross-)built based on the `golang:alpine` docker image.
+Then you install it with `make install` (as root). Since version 2.1 it also installs a systemd service file.
 
-### (NEW) Docker
+To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
+details how **netspot** is (cross-)built based on the `golang:alpine` docker image.
+
+### Docker
 
 `netspot` is now available through a docker image, hosted on Github. You can have a look to the [local registry](https://github.com/users/asiffer/packages/container/package/netspot) to pull the image.
 
@@ -71,6 +73,12 @@ Once you have pulled the image, you can run `netspot` interactively through:
 ```sh
 docker run --rm -it --name netspot --cap-add NET_ADMIN --network host netspot:latest
 ```
+
+### (NEW) Systemd
+
+Since version `2.1`, `netspot` is also available through a [systemd portable service](https://systemd.io/PORTABLE_SERVICES/).
+
+You can also grab the `netspot.service` file and install it at /usr/local/lib/systemd/system/.
 
 ## Get started
 
