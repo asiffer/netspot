@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/asiffer/netspot/miner/counters"
@@ -42,7 +41,6 @@ var (
 
 // Storing/Accessing the counters
 var (
-	mux, valmux          sync.RWMutex            // Locker for the counter map access
 	internalEventChannel = make(EventChannel, 1) // to receive events
 	// externalDataChannel  = make(DataChannel, 1)  // to send data to the analyzer
 )
@@ -55,14 +53,6 @@ var (
 	snapshotLen      int32         // the maximum size to read for each packet
 	promiscuous      bool          // promiscuous mode of the interface
 	timeout          time.Duration // time to wait if nothing happens
-)
-
-// Packet sniffing/parsing
-var (
-	handle *pcap.Handle
-	// ringHandle *pfring.Ring
-	parser *gopacket.DecodingLayerParser
-	err    error
 )
 
 // Dispatcher
@@ -121,7 +111,7 @@ func InitLogger() {
 func Zero() error {
 	if IsSniffing() {
 		minerLogger.Error().Msg("Cannot reload, sniffing in progress")
-		return errors.New("Cannot reload, sniffing in progress")
+		return errors.New("cannot reload, sniffing in progress")
 	}
 
 	reset()
@@ -323,11 +313,11 @@ func sniff(period time.Duration, data DataChannel) {
 // channel where counters are sent
 func Start(period time.Duration) (DataChannel, error) {
 	if IsSniffing() {
-		return nil, fmt.Errorf("Already sniffing")
+		return nil, fmt.Errorf("already sniffing")
 	}
 	ctr := dispatcher.loadedCounters()
 	if len(ctr) == 0 {
-		return nil, fmt.Errorf("No counters loaded")
+		return nil, fmt.Errorf("no counters loaded")
 	}
 
 	minerLogger.Info().Msgf("Start sniffing %s", device)
@@ -343,7 +333,7 @@ func Start(period time.Duration) (DataChannel, error) {
 	for !IsSniffing() {
 		select {
 		case <-internalEventChannel: // error case
-			return nil, fmt.Errorf("Something bad happened")
+			return nil, fmt.Errorf("something bad happened")
 		default:
 			// pass
 		}
@@ -391,9 +381,3 @@ func fileExists(name string) bool {
 	}
 	return true
 }
-
-// Main ===================================================================== //
-// ========================================================================== //
-// ========================================================================== //
-
-func main() {}
