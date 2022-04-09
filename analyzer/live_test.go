@@ -79,6 +79,7 @@ func TestLivePcapHuge(t *testing.T) {
 			t.Error(err)
 		}
 	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func TestLiveAll(t *testing.T) {
@@ -130,6 +131,7 @@ func TestLiveAll(t *testing.T) {
 		} else {
 			testOK()
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 
 }
