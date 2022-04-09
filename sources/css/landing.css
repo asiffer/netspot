@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
     margin: 0;
     height: 100%;
     overflow: hidden;
@@ -11,15 +12,24 @@ body, html {
     top: 25vh;
 }
 
+.vanta {
+    top: 0;
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+}
+
 h1 {
     font-weight: 800;
     font-size: 10em;
     margin: 0;
     width: 100%;
+    color: var(--title-color);
 }
 
 h2 {
-    font-weight: lighter;
+    font-weight: 300;
     width: 100%;
     font-size: 2em;
     margin: 0;
@@ -31,6 +41,7 @@ h2 {
     width: 100%;
     padding-left: 20%;
     padding-top: 1em;
+    color: var(--title-color);
 }
 
 .back {
@@ -44,7 +55,7 @@ h2 {
 }
 
 .btn {
-    border: solid 2px var(--celadon-blue);
+    border: solid 2px var(--title-btn-color);
     border-radius: 0.1rem;
     text-decoration: none;
     padding: 0.5em 1em;
@@ -55,35 +66,36 @@ h2 {
 }
 
 .btn-normal {
-    color: white;
-    background-color: var(--celadon-blue);
+    color: var(--title-color);
+    background-color: var(--title-btn-color);
 }
 
 .btn-inv {
-    color: var(--celadon-blue);
+    color: var(--title-btn-color);
     background-color: transparent;
 }
 
 .btn-inv-muted {
-    color: var(--celadon-blue);
+    color: var(--title-btn-color);
     background-color: transparent;
-    opacity: 33%;
+    opacity: 60%;
 }
 
 .btn-normal:hover {
-    background-color: var(--prussian-blue);
-    border-color: var(--prussian-blue);
+    background-color: var(--title-color);
+    border-color: var(--title-color);
+    color: var(--title-btn-color);
 }
 
 .btn-inv:hover {
-    color: var(--prussian-blue);
-    border-color: var(--prussian-blue);
+    color: var(--title-color);
+    border-color: var(--title-color);
 }
 
 .btn-inv-muted:hover {
-    color: var(--prussian-blue);
-    border-color: var(--prussian-blue);
-    opacity: 100%;
+    color: var(--title-color);
+    border-color: var(--title-color);
+    opacity: 90%;
 }
 
 #background {

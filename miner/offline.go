@@ -27,7 +27,7 @@ func sniffOffline(packetChan chan gopacket.Packet,
 	for {
 		select {
 		// manage events
-		case e, _ := <-internalEventChannel:
+		case e := <-internalEventChannel:
 			switch e {
 			case STOP:
 				// the counters are stopped

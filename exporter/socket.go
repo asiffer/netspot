@@ -146,6 +146,9 @@ func (s *Socket) Write(t time.Time, data map[string]float64) error {
 		default:
 			return fmt.Errorf("bad data format (%s)", s.format)
 		}
+		if err != nil {
+			return err
+		}
 		_, err = s.dataConn.Write(bin)
 		return err
 	}
@@ -172,6 +175,9 @@ func (s *Socket) Warn(t time.Time, x *SpotAlert) error {
 			bin, err = toGob(raw)
 		default:
 			return fmt.Errorf("bad data format (%s)", s.format)
+		}
+		if err != nil {
+			return err
 		}
 		_, err = s.alarmConn.Write(bin)
 		return err

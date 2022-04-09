@@ -69,7 +69,8 @@ func sniffOnline(packetChan chan gopacket.Packet,
 	data DataChannel) error {
 
 	// set the flush tick
-	tick := time.Tick(period)
+	tick := time.NewTicker(period)
+	// tick := time.Tick(period)
 
 	// now we are sniffing!
 	minerLogger.Debug().Msgf("Sniffing interface...")
@@ -81,12 +82,12 @@ func sniffOnline(packetChan chan gopacket.Packet,
 	for {
 		select {
 		// periodic flush
-		case st := <-tick:
+		case st := <-tick.C:
 			sourceTime.Set(st)
 			dispatcher.terminate()
 			data <- dispatcher.flushAll()
 		// manage events
-		case e, _ := <-internalEventChannel:
+		case e := <-internalEventChannel:
 			switch e {
 			case STOP:
 				// the counters are stopped

@@ -21,6 +21,25 @@ func init() {
 	}
 }
 
+func TestConsoleBadInit(t *testing.T) {
+	title(t.Name())
+	m := map[string]interface{}{
+		consolePrefix + ".data":  false,
+		consolePrefix + ".alarm": false,
+	}
+	if err := config.LoadForTest(m); err != nil {
+		panic(err)
+	}
+
+	c := available["console"]
+	checkTitle("Empty config")
+	if c.Init() != nil {
+		testERROR()
+	} else {
+		testOK()
+	}
+}
+
 func TestInitStartCloseConsole(t *testing.T) {
 	title(t.Name())
 
@@ -37,6 +56,22 @@ func TestInitStartCloseConsole(t *testing.T) {
 	} else {
 		testOK()
 		defer Unload(c.Name())
+	}
+
+	checkTitle("Check exporting data")
+	if !c.LogsData() {
+		testERROR()
+		t.Fatalf("The exporting module does not send data")
+	} else {
+		testOK()
+	}
+
+	checkTitle("Check exporting alarm")
+	if !c.LogsAlarm() {
+		testERROR()
+		t.Fatalf("The exporting module does not send alarms")
+	} else {
+		testOK()
 	}
 
 	checkTitle("Start")

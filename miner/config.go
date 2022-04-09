@@ -88,7 +88,7 @@ func SetPromiscuous(b bool) error {
 // SetSnapshotLen sets the maximum size of packets which are captured
 func SetSnapshotLen(sl int32) error {
 	if sl <= 0 {
-		return fmt.Errorf("Snapshot length must be strictly positive")
+		return fmt.Errorf("snapshot length must be strictly positive")
 	}
 	snapshotLen = sl
 	minerLogger.Debug().Msgf("Snapshot length set to %d", sl)
@@ -119,7 +119,7 @@ func SetDevice(dev string) error {
 			device = dev
 			iface = false
 		} else {
-			err := fmt.Errorf("Unknown device %s", dev)
+			err := fmt.Errorf("unknown device %s", dev)
 			minerLogger.Error().Msg(err.Error())
 			return err
 		}

@@ -136,7 +136,7 @@ func (d *Dispatcher) buildCounterList() {
 func (d *Dispatcher) load(name string) error {
 	ctr, exists := counters.AvailableCounters[name]
 	if !exists {
-		return fmt.Errorf("The counter %s does not exists", name)
+		return fmt.Errorf("the counter %s does not exists", name)
 	}
 	// ensure the counter is zero
 	ctr.Reset()
@@ -148,7 +148,7 @@ func (d *Dispatcher) load(name string) error {
 func (d *Dispatcher) unload(name string) error {
 	_, exists := counters.AvailableCounters[name]
 	if !exists {
-		return fmt.Errorf("The counter %s does not exists", name)
+		return fmt.Errorf("the counter %s does not exists", name)
 	}
 
 	delete(d.counters, name)

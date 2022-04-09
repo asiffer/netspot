@@ -199,5 +199,6 @@ portable_service: build_netspot
 			   --format=tar \
 			   --compress \
 			   --image-id=netspot \
-			   --package=libpcap
+			   --package=libpcap \
+			   --package=libpcap-devel
 

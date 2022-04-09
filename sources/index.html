@@ -2,46 +2,32 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet"> 
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet" />
     <!-- <link rel="stylesheet" href="css/roboto.css"> -->
-    <link rel="stylesheet" href="css/color.css">
-    <link rel="stylesheet" href="css/nord.css">
-    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/nord.css" />
+    <link rel="stylesheet" href="css/landing.css" />
 </head>
 
 <body>
-
-    <div id="background">
-        <svg version="1.1"
-        xmlns="http://www.w3.org/2000/svg"
-        class="back" height="100%" viewBox="0 0 170 170">
-            <g transform="rotate(-45)">
-            <g transform="translate(-60,60)">
-            <rect x="10" y="10" width="100" height="100" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/> 
-            <path d="M 35 35 h 50 v 50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
-            <path d="M 35 85 l 50 -50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
-            </g></g>
-            <animate attributeType="XML" attributeName="width" from="1100" to="1100" dur="1s" repeatCount="indefinite"/>
-        </svg>
+    <div id="vanta" class="vanta">
     </div>
 
     <div class="landing">
         <div class="container">
-            <h1>netsp<svg version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em" height="1em" viewBox="0 0 170 170" style="margin-bottom: -0.2em;">
+            <h1>netsp<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 170 170" style="margin-bottom: -0.2em;">
                <g transform="rotate(-45)">
                <g transform="translate(-60,60)">
-               <rect x="10" y="10" width="100" height="100" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/> 
-               <path d="M 35 35 h 50 v 50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
-               <path d="M 35 85 l 50 -50" fill="transparent" stroke="var(--celadon-blue)" stroke-width="10"/>
+               <rect x="10" y="10" width="100" height="100" fill="transparent" stroke="var(--title-color)" stroke-width="10"/> 
+               <path d="M 35 35 h 50 v 50" fill="transparent" stroke="var(--title-color)" stroke-width="10"/>
+               <path d="M 35 85 l 50 -50" fill="transparent" stroke="var(--title-color)" stroke-width="10"/>
                </g></g>
             </svg>t</h1>
-        </h2>
+            </h2>
             <h2>A simple IDS with statistical learning</h2>
             <div class="center">
                 <a href="download/binaries" class="btn btn-normal">Install</a>
@@ -51,5 +37,27 @@
         </div>
     </div>
 </body>
+
+<footer>
+    <script src="js/three.min.js"></script>
+    <script src="js/vanta.net.min.js"></script>
+    <script>
+        VANTA.NET({
+            el: "#vanta",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            points: 13.0,
+            showDots: false,
+            spacing: 15.0,
+            color: "#a8dadc",
+            backgroundColor: "#132239",
+        });
+    </script>
+</footer>
 
 </html>

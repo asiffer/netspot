@@ -4,7 +4,10 @@
     --powder-blue: #a8dadcff;
     --celadon-blue: #457b9dff;
     --prussian-blue: #1d3557ff;
+    --title-color: var(--honeydew);
+    --title-btn-color: var(--celadon-blue);
 }
+
 
 /* redefine colors */
 

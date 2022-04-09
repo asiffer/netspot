@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const SpotAlertJsonFormat = "\"status\":\"%s\",\"stat\":\"%s\",\"value\":%f,\"code\":%d,\"probability\":%f"
+const SpotAlertJsonFormat = "\"status\":\"%s\",\"stat\":\"%s\",\"value\":%e,\"code\":%d,\"probability\":%e"
 
 // SpotAlert is a simple structure to log alerts sent
 // by spot instances
@@ -28,18 +28,6 @@ func (s *SpotAlert) toUntypedMap() map[string]interface{} {
 		"code":        s.Code,
 		"probability": s.Probability,
 	}
-}
-
-func (s *SpotAlert) toJSON() string {
-	return fmt.Sprintf("{%s}",
-		fmt.Sprintf(SpotAlertJsonFormat,
-			s.Status,
-			s.Stat,
-			s.Value,
-			s.Code,
-			s.Probability,
-		),
-	)
 }
 
 func (s *SpotAlert) toJSONwithTime(t time.Time) string {

@@ -4,6 +4,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -17,7 +18,7 @@ import (
 // @Summary Manage the IDS status
 // @Description Use this path to start/stop the IDS
 // @Accept  json
-// @Produce  json
+// @Produce json
 // @Param action body string false "the action to perform" Enums("start", "stop")
 // @Success 200 {string} string "Comment about the action performed"
 // @Failure 400 {object} apiError "Error message"
@@ -25,6 +26,7 @@ import (
 func RunHandler(w http.ResponseWriter, r *http.Request) {
 	// read content
 	raw, err := ioutil.ReadAll(r.Body)
+	fmt.Println("RAW:", string(raw))
 	if err != nil {
 		apiLogger.Error().Msg(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
