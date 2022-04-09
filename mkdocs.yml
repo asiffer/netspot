@@ -29,7 +29,7 @@ extra_css:
 
 extra:
   netspot:
-    version: 2.1.1
+    version: 2.1.2
 
 nav:
   - Home: "./index.html"

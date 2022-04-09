@@ -44,9 +44,9 @@ picture below).
 
 The latest compiled binaries can be found below.
 
-[![amd64](https://img.shields.io/badge/v2.1.1-amd64-5e81ac?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.1/netspot-2.1.1-amd64-linux-static)
-[![arm](https://img.shields.io/badge/v2.1.1-arm-81a1c1?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.1/netspot-2.1.1-arm-linux-static)
-[![arm64](https://img.shields.io/badge/v2.1.1-arm64-88c0d0?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.1/netspot-2.1.1-arm64-linux-static)
+[![amd64](https://img.shields.io/badge/v2.1.2-amd64-5e81ac?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.2/netspot-2.1.2-amd64-linux-static)
+[![arm](https://img.shields.io/badge/v2.1.2-arm-81a1c1?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.2/netspot-2.1.2-arm-linux-static)
+[![arm64](https://img.shields.io/badge/v2.1.2-arm64-88c0d0?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.2/netspot-2.1.2-arm64-linux-static)
 
 ### Building from sources
 
