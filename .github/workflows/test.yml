@@ -21,7 +21,7 @@ jobs:
       influxdb:
         image: influxdb:1.8
         ports:
-          - 8086/tcp
+          - 8086:8086
     steps:
       - name: Get packages
         run: apk update; apk add $PACKAGES
