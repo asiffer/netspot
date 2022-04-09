@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const SpotAlertJsonFormat = "\"status\":\"%s\",\"stat\":\"%s\",\"value\":%f,\"code\":%d,\"probability\":%f"
+const SpotAlertJsonFormat = "\"status\":\"%s\",\"stat\":\"%s\",\"value\":%e,\"code\":%d,\"probability\":%e"
 
 // SpotAlert is a simple structure to log alerts sent
 // by spot instances
