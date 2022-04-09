@@ -5,6 +5,7 @@ package exporter
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
@@ -424,7 +425,8 @@ func TestStartCloseAll(t *testing.T) {
 	startSocket(alarmAddr)
 
 	checkTitle("Start all modules")
-	if err := Start("full"); err != nil {
+	series := fmt.Sprintf("full-%d", rand.Int())
+	if err := Start(series); err != nil {
 		testERROR()
 		t.Error(err)
 	} else {
