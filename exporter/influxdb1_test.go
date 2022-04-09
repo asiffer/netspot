@@ -193,10 +193,15 @@ func TestInfluxStatus(t *testing.T) {
 func TestInfluxBatchWrite(t *testing.T) {
 	title(t.Name())
 
+	host := "http://localhost:8086"
+	if isRunningInDockerContainer() {
+		host = "http://influxdb:8086"
+	}
+
 	conf := map[string]interface{}{
 		"exporter.influxdb.data":       true,
 		"exporter.influxdb.alarm":      true,
-		"exporter.influxdb.address":    "http://127.0.0.1:8086",
+		"exporter.influxdb.address":    host,
 		"exporter.influxdb.database":   "netspot",
 		"exporter.influxdb.username":   "netspot",
 		"exporter.influxdb.password":   "netspot",
