@@ -3,6 +3,7 @@
 package exporter
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 
@@ -187,4 +188,40 @@ func TestInfluxStatus(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer Unload(inf.Name())
+}
+
+func TestInfluxBatchWrite(t *testing.T) {
+	title(t.Name())
+
+	conf := map[string]interface{}{
+		"exporter.influxdb.data":       true,
+		"exporter.influxdb.alarm":      true,
+		"exporter.influxdb.address":    "http://127.0.0.1:8086",
+		"exporter.influxdb.database":   "netspot",
+		"exporter.influxdb.username":   "netspot",
+		"exporter.influxdb.password":   "netspot",
+		"exporter.influxdb.batch_size": 20,
+		"exporter.influxdb.agent_name": "local",
+	}
+	config.LoadForTest(conf)
+
+	inf := available["influxdb"]
+
+	if err := inf.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer Unload(inf.Name())
+	inf.Start("exporter-infludb-test")
+
+	// send data multiple times
+	checkTitle("Writing data")
+	n, _ := config.GetStrictlyPositiveInt("exporter.influxdb.batch_size")
+	for i := 0; i < 2*n; i++ {
+		data := map[string]float64{"stat0": rand.Float64(), "stat1": rand.Float64()}
+		if err := inf.Write(time.Now(), data); err != nil {
+			testERROR()
+			t.Fatal(err)
+		}
+	}
+	testOK()
 }

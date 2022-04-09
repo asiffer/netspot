@@ -30,18 +30,6 @@ func (s *SpotAlert) toUntypedMap() map[string]interface{} {
 	}
 }
 
-func (s *SpotAlert) toJSON() string {
-	return fmt.Sprintf("{%s}",
-		fmt.Sprintf(SpotAlertJsonFormat,
-			s.Status,
-			s.Stat,
-			s.Value,
-			s.Code,
-			s.Probability,
-		),
-	)
-}
-
 func (s *SpotAlert) toJSONwithTime(t time.Time) string {
 	return fmt.Sprintf("{\"time\":%d,%s}",
 		t.UnixNano(),
