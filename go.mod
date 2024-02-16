@@ -16,7 +16,7 @@ require (
 	github.com/swaggo/http-swagger v1.2.6
 	github.com/swaggo/swag v1.7.9
 	github.com/urfave/cli/v2 v2.3.0
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
+	golang.org/x/net v0.17.0
 )
 
 require (
@@ -52,9 +52,9 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20211221223016-e29036178569 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
-	golang.org/x/text v0.3.8 // indirect
-	golang.org/x/tools v0.1.12 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gonum.org/v1/gonum v0.9.3 // indirect
 	google.golang.org/api v0.63.0 // indirect
