@@ -2,8 +2,6 @@ module github.com/asiffer/netspot
 
 go 1.21
 
-toolchain go1.21.6
-
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/asiffer/gospot v0.1.1
