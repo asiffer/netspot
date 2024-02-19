@@ -8,29 +8,29 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
 
-    - name: Put current version into environment
-      run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
+      - name: Put current version into environment
+        run: echo "NETSPOT_VERSION=$(make print_version DEBUG=false)" >> $GITHUB_ENV
 
-    - name: Build Image
-      id: build-image
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: asiffer/netspot
-        tags: latest ${{ env.NETSPOT_VERSION }}-${{ GITHUB_RUN_ID }}
-        dockerfiles: |
-          ./Dockerfile
-        build-args: |
-          GIT_COMMIT=${{ GITHUB_RUN_ID }}
+      - name: Build Image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: asiffer/netspot
+          tags: latest ${{ env.NETSPOT_VERSION }}-${{ github.run_id }}
+          dockerfiles: |
+            ./Dockerfile
+          build-args: |
+            GIT_COMMIT=${{ github.run_id }}
 
-    - name: Push GitHub container registry
-      id: push-to-ghcr
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: ${{ steps.build-image.outputs.image }}
-        tags: ${{ steps.build-image.outputs.tags }}
-        registry: ghcr.io
-        username: asiffer
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push GitHub container registry
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ghcr.io
+          username: asiffer
+          password: ${{ secrets.GITHUB_TOKEN }}
