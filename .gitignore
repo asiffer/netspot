@@ -4,3 +4,5 @@ coverage*
 .coverage*
 docs/
 README.md
+*.dump
+*.pcap
