@@ -16,9 +16,10 @@ var DummyTime = time.Unix(-(1<<63 - 1), rand.Int64())
 // to read packets from a pcap file
 type GoPacketCollector struct {
 	CollectorHooks
-	handle *pcap.Handle
-	source string
-	tick   time.Duration
+	handle         *pcap.Handle
+	source         string
+	tick           time.Duration
+	firstTimestamp time.Time
 }
 
 // NewGoPacketCollector returns a new GoPacketCollector
@@ -121,6 +122,7 @@ func (c *GoPacketCollector) Start(stop chan bool) {
 			// check the clock
 			if lastSendTimestamp.Equal(DummyTime) {
 				// first packet
+				c.firstTimestamp = metadata.Timestamp
 				lastSendTimestamp = metadata.Timestamp
 			} else if metadata.Timestamp.Sub(lastSendTimestamp) > c.tick {
 				// send data
@@ -180,4 +182,8 @@ func (c *GoPacketCollector) Start(stop chan bool) {
 			}
 		}
 	}
+}
+
+func (c *GoPacketCollector) FirstTimestamp() time.Time {
+	return c.firstTimestamp
 }

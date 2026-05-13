@@ -39,8 +39,11 @@ type MonitoredStat struct {
 	trainingSetIndex int
 }
 
-func Monitor(s Stat, options ...SpotOption) *MonitoredStat {
-	spot := NewSpot(options...)
+func Monitor(s Stat, options ...SpotOption) (*MonitoredStat, error) {
+	spot, err := NewSpot(options...)
+	if err != nil {
+		return nil, err
+	}
 	m := &MonitoredStat{
 		stat:             s,
 		spot:             spot,
@@ -49,7 +52,7 @@ func Monitor(s Stat, options ...SpotOption) *MonitoredStat {
 	// if level is 0.98 and minData is 20, it means that the 0.02 highest values represent
 	// about 20 values. So we need 20/(1-0.98) = 1000 training data to reach this minData.
 	minSize := int(float64(MIN_DATA) / (1 - m.spot.Level))
-	return m.WithTrainingSetSize(minSize)
+	return m.WithTrainingSetSize(minSize), nil
 }
 
 // SetTrainingSetSize sets the size of the training set
@@ -118,7 +121,7 @@ func NewRecord() Record {
 // MonitoredStatsList stores all the monitored statistics
 type MonitoredStatsList struct {
 	monitoredStats []*MonitoredStat
-	alertHooks     *register.Register2[string, *StatValue]
+	alertHooks     *register.Register3[string, time.Time, *StatValue]
 	valueHooks     *register.Register[*Record]
 	spotErrorHooks *register.Register2[string, *SpotError]
 }
@@ -126,7 +129,7 @@ type MonitoredStatsList struct {
 func NewMonitoredStatsList() *MonitoredStatsList {
 	return &MonitoredStatsList{
 		monitoredStats: make([]*MonitoredStat, 0),
-		alertHooks:     register.NewRegister2[string, *StatValue](),
+		alertHooks:     register.NewRegister3[string, time.Time, *StatValue](),
 		valueHooks:     register.NewRegister[*Record](),
 		spotErrorHooks: register.NewRegister2[string, *SpotError](),
 	}
@@ -138,7 +141,7 @@ func (m *MonitoredStatsList) Add(ms *MonitoredStat) {
 }
 
 // OnAlert registers a new hook to be called when an alert is triggered
-func (m *MonitoredStatsList) OnAlert(hook func(string, *StatValue)) *MonitoredStatsList {
+func (m *MonitoredStatsList) OnAlert(hook func(string, time.Time, *StatValue)) *MonitoredStatsList {
 	m.alertHooks.Register(hook)
 	return m
 }
@@ -180,7 +183,7 @@ func (m *MonitoredStatsList) Hook(data *collector.Data) {
 			}
 			record.Alerts = append(record.Alerts, s.stat.Name())
 			// also dispatch the alert to alert hooks
-			m.alertHooks.Exec(s.stat.Name(), &sv)
+			m.alertHooks.Exec(s.stat.Name(), record.Time, &sv)
 		}
 		record.Stats[s.stat.Name()] = &sv
 

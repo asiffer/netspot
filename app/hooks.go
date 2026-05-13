@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/json"
@@ -35,12 +35,7 @@ func (h *LoggerHook) HandleSpotError(name string, se *analyzer.SpotError) {
 		Msg("Spot error")
 }
 
-// type JSONLRecord struct {
-// 	analyzer.Record
-// 	// Counters *collector.Data  `json:"counters,omitempty"`
-// 	// Stats *analyzer.Record `json:"stats,omitempty"`
-// }
-
+// JSONLRecord is the struct representing the data to be stored in JSONL format
 type JSONLHook struct {
 	filename string
 	encoder  *json.Encoder
@@ -68,19 +63,8 @@ func (h *JSONLHook) HandleCounters(data *collector.Data) {
 }
 
 func (h *JSONLHook) HandleRecord(record *analyzer.Record) {
-	// jsonRecord := JSONLRecord{Record: *record}
-	// Counters: h.data,
-	// 	Stats: record,
-	// }
 	if err := h.encoder.Encode(record); err != nil {
 		logger.Error().Err(err).Msg("Failed to write JSONL record")
 	}
 	h.data = nil
 }
-
-// func StatAlertHook(alert analyzer.Alert) {
-// 	logger.Warn().Str("stat", alert.Name).
-// 		Float64("value", alert.Value).
-// 		Float64("threshold", alert.Threshold).
-// 		Float64("probability", alert.Probability).Send()
-// }

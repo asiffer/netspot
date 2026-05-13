@@ -1,9 +1,10 @@
-package main
+package app
 
 import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -43,7 +44,9 @@ func init() {
 		return fmt.Sprintf("\033[2m%s\033[0m", i) // Dim
 	}
 
-	// log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	// everything in nanoseconds
+	zerolog.DurationFieldInteger = true
+	zerolog.DurationFieldUnit = time.Nanosecond
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixNano
 	logger = zerolog.New(output).With().Timestamp().Logger()
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/asiffer/netspot/collector/xdp"
@@ -65,6 +66,8 @@ type XDPCollector struct {
 	// config
 	iface *net.Interface
 	tick  time.Duration
+	// extra
+	firstTimestamp time.Time
 }
 
 // NewXDPCollector creates a new collector given the network interface and
@@ -127,11 +130,15 @@ func (c *XDPCollector) Unload() error {
 // Start creates a goroutine that periodically fetches data from the
 // XDP hook
 func (c *XDPCollector) Start(stop chan bool) {
+	once := sync.Once{}
 	tick := time.NewTicker(c.tick)
 	out := Data{}
 	for {
 		select {
 		case t := <-tick.C:
+			once.Do(func() {
+				c.firstTimestamp = t
+			})
 			// prepare data
 			out.TIME = uint64(t.UnixNano())
 			// *out = Data{TIME: uint64(t.UnixNano())}
@@ -154,4 +161,8 @@ func (c *XDPCollector) Start(stop chan bool) {
 			return
 		}
 	}
+}
+
+func (c *XDPCollector) FirstTimestamp() time.Time {
+	return c.firstTimestamp
 }

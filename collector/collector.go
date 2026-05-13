@@ -18,4 +18,5 @@ type Collector interface {
 	Load() error
 	Unload() error
 	Config() CollectorConfig
+	FirstTimestamp() time.Time
 }

@@ -64,7 +64,7 @@ func WithMaxExcess(maxExcess uint64) SpotOption {
 
 // NewSpot creates a new Spot instance for the default config
 // with variadic options
-func NewSpot(options ...SpotOption) *gospot.Spot {
+func NewSpot(options ...SpotOption) (*gospot.Spot, error) {
 	config := NewSpotConfig()
 	for _, opt := range options {
 		opt(config)
@@ -77,8 +77,8 @@ func NewSpot(options ...SpotOption) *gospot.Spot {
 		config.Level,
 		config.MaxExcess)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return spot
+	return spot, nil
 }

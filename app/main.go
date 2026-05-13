@@ -1,8 +1,6 @@
-package main
+package app
 
 import (
-	"errors"
-	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -12,48 +10,16 @@ import (
 
 	"github.com/asiffer/netspot/analyzer"
 	"github.com/asiffer/netspot/collector"
-	"github.com/asiffer/puzzle"
-	"github.com/asiffer/puzzle/flagset"
+	"github.com/asiffer/puzzle/pflagset"
+	"github.com/spf13/pflag"
 )
-
-var (
-	collectorType string        = "gopacket"
-	tick          time.Duration = 5 * time.Second
-	source        string
-	stats         []string = make([]string, 0)
-	allStats      bool     = false
-	output        string   = "netspot.jsonl"
-
-	statsMap = map[string]analyzer.Stat{
-		"RACK":   &analyzer.RACK{},
-		"SYNFIN": &analyzer.SYNFIN{},
-		"BPS":    &analyzer.BPS{},
-		"PPS":    &analyzer.PPS{},
-		"APS":    &analyzer.APS{},
-		"DPE":    &analyzer.DPE{},
-	}
-)
-
-var config = puzzle.NewConfig()
-
-func init() {
-	if err := errors.Join(
-		puzzle.DefineVar(config, "collector", &collectorType, puzzle.WithDescription("Collector type (xdp or gopacket)")),
-		puzzle.DefineVar(config, "source", &source, puzzle.WithDescription("Packet source (interface name or .pcap file)")),
-		puzzle.DefineVar(config, "tick", &tick, puzzle.WithDescription("Stats computation period")),
-		puzzle.DefineVar(config, "stats", &stats, puzzle.WithDescription("Stats to compute (RACK, SYNFIN, BPS, PPS, APS)")),
-		puzzle.DefineVar(config, "all-stats", &allStats, puzzle.WithDescription("Compute all stats available")),
-		puzzle.DefineVar(config, "output", &output, puzzle.WithShortFlagName("o"), puzzle.WithDescription("Output file for stats")),
-	); err != nil {
-		panic(err)
-	}
-}
 
 func setupFromCLI() (collector.Collector, error) {
-	fs, err := flagset.Build(config, "netspot", flag.ExitOnError)
+	fs, err := pflagset.Build(config, "netspot", pflag.ExitOnError)
 	if err != nil {
 		return nil, err
 	}
+	fs.SortFlags = false
 
 	// parse cli args
 	if err := fs.Parse(os.Args[1:]); err != nil {
@@ -68,7 +34,7 @@ func setupFromCLI() (collector.Collector, error) {
 			stats = append(stats, stat)
 		}
 	} else if len(stats) == 0 {
-		return nil, fmt.Errorf("No stats specified, use --stats or --all-stats")
+		return nil, fmt.Errorf("No stats specified, use --stats=<stats> or --all-stats")
 	} else {
 		for _, s := range stats {
 			if _, ok := statsMap[s]; !ok {
@@ -95,7 +61,7 @@ func setupFromCLI() (collector.Collector, error) {
 	}
 }
 
-func main() {
+func Run() {
 	co, err := setupFromCLI()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to setup")
@@ -110,52 +76,72 @@ func main() {
 	for _, s := range stats {
 		// already validated in setupFromCLI, no need to check existence
 		stat, _ := statsMap[s]
-		statsList.Add(analyzer.Monitor(stat))
+		options, err := getSpotOptions(s)
+		if err != nil {
+			logger.Fatal().Err(err).Str("stat", s).Msg("Failed to get SPOT options")
+		}
+		ms, err := analyzer.Monitor(stat, options...)
+		if err != nil {
+			logger.Fatal().Err(err).Str("stat", s).Msg("Failed to create monitored stat")
+		}
+		statsList.Add(ms)
 	}
 	logger.Info().Strs("stats", stats).Msg("Stats monitored")
 
-	jsonl := JSONLHook{filename: output}
-	if err := jsonl.Open(); err != nil {
-		logger.Fatal().Err(err).Msg("Failed to open JSONL output file")
-	}
-	defer func() {
-		if err := jsonl.Close(); err != nil {
-			logger.Error().Err(err).Msg("Failed to close JSONL output file")
-		}
-		logger.Info().Str("file", output).Msg("Data saved")
-	}()
-
+	// ================================ HOOKS ================================
 	co.
-		OnLog(logger.Info().Msg).
-		OnData(statsList.Hook).       // update the stats with new data from the collector
-		OnData(jsonl.HandleCounters). // store also the counters
-		OnError(func(err error) {
+		OnLog(logger.Info().Msg). // forward collector logs to app logger
+		OnError(func(err error) { // forward collector errors to app logger
 			logger.Error().Err(err).Msg("collector error")
-		})
+		}).
+		OnData(statsList.Hook) // update the stats with new data from the collector
+
+	// write jsonl logs
+	if output != "" {
+		jsonl := JSONLHook{filename: output}
+		if err := jsonl.Open(); err != nil {
+			logger.Fatal().Err(err).Msg("Failed to open JSONL output file")
+		}
+		defer func() {
+			if err := jsonl.Close(); err != nil {
+				logger.Error().Err(err).Msg("Failed to close JSONL output file")
+			}
+			logger.Info().Str("file", output).Msg("Data saved")
+		}()
+		co.OnData(jsonl.HandleCounters)      // store the counters
+		statsList.OnData(jsonl.HandleRecord) // handle record + previously saved counters
+	}
 
 	statsList.
-		OnData(jsonl.HandleRecord). // handle record + previously saved counters
-		OnData(func(record *analyzer.Record) {
-			info := logger.Info().Time("time", record.Time)
-			for key, value := range record.Stats {
-				info.Float64(key, value.Value)
-			}
-			info.Send()
-		}).
+		// forward internal spot errors to app logger
 		OnSpotError(func(s string, se *analyzer.SpotError) {
 			logger.Error().
 				Err(se.Err).
 				Str("stat", s).
 				Msg("Spot error")
 		}).
-		OnAlert(func(s string, v *analyzer.StatValue) {
+		// forward stat alerts to app logger
+		OnAlert(func(s string, t time.Time, v *analyzer.StatValue) {
 			logger.Warn().
 				Str("stat", s).
+				Time("source_time_ns", t).
+				TimeDiff("timesince_ns", t, co.FirstTimestamp()).
 				Float64("value", v.Value).
 				Float64("threshold", v.AnomalyThreshold).
 				Float64("probability", v.Alert.Probability).
 				Msg("Anomaly detected")
 		})
+
+	if logRecords {
+		// log records to stdout as well
+		statsList.OnData(func(record *analyzer.Record) {
+			info := logger.Info().Time("time", record.Time)
+			for key, value := range record.Stats {
+				info.Float64(key, value.Value)
+			}
+			info.Send()
+		})
+	}
 
 	logger.Info().Msg("Loading collector")
 	if err := co.Load(); err != nil {
