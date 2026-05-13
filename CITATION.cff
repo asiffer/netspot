@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: If you use this software, please cite the article from preferred-citation.
+authors:
+  - family-names: Siffer
+    given-names: Alban
+  - family-names: Fouque
+    given-names: Pierre-Alain
+  - family-names: Termier
+    given-names: Alexandre
+  - family-names: Largouet
+    given-names: Christine
+title: 'Netspot: A simple Intrusion Detection System with statistical learning'
+version: 1.0.0
+date-released: '2020-05-13'
+preferred-citation:
+  authors:
+    - family-names: Siffer
+      given-names: Alban
+      orcid: "https://orcid.org/0000-0002-0233-3103"
+    - family-names: Fouque
+      given-names: Pierre-Alain
+      orcid: "https://orcid.org/0000-0003-4997-2276"
+    - family-names: Termier
+      given-names: Alexandre
+    - family-names: Largouet
+      given-names: Christine
+  title: 'Netspot: A simple Intrusion Detection System with statistical learning'
+  type: conference-paper
+  pages: 911--918
+  year: '2020'
+  collection-title: 2020 IEEE 19th international conference on trust, security and privacy in computing and communications (TrustCom)
+  conference: {}
+  publisher: {}
