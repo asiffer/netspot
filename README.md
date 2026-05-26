@@ -1,249 +1,159 @@
-![Release](https://shields.io/github/v/release/asiffer/netspot?include_prereleases)
-![Build](https://github.com/asiffer/netspot/workflows/Build/badge.svg)
-![Test](https://github.com/asiffer/netspot/workflows/Test/badge.svg)
-[![Coverage](https://codecov.io/gh/asiffer/netspot/branch/master/graph/badge.svg)](https://codecov.io/gh/asiffer/netspot)
-[![GoReport](https://goreportcard.com/badge/github.com/asiffer/netspot)](https://goreportcard.com/report/github.com/asiffer/netspot)
-
-![netspot](assets/netspot6.png)
-
-A simple IDS with statistical learning
-
-Visit the project page: **https://asiffer.github.io/netspot/**
-
-Join the [**Discord**](https://discord.gg/82HW2fydvD) server!
-
-- [Overview](#overview)
-- [Installation](#installation)
-  - [Binaries](#binaries)
-  - [Building from sources](#building-from-sources)
-  - [(NEW) Docker](#new-docker)
-- [Get started](#get-started)
-  - [Inline](#inline)
-  - [Service](#service)
-  - [Architecture overview](#architecture-overview)
-  - [Roadmap](#roadmap)
-- [Notes](#notes)
-  - [Version 2.0a](#version-20a)
-  - [Version 1.3](#version-13)
-  - [Version 1.2](#version-12)
-  - [Version 1.1](#version-11)
-  - [Version 1.0](#version-10)
+<p align="center">
+    <img src="https://raw.githubusercontent.com/asiffer/netspot/master/assets/netspot.png" width="100%" alt="asiffer/netspot">
+</p>
 
 ## Overview
 
-**netspot** is a simple anomaly-based network IDS written in `Go` (based on [GoPacket](https://github.com/google/gopacket))
+`netspot` is an anomaly-based network intrusion detection system (A-NIDS) written in `Go` leveraging both [`XDP`](https://en.wikipedia.org/wiki/Express_Data_Path) and [`gopacket`](https://github.com/google/gopacket) to inspect packets.
 
-The **netspot** core uses [**SPOT**](https://asiffer.github.io/libspot/), a statistical learning algorithm so as to detect abnormal behaviour in network traffic (see the
-picture below).
+`netspot` aggregates network metrics on time slots and uses the [SPOT algorithm](https://asiffer.github.io/libspot/) to detect abnormal events. Simple.
 
-**netspot** is provided as a single and statically-compiled binary ([musl](https://www.musl-libc.org/) + [libpcap](https://www.tcpdump.org/)).
+## About
+
+This project is an extension of research work previously published at TrustCom'20 conference. 
+If `netspot` contributes to a project that leads to a publication, please acknowledge this fact 
+by citing this work.
+
+```bibtex
+@inproceedings{siffer2020netspot,
+  title={Netspot: A simple Intrusion Detection System with statistical learning},
+  author={Siffer, Alban and Fouque, Pierre-Alain and Termier, Alexandre and Largouet, Christine},
+  booktitle={2020 IEEE 19th international conference on trust, security and privacy in computing and communications (TrustCom)},
+  pages={911--918},
+  year={2020},
+  organization={IEEE}
+}
+```
 
 ## Installation
 
-### Binaries
+Download statically-compiled binaries from the [latest release](https://github.com/asiffer/netspot/releases/latest). 
+Binaries for `amd64`, `arm64` and `armv7` are available.
 
-The latest compiled binaries can be found below.
-
-[![amd64](https://img.shields.io/badge/v2.1.2-amd64-5e81ac?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.2/netspot-2.1.2-amd64-linux-static)
-[![arm](https://img.shields.io/badge/v2.1.2-arm-81a1c1?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.2/netspot-2.1.2-arm-linux-static)
-[![arm64](https://img.shields.io/badge/v2.1.2-arm64-88c0d0?logo=go)](https://github.com/asiffer/netspot/releases/download/v2.1.2/netspot-2.1.2-arm64-linux-static)
-
-### Building from sources
-
-To build **netspot** from sources, you mainly need a `Go` compiler (`>=1.16`) and `libpcap-dev`. Through the basic `make` command, **netspot** is dynamically
-linked to `libpcap` and your `libc` (generally GNU `libc`).
-
-```sh
-git clone https://github.com/asiffer/netspot.git
-cd netspot
-make
-```
-
-Then you install it with `make install` (as root). Since version 2.1 it also installs a systemd service file.
-
-To perform a static build, you rather have to use `musl`. The [dev](dev/) folder
-details how **netspot** is (cross-)built based on the `golang:alpine` docker image.
-
-### Docker
-
-`netspot` is now available through a docker image, hosted on Github. You can have a look to the [local registry](https://github.com/users/asiffer/packages/container/package/netspot) to pull the image.
-
-Once you have pulled the image, you can run `netspot` interactively through:
-
-```sh
-docker run --rm -it --name netspot --cap-add NET_ADMIN --network host netspot:latest
-```
-
-### (NEW) Systemd
-
-Since version `2.1`, `netspot` is also available through a [systemd portable service](https://systemd.io/PORTABLE_SERVICES/).
-
-You can also grab the `netspot.service` file and install it at /usr/local/lib/systemd/system/.
-
-## Get started
-
-### Inline
-
-Basically, you can run `netspot` on a network interface. In the example below,
-`netspot` monitors the `PERF` statistics (packet processing rate) on the `eth0` interface.
-The computation period is `1s` and the values are printed to the console (`-v`).
-
-```sh
-netspot run -d eth0 -s PERF -p 1s -v
-```
-
-You can also analyze a capture file.
-
-```sh
-netspot run -d file.pcap -s PERF -s R_SYN -p 500ms -v
-```
-
-All these command-line options can be set in a config file:
-
-```toml
-# netspot.toml
-
-[miner]
-device = "~/file.pcap"
-
-[analyzer]
-period = "500ms"
-stats = ["PERF", "R_SYN"]
-
-[exporter.console]
-data = true
-```
-
-```sh
-netspot run --config netspot.toml
-```
-
-All the available statistics can be listed with the `netspot ls` command.
-
-To print the default config (in TOML format only), you can run the following command:
-
-```sh
-netspot defaults
-```
-
-### Service
-
-Even if it is not the main way to use **netspot**, it can
-run as a service, exposing a minimal REST API.
-
-```sh
-netspot serve
-```
-
-By default it listens at `tcp://localhost:11000`, and you can visit `http://localhost:11000` to look at the simple dashboard that displays
-the current config of `netspot`.
-
-![dashboard](assets/dashboard.png)
-
-Naturally, depending on the interface(s) you monitor, you would like to change the API endpoint not to pollute what `netspot` is analyzing.
-You can be changed it with the `-e` flag. For instance, you can consider a unix socket.
-
-```sh
-netspot serve -e unix:///tmp/netspot.sock
-```
-
-The server exposes few methods that allows to do roughly everything.
-
-| Method | Path           | Description                               |
-| ------ | -------------- | ----------------------------------------- |
-| `GET`  | `/api/config`  | Get the current config (JSON output)      |
-| `POST` | `/api/config`  | Change the config (JSON expected)         |
-| `POST` | `/api/run`     | Manage the status of netspot (start/stop) |
-| `GET`  | `/api/stats`   | Get the list of available statistics      |
-| `GET`  | `/api/devices` | Get the list of available interfaces      |
-
-In addition, a `Go` client is available in the `api/client` subpackage.
-
-```sh
-go get -u github.com/asiffer/netspot/api/client
-```
-
-## Developer
-
-`netspot` is rather modular so as to let people enriching it. Developers can notably
-create their own counters, statistics or exporting modules. You should have a look to
-the [project website](https://asiffer.github.io/netspot/developer/).
-
-### Architecture overview
-
-![architecture](assets/netspot-archi.png)
-
-At the lowest level, `netspot` parses packets and increment some basic **counters**. This part is performed by the `miner` subpackage.
-The packet source can either be an network interface or a .pcap file (network capture).
-
-At a given period (for instance every second), counter values are retrieved so as to build **statistics**. This is the role of the `analyzer`. The statistics are the measures monitored by `netspot`.
-
-Every statistic embeds an instance of the `SPOT` algorithm to monitor itself. This algorithm learns the _normal_ behaviour of the statistic and constantly updates its knowledge. When an abnormal value occurs, `SPOT` triggers an alarm.
-
-Finally, the `analyzer` forwards stat values, SPOT thresholds and SPOT alarms to the `exporter`. This last component dispatch
-these information to some modules that binds to different backends
-(console, file, socket or InfluxDB database currently).
-
-### Roadmap
-
-Here are some ideas to improve netspot:
-
-- [ ] InfluxDB (v2+) exporting module
-- [ ] ElasticSearch exporting module
-- [ ] MySQL exporting module
-- [ ] New counters/statistics
-- [ ] Provide a bare metal snap
-- [ ] Web-based GUI (or TUI) for the netspot service
-- [ ] Port `netspot` to arduino or other small dev board
-
-### Building documentation
-
-The docs is built with [`mkdocs`](https://www.mkdocs.org/). You also need some extensions:
+Otherwise you can build directly from source:
 
 ```shell
-pip3 install mkdocs mkdocs-markdownextradata-plugin mkdocs-material pymdown-extensions
+go install github.com/asiffer/netspot@latest
 ```
 
-## Notes
+> [!WARNING]
+> The output binary notably needs `libpcap.so.1` installed 
 
-### Version 2.0a
+## Getting Started
 
-This is the second big refactoring. Many things have changed, making the way to use **netspot** more _modern_.
+`netspot` basically needs a **source** (NIC or `.pcap` file) and a **tick** (time slot size)
 
-- Single and statically-compiled binary. Forget about the server, just run the binary on what you want (a server mode still exists but it is rather minimal)
-- Better performances! I think that **netspot** can process
-  twice as fast: **1M pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+.
-- Developper process has been improved so as to "easily" add new counters, statistics and exporting modules.
+```shell
+netspot --source file.pcap --tick 250ms --all-stats
+```
 
-### Version 1.3
+You can then track the anomalies through stdout logs.
 
-The IDS is quite ready for a release!
+```shell
+10:38:18.176 INFO   Source defined source:200704011400.dump
+10:38:18.176 INFO   Stats monitored stats:["BPS","PPS","APS","DPE","RACK","SYNFIN"]
+10:38:18.176 INFO   Loading collector collector:gopacket
+10:38:18.176 INFO   Open 200704011400.dump
+10:38:18.176 INFO   Starting
+10:38:19.904 INFO   Stat fit source_time_ns:1175404101043862000 stat:BPS timesince_ns:500162607000
+10:38:19.904 INFO   Stat fit source_time_ns:1175404101043862000 stat:PPS timesince_ns:500162607000
+10:38:19.904 INFO   Stat fit source_time_ns:1175404101043862000 stat:APS timesince_ns:500162607000
+10:38:19.904 INFO   Stat fit source_time_ns:1175404101043862000 stat:DPE timesince_ns:500162607000
+10:38:19.904 INFO   Stat fit source_time_ns:1175404101043862000 stat:RACK timesince_ns:500162607000
+10:38:19.904 INFO   Stat fit source_time_ns:1175404101043862000 stat:SYNFIN timesince_ns:500162607000
+10:38:19.906 WARN   Anomaly detected probability:0.0003707745276524869 source_time_ns:1175404101543963000 stat:APS threshold:58.972433165294696 timesince_ns:500662708000 value:58.990582191780824
+10:38:19.909 WARN   Anomaly detected probability:0 source_time_ns:1175404102544374000 stat:APS threshold:58.972433165294696 timesince_ns:501663119000 value:59.19199346405229
+...
+```
 
-- New counters and new stats
-- New HTTP API with OpenAPI spec
-- Cleaner code
-- New distributions options (Debian package, Docker image, `armhf` and `aarch64` binaries)
+If you want to monitor a network interface, you can use either `gopacket` (userspace level) or `xdp` (kernel level) collector.
 
-### Version 1.2
+```shell
+sudo netspot --source eth0 --collector xdp --tick 1s --all-stats
+```
 
-Bye, bye Python... Welcome Go! The IDS has been reimplemented in `Go` for performances and concurrency reasons.
+## Advanced usage
 
-A controller (CLI) is also provided so as to manage the NetSpot service. I don't know if I will put it in another package later.
+### JSONL
 
-More tests are always needed.
+All the collected data can be stored in a `jsonl` file (JSON records) to forward them to other tools or just analyze them afterwards.
 
-### Version 1.1
+```shell
+netspot --source file.pcap --tick 250ms --output out.jsonl
+```
 
-This version is cleaner than the previous one. Some object have been added so as to balance the tasks. The interactive console is also simpler.
+You can parse it with the following json schema.
 
-Now, I am reflecting on improving performances. Python is not very efficient for this purpose so I will probably use another programming language for specific and highly parallelizable tasks.
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Netspot Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stats": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/StatName" },
+      "additionalProperties": { "$ref": "#/$defs/StatValue" }
+    },
+    "alerts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/StatName" }
+    }
+  },
+  "required": ["time", "stats"],
+  "$defs": {
+    "StatName": {
+      "type": "string",
+      "enum": ["APS", "BPS", "DPE", "PPS", "RACK", "SYNFIN"]
+    },
+    "StatValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": { "$ref": "#/$defs/NonFiniteFloat" },
+        "spot_result": { "type": "integer" },
+        "excess_threshold": { "$ref": "#/$defs/NonFiniteFloat" },
+        "anomaly_threshold": { "$ref": "#/$defs/NonFiniteFloat" },
+        "alert": { "$ref": "#/$defs/Alert" }
+      },
+      "required": ["value", "spot_result", "excess_threshold", "anomaly_threshold"]
+    },
+    "Alert": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "probability": { "$ref": "#/$defs/NonFiniteFloat" }
+      },
+      "required": ["probability"]
+    },
+    "NonFiniteFloat": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string", "enum": ["NaN", "Inf", "-Inf"] }
+      ]
+    }
+  }
+}
+```
 
-Sorry Scapy, but you take too long time to parse and dispatch packets...
+> [!WARNING]
+> As JSON does not manage `NaN` and `Inf`, you probably need some manual tweaks to make it serve your purpose.
 
-### Version 1.0
+### Spot algorithm
 
-This first version is ugly: everything is a big class! No, not really but the size of the main object has increased greatly with the new incoming ideas. So the next version will try to split it into smaller classes.
+`netspot` defines some default parameters to monitor network statistics. You can modify them (per stat) through CLI flags.
 
-Moreover, there are not any unit tests (see cfy for good arguments), but the next version will be more serious (I hope).
+| Parameter    | Type    | Flag                       | Description                               | Default value |
+| ------------ | ------- | -------------------------- | ----------------------------------------- | ------------- |
+| `q`          | `float` | `--spot-<stat>-q`          | Abnormal event probability                | `5e-4`        |
+| `level`      | `float` | `--spot-<stat>-level`      | Out of tail distribution probability      | `0.98`        |
+| `max-excess` | `uint`  | `--spot-<stat>-max-excess` | Maximum number of tail data for fitting   | `1000`        |
+| `low`        |         | `--spot-<stat>-low`        | Monitor low values instead of high values |               |
 
-There are probably many bugs, don't be surprised.
+
+See [libspot](https://asiffer.github.io/libspot/parameters/) to get the full picture.

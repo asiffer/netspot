@@ -2,5 +2,9 @@
 bin
 coverage*
 .coverage*
-docs/
-README.md
+*.dump
+*.pcap
+libpcap*
+zig*
+*Dockerfile
+netspot*

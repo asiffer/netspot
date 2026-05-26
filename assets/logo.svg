@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -15 180 180" role="img">
+  <!-- Left vertical of the N -->
+  <circle cx="15" cy="15" r="7" fill="currentColor" />
+  <circle cx="15" cy="45" r="7" fill="currentColor" />
+  <circle cx="15" cy="75" r="7" fill="currentColor" />
+  <circle cx="15" cy="105" r="7" fill="currentColor" />
+  <circle cx="15" cy="135" r="7" fill="currentColor" />
+
+  <!-- Diagonal stroke -->
+  <circle cx="45" cy="45" r="7" fill="currentColor" />
+  <circle cx="75" cy="75" r="7" fill="currentColor" />
+  <circle cx="105" cy="105" r="7" fill="currentColor" />
+
+  <!-- Right vertical of the N -->
+  <circle cx="135" cy="15" r="11" fill="#f43f5e" />
+  <circle cx="135" cy="15" r="11" fill="#f43f5e">
+    <animate
+      attributeName="r"
+      values="11;27"
+      dur="0.8s"
+      begin="0.3s"
+      fill="freeze"
+    />
+    <animate
+      attributeName="opacity"
+      values="0.6;0"
+      dur="0.8s"
+      begin="0.3s"
+      fill="freeze"
+    />
+  </circle>
+  <circle cx="135" cy="45" r="7" fill="currentColor" />
+  <circle cx="135" cy="75" r="7" fill="currentColor" />
+  <circle cx="135" cy="105" r="7" fill="currentColor" />
+  <circle cx="135" cy="135" r="7" fill="currentColor" />
+</svg>
