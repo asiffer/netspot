@@ -1,6 +1,11 @@
 on:
   workflow_dispatch:
   pull_request:
+      paths:
+      - "**.go"
+      - go.sum
+      - go.mod
+      - .github/workflows/build.yml
   push:
     branches:
       - master
