@@ -36,7 +36,7 @@ Otherwise you can build directly from source:
 go install github.com/asiffer/netspot@latest
 ```
 
-> [WARNING]
+> [!WARNING]
 > The output binary notably needs `libpcap.so.1` installed 
 
 ## Getting Started
@@ -141,7 +141,7 @@ You can parse it with the following json schema.
 }
 ```
 
-> [WARNING]
+> [!WARNING]
 > As JSON does not manage `NaN` and `Inf`, you probably need some manual tweaks to make it serve your purpose.
 
 ### Spot algorithm
