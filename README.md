@@ -8,6 +8,9 @@
 
 `netspot` aggregates network metrics on time slots and uses the [SPOT algorithm](https://asiffer.github.io/libspot/) to detect abnormal events. Simple.
 
+> [!NOTE]  
+> A brand new `v3` is now available. It is quite different from previous versions while doing the same job (flagging network anomalies with the SPOT algorithm). This new version drops side features like dashboard, api, docker... focusing on its first goals.
+
 ## About
 
 This project is an extension of research work previously published at TrustCom'20 conference. 
@@ -24,6 +27,9 @@ by citing this work.
   organization={IEEE}
 }
 ```
+
+
+
 
 ## Installation
 
@@ -157,3 +163,56 @@ You can parse it with the following json schema.
 
 
 See [libspot](https://asiffer.github.io/libspot/parameters/) to get the full picture.
+
+## Contributing
+
+This project is open to contributions! Here is the classical workflow: open an issue then we could discuss (among humans) about the bug/feature and plan something (or close it).
+
+## Notes
+
+### Version 3.0
+
+Third big refactoring. Removing all the side stuff (API, docker, dashboard, systemd etc.) so as to _do one thing and do it well_.
+The goal was to be able to flag network anomalies (from NIC or .pcap) while keeping collected data (for further analysis), not much.
+
+### Version 2.0a
+
+This is the second big refactoring. Many things have changed, making the way to use **netspot** more _modern_.
+
+- Single and statically-compiled binary. Forget about the server, just run the binary on what you want (a server mode still exists but it is rather minimal)
+- Better performances! I think that **netspot** can process
+  twice as fast: **1M pkt/s** on my affordable desktop and **100K pkt/s** on a Raspberry 3B+.
+- Developper process has been improved so as to "easily" add new counters, statistics and exporting modules.
+
+### Version 1.3
+
+The IDS is quite ready for a release!
+
+- New counters and new stats
+- New HTTP API with OpenAPI spec
+- Cleaner code
+- New distributions options (Debian package, Docker image, `armhf` and `aarch64` binaries)
+
+### Version 1.2
+
+Bye, bye Python... Welcome Go! The IDS has been reimplemented in `Go` for performances and concurrency reasons.
+
+A controller (CLI) is also provided so as to manage the NetSpot service. I don't know if I will put it in another package later.
+
+More tests are always needed.
+
+### Version 1.1
+
+This version is cleaner than the previous one. Some object have been added so as to balance the tasks. The interactive console is also simpler.
+
+Now, I am reflecting on improving performances. Python is not very efficient for this purpose so I will probably use another programming language for specific and highly parallelizable tasks.
+
+Sorry Scapy, but you take too long time to parse and dispatch packets...
+
+### Version 1.0
+
+This first version is ugly: everything is a big class! No, not really but the size of the main object has increased greatly with the new incoming ideas. So the next version will try to split it into smaller classes.
+
+Moreover, there are not any unit tests (see cfy for good arguments), but the next version will be more serious (I hope).
+
+There are probably many bugs, don't be surprised.
