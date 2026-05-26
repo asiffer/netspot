@@ -35,12 +35,12 @@ var (
 func init() {
 	if err := errors.Join(
 		puzzle.DefineVar(config, "collector", &collectorType, puzzle.WithDescription("Collector type (xdp or gopacket)")),
-		puzzle.DefineVar(config, "source", &source, puzzle.WithDescription("Packet source (interface name or .pcap file)")),
-		puzzle.DefineVar(config, "tick", &tick, puzzle.WithDescription("Stats computation period")),
+		puzzle.DefineVar(config, "source", &source, puzzle.WithDescription("Packet source (interface name or .pcap file)"), puzzle.WithShortFlagName("s")),
+		puzzle.DefineVar(config, "tick", &tick, puzzle.WithDescription("Stats computation period"), puzzle.WithShortFlagName("t")),
 		puzzle.DefineVar(config, "stats", &stats, puzzle.WithDescription("Stats to compute")),
-		puzzle.DefineVar(config, "all-stats", &allStats, puzzle.WithDescription("Compute all stats available")),
+		puzzle.DefineVar(config, "all-stats", &allStats, puzzle.WithDescription("Compute all stats available"), puzzle.WithShortFlagName("a")),
 		puzzle.DefineVar(config, "output", &output, puzzle.WithShortFlagName("o"), puzzle.WithDescription("Output file for all records")),
-		puzzle.DefineVar(config, "log-records", &logRecords, puzzle.WithDescription("Enable logging of records")),
+		puzzle.DefineVar(config, "log-records", &logRecords, puzzle.WithDescription("Enable logging of records"), puzzle.WithShortFlagName("v")),
 	); err != nil {
 		panic(err)
 	}
