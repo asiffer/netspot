@@ -9,15 +9,18 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "**.go"
-      - go.sum
-      - go.mod
-      - .github/workflows/build.yml
+    tags:
+      - "v*"
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - name: Set up Go
@@ -29,4 +32,36 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
+          name: binaries
           path: bin/*
+  release:
+    needs: build
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: binaries
+          path: bin
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create
+          "$GITHUB_REF_NAME"
+          --repo "$GITHUB_REPOSITORY"
+          --notes ""
+          --draft
+      - name: Upload artifact to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        # Upload to GitHub Release using the `gh` CLI.
+        # `bin/` contains the built packages
+        run: >-
+          gh release upload
+          "$GITHUB_REF_NAME" bin/**
+          --repo "$GITHUB_REPOSITORY"
