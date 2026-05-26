@@ -186,6 +186,7 @@ func (m *MonitoredStatsList) Hook(data *collector.Data) {
 		}
 		// populate stat values to dispatch to hooks
 		sv := StatValue{
+			Value:            value,
 			ExcessThreshold:  s.spot.ExcessThreshold,
 			AnomalyThreshold: s.spot.AnomalyThreshold,
 			SpotResult:       result,
