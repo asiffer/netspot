@@ -20,6 +20,7 @@ const (
 	NORMAL     = int(gospot.NORMAL)
 	EXCESS     = int(gospot.EXCESS)
 	ANOMALY    = int(gospot.ANOMALY)
+	FIT        = ANOMALY + 1
 	RETURN_NAN = -1
 )
 
@@ -89,6 +90,7 @@ func (m *MonitoredStat) Flag(data *collector.Data) (float64, int, error) {
 			// we don't need this training set anymore
 			m.trainingSet = nil
 			m.trainingSetIndex = -1
+			return value, FIT, nil
 		}
 	}
 	return value, NORMAL, nil
@@ -101,6 +103,7 @@ type Alert struct {
 
 type StatValue struct {
 	Value            float64 `json:"value,format:nonfinite"`             // stat value
+	SpotResult       int     `json:"spot_result"`                        // SPOT result (NORMAL, EXCESS, ANOMALY, FIT)
 	ExcessThreshold  float64 `json:"excess_threshold,format:nonfinite"`  // Excess threshold
 	AnomalyThreshold float64 `json:"anomaly_threshold,format:nonfinite"` // Anomaly threshold
 	Alert            *Alert  `json:"alert,omitempty"`                    // Alert if the value is an anomaly
@@ -124,6 +127,7 @@ type MonitoredStatsList struct {
 	alertHooks     *register.Register3[string, time.Time, *StatValue]
 	valueHooks     *register.Register[*Record]
 	spotErrorHooks *register.Register2[string, *SpotError]
+	spotFitHooks   *register.Register2[string, time.Time]
 }
 
 func NewMonitoredStatsList() *MonitoredStatsList {
@@ -132,6 +136,7 @@ func NewMonitoredStatsList() *MonitoredStatsList {
 		alertHooks:     register.NewRegister3[string, time.Time, *StatValue](),
 		valueHooks:     register.NewRegister[*Record](),
 		spotErrorHooks: register.NewRegister2[string, *SpotError](),
+		spotFitHooks:   register.NewRegister2[string, time.Time](),
 	}
 }
 
@@ -157,6 +162,11 @@ func (m *MonitoredStatsList) OnSpotError(hook func(string, *SpotError)) *Monitor
 	return m
 }
 
+func (m *MonitoredStatsList) OnSpotFit(hook func(string, time.Time)) *MonitoredStatsList {
+	m.spotFitHooks.Register(hook)
+	return m
+}
+
 // Hook is a method aimed to be passed to the chosen collector
 func (m *MonitoredStatsList) Hook(data *collector.Data) {
 	record := NewRecord()
@@ -170,13 +180,20 @@ func (m *MonitoredStatsList) Hook(data *collector.Data) {
 			})
 			continue
 		}
+		// if the stat just got trained, we can trigger a specific hook for this event
+		if result == FIT {
+			m.spotFitHooks.Exec(s.stat.Name(), record.Time)
+		}
 		// populate stat values to dispatch to hooks
 		sv := StatValue{
-			Value:            value,
 			ExcessThreshold:  s.spot.ExcessThreshold,
 			AnomalyThreshold: s.spot.AnomalyThreshold,
+			SpotResult:       result,
 		}
+
+		// if the value is an anomaly, we create an alert and dispatch it to alert hooks
 		if result == ANOMALY {
+			// in all cases the alert is also inserted in the record
 			sv.Alert = &Alert{
 				Probability: s.spot.Probability(value),
 				State:       *s.spot,
@@ -185,6 +202,7 @@ func (m *MonitoredStatsList) Hook(data *collector.Data) {
 			// also dispatch the alert to alert hooks
 			m.alertHooks.Exec(s.stat.Name(), record.Time, &sv)
 		}
+
 		record.Stats[s.stat.Name()] = &sv
 
 	}

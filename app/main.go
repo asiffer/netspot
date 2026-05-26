@@ -68,7 +68,6 @@ func Run() {
 	}
 
 	logger.Info().
-		Str("collector", collectorType).
 		Str("source", co.Config().Source).
 		Msg("Source defined")
 
@@ -90,7 +89,9 @@ func Run() {
 
 	// ================================ HOOKS ================================
 	co.
-		OnLog(logger.Info().Msg). // forward collector logs to app logger
+		OnLog(func(msg string) { // forward collector logs to app logger
+			logger.Info().Msg(msg)
+		}).
 		OnError(func(err error) { // forward collector errors to app logger
 			logger.Error().Err(err).Msg("collector error")
 		}).
@@ -130,6 +131,14 @@ func Run() {
 				Float64("threshold", v.AnomalyThreshold).
 				Float64("probability", v.Alert.Probability).
 				Msg("Anomaly detected")
+		}).
+		// print on fit
+		OnSpotFit(func(s string, t time.Time) {
+			logger.Info().
+				Str("stat", s).
+				Time("source_time_ns", t).
+				TimeDiff("timesince_ns", t, co.FirstTimestamp()).
+				Msg("Stat fit")
 		})
 
 	if logRecords {
@@ -143,7 +152,7 @@ func Run() {
 		})
 	}
 
-	logger.Info().Msg("Loading collector")
+	logger.Info().Str("collector", collectorType).Msg("Loading collector")
 	if err := co.Load(); err != nil {
 		logger.Fatal().Err(err).Msg("Failed to load collector")
 	}
