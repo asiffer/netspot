@@ -90,17 +90,17 @@ func (c *XDPCollector) Config() CollectorConfig {
 // Load loads ebpf object and attaches it to configured interface
 func (c *XDPCollector) Load() error {
 	var err error
-	c.log("remove memory lock")
+	c.log("Removing memory lock")
 	if err = rlimit.RemoveMemlock(); err != nil {
 		return err
 	}
 
-	c.log("load eBPF objects")
+	c.log("Loading eBPF objects")
 	if err = xdp.LoadXDPObjects(&c.objs, nil); err != nil {
 		return err
 	}
 
-	c.log(fmt.Sprintf("attach program to XDP hook (%s)", c.iface.Name))
+	c.log(fmt.Sprintf("Attaching program to XDP hook (%s)", c.iface.Name))
 	if c.link, err = link.AttachXDP(link.XDPOptions{
 		Program:   c.objs.XdpUpdateCounters,
 		Interface: c.iface.Index,
@@ -114,12 +114,12 @@ func (c *XDPCollector) Load() error {
 // Unload detaches the program from the interface and unloads the ebpf object
 func (c *XDPCollector) Unload() error {
 	// unattach
-	c.log(fmt.Sprintf("detach program from XDP hook (%s)", c.iface.Name))
+	c.log(fmt.Sprintf("Detaching program from XDP hook (%s)", c.iface.Name))
 	if err := c.link.Close(); err != nil {
 		return err
 	}
 	// unload objects
-	c.log("unload eBPF objects")
+	c.log("Unloading eBPF objects")
 	if err := c.objs.Close(); err != nil {
 		return err
 	}
@@ -156,7 +156,7 @@ func (c *XDPCollector) Start(stop chan bool) {
 				c.send(&out)
 			}
 		case <-stop:
-			c.log("receiving stop signal")
+			c.log("Receiving stop signal")
 			c.end(nil)
 			return
 		}
