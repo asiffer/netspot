@@ -8,6 +8,7 @@ GO      ?= $(shell command -v go)
 # zig cross compiler for static build, we use zig to build libpcap and link it statically to netspot
 CC 		 := $(CURDIR)/zig/zig cc
 LD_FLAGS ?= -linkmode external -extldflags "-static" -s -w
+ZIG_URL  := https://ziglang.org/builds/zig-x86_64-linux-0.17.0-dev.1245+efd6f190f.tar.xz
 
 # libcap build settings
 LIBPCAP_VERSION 	:= 1.10.6
@@ -32,7 +33,7 @@ $(XDP_GENERATED) &: $(XDP_DIR)/hook.c
 
 # cross compiler use to statically build both libpcap and netspot
 zig/zig:
-	curl -sL "https://ziglang.org/builds/zig-x86_64-linux-0.17.0-dev.296+a85a29ae4.tar.xz" | tar -xJC .
+	curl -sL "$(ZIG_URL)" | tar -xJC .
 	mv ./zig-* zig
 
 # libpcap sources
