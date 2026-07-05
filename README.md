@@ -164,6 +164,23 @@ You can parse it with the following json schema.
 
 See [libspot](https://asiffer.github.io/libspot/parameters/) to get the full picture.
 
+## Benchmark
+
+Here are some `netspot` benchmarks run on packet captures from [MAWILab](http://www.fukuda-lab.org/mawilab/index.html) (on Intel(R) Core(TM) i7-10850H CPU).
+
+| source                                                                               | tick  | mean_time |     pkts | avg_pkt_size | pps     | gbps    |
+| :----------------------------------------------------------------------------------- | :---- | --------: | -------: | -----------: | ------- | ------- |
+| [200704011400.dump](http://www.fukuda-lab.org/mawilab/v1.1/2007/04/01/20070401.html) | 100ms |   3.76222 |  9503556 |        633.4 | 2526048 | 12.8    |
+| [200704011400.dump](http://www.fukuda-lab.org/mawilab/v1.1/2007/04/01/20070401.html) | 500ms |   3.13571 |  9503556 |        633.4 | 3030746 | 15.3574 |
+| [201302281400.dump](http://www.fukuda-lab.org/mawilab/v1.1/2013/02/28/20130228.html) | 100ms |   8.97875 | 25581540 |        759.9 | 2849120 | 17.3204 |
+| [201302281400.dump](http://www.fukuda-lab.org/mawilab/v1.1/2013/02/28/20130228.html) | 500ms |   8.21167 | 25581540 |        759.9 | 3115267 | 18.9383 |
+| [202005091400.pcap](http://www.fukuda-lab.org/mawilab/v1.1/2020/05/09/20200509.html) | 100ms |    29.205 | 90422857 |        431.9 | 3096143 | 10.6978 |
+| [202005091400.pcap](http://www.fukuda-lab.org/mawilab/v1.1/2020/05/09/20200509.html) | 500ms |    26.525 | 90422857 |        431.9 | 3408967 | 11.7787 |
+
+We can notice that `netspot` can treats about **3 millions packets/s** (with the `gopacket` collector). 
+Also this benchmark shows that the bitrate processing ability (`gbps`) is not a fundamental constant. 
+This is consistent with the fact that netspot does not inspect payloads.
+
 ## Contributing
 
 This project is open to contributions! Here is the classical workflow: open an issue then we could discuss (among humans) about the bug/feature and plan something (or close it).
